@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PomocaGPT · Guía de uso interno</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  background-color: #f8f9fb;
+  color: #0f1923;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── NAV ─── */
+nav {
+  position: sticky; top: 0; z-index: 200;
+  background-color: rgba(255,255,255,0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid #e8eaed;
+  height: 58px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 1.75rem;
+}
+
+.logo { display: flex; align-items: center; gap: 0.6rem; cursor: pointer; }
+.logo-mark {
+  width: 30px; height: 30px; border-radius: 8px;
+  background-color: #1B3A6B;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 800; color: #3DB53D;
+  letter-spacing: -0.5px; flex-shrink: 0;
+}
+.logo-text { font-weight: 700; font-size: 1rem; color: #0f1923; letter-spacing: -0.3px; }
+.logo-text span { color: #3DB53D; }
+.logo-badge {
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 0.05em;
+  color: #6b7280; background-color: #f1f3f5;
+  padding: 0.18rem 0.5rem; border-radius: 100px;
+  text-transform: uppercase;
+}
+
+.nav-links { display: flex; gap: 0.15rem; }
+.nav-btn {
+  padding: 0.38rem 0.85rem; border-radius: 8px;
+  font-size: 0.82rem; font-weight: 600;
+  color: #6b7280; cursor: pointer;
+  border: none; background: none;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: background-color 0.15s, color 0.15s;
+}
+.nav-btn:hover { background-color: #f1f3f5; color: #0f1923; }
+.nav-btn.active { background-color: #1B3A6B; color: #ffffff; }
+
+/* ─── PAGES ─── */
+.page { display: none; }
+.page.active { display: block; animation: pageIn 0.25s ease both; }
+@keyframes pageIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ─── HERO ─── */
+.hero {
+  background-color: #1B3A6B;
+  padding: 3rem 1.75rem 2.75rem;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle at 80% 50%, rgba(61,181,61,0.12) 0%, transparent 60%);
+  pointer-events: none;
+}
+.hero::after {
+  content: '';
+  position: absolute; bottom: -1px; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, #3DB53D 0%, #2563eb 50%, #3DB53D 100%);
+}
+.hero-inner { max-width: 720px; position: relative; }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.09em;
+  text-transform: uppercase; color: #3DB53D;
+  margin-bottom: 1rem;
+}
+.hero-dot { width: 6px; height: 6px; border-radius: 50%; background-color: #3DB53D; display: inline-block; }
+.hero h1 {
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+  margin-bottom: 0.85rem;
+}
+.hero h1 em { font-style: normal; color: #3DB53D; }
+.hero p { font-size: 0.95rem; color: #8fa8c8; font-weight: 400; line-height: 1.65; max-width: 480px; }
+
+/* ─── LAYOUT ─── */
+.container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+/* ─── SECTION HEADERS ─── */
+.sh { margin-bottom: 1.25rem; }
+.sh-label { font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #3DB53D; display: block; margin-bottom: 0.3rem; }
+.sh-title { font-size: 1.15rem; font-weight: 700; color: #0f1923; letter-spacing: -0.3px; }
+.sh-sub { font-size: 0.83rem; color: #6b7280; margin-top: 0.25rem; line-height: 1.55; }
+
+.divider { height: 1px; background-color: #e8eaed; margin: 2.25rem 0; }
+
+/* ─── TOOLS ─── */
+.tools-wrap {
+  background-color: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e8eaed;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.tool-head {
+  display: grid; grid-template-columns: 1fr auto auto;
+  background-color: #1B3A6B;
+  padding: 0.65rem 1.25rem;
+  gap: 1rem;
+}
+.tool-head span { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: rgba(255,255,255,0.6); }
+.tool-row {
+  display: grid; grid-template-columns: 1fr auto auto;
+  align-items: center;
+  padding: 0.9rem 1.25rem;
+  border-bottom: 1px solid #f1f3f5;
+  gap: 1rem;
+  transition: background-color 0.15s;
+}
+.tool-row:last-child { border-bottom: none; }
+.tool-row:hover { background-color: #fafbfc; }
+.tool-task { font-size: 0.84rem; color: #374151; }
+.tool-name { font-size: 0.84rem; font-weight: 700; color: #1B3A6B; text-align: right; white-space: nowrap; }
+.tool-link {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.3rem 0.7rem;
+  background-color: #3DB53D;
+  color: #ffffff;
+  font-size: 0.74rem; font-weight: 700;
+  border-radius: 7px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.15s, transform 0.1s;
+}
+.tool-link:hover { background-color: #2ea32e; transform: translateY(-1px); }
+
+/* ─── PROMPT CARDS ─── */
+.prompts-grid { display: flex; flex-direction: column; gap: 0.6rem; }
+
+.prompt-card {
+  background-color: #ffffff;
+  border: 1px solid #e8eaed;
+  border-radius: 12px;
+  padding: 1.1rem 1.25rem;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.prompt-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); border-color: #d0d5dd; }
+.prompt-card-top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 0.6rem; }
+.prompt-card-name { font-weight: 700; font-size: 0.88rem; color: #0f1923; }
+.prompt-text {
+  background-color: #f8f9fb;
+  border-radius: 8px;
+  border-left: 3px solid #3DB53D;
+  padding: 0.75rem 1rem;
+  font-size: 0.79rem;
+  color: #4b5563;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* ─── COPY BTN ─── */
+.cbtn {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.3rem 0.75rem;
+  border: 1.5px solid #e0e3e7;
+  border-radius: 7px;
+  background-color: #ffffff;
+  color: #6b7280;
+  font-size: 0.74rem; font-weight: 700;
+  cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  white-space: nowrap;
+  transition: border-color 0.15s, color 0.15s, background-color 0.15s;
+}
+.cbtn:hover { border-color: #3DB53D; color: #3DB53D; }
+.cbtn.ok { border-color: #3DB53D; color: #3DB53D; background-color: #f0faf0; }
+
+/* ─── HOW TO PROMPT ─── */
+.htp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; margin-bottom: 1rem; }
+.htp-card {
+  background-color: #ffffff;
+  border: 1px solid #e8eaed;
+  border-radius: 12px;
+  padding: 1.1rem;
+  transition: box-shadow 0.2s;
+}
+.htp-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+.htp-num {
+  width: 24px; height: 24px; border-radius: 7px;
+  background-color: #1B3A6B;
+  color: #ffffff;
+  font-size: 0.72rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 0.65rem;
+}
+.htp-title { font-weight: 700; font-size: 0.86rem; color: #0f1923; margin-bottom: 0.3rem; }
+.htp-desc { font-size: 0.77rem; color: #6b7280; line-height: 1.55; margin-bottom: 0.65rem; }
+.htp-example {
+  background-color: #f8f9fb;
+  border-left: 2px solid #3DB53D;
+  border-radius: 4px;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.73rem;
+  color: #4b5563;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.htp-full {
+  background-color: #1B3A6B;
+  border-radius: 12px;
+  padding: 1.2rem 1.35rem;
+}
+.htp-full-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #3DB53D; margin-bottom: 0.55rem; display: block; }
+.htp-full-text { font-size: 0.82rem; color: #8fa8c8; line-height: 1.75; }
+.htp-full-text mark { background: none; color: #3DB53D; font-weight: 600; }
+
+/* ─── AREAS ─── */
+.areas-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
+.area-card {
+  background-color: #ffffff;
+  border: 1px solid #e8eaed;
+  border-radius: 12px;
+  padding: 1.1rem 0.9rem;
+  cursor: pointer;
+  display: flex; flex-direction: column; gap: 0.4rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  text-align: left;
+  border: none;
+  transition: box-shadow 0.2s, transform 0.15s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.area-card.ready:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+.area-card.ready { border-top: 3px solid #3DB53D; background-color: #ffffff; }
+.area-card.soon { opacity: 0.45; cursor: default; background-color: #f8f9fb; border: 1px solid #e8eaed; border-top: 3px solid #e0e3e7; }
+.area-emoji { font-size: 1.35rem; }
+.area-name { font-weight: 700; font-size: 0.83rem; color: #0f1923; }
+.area-pill {
+  display: inline-block; font-size: 0.63rem; font-weight: 700;
+  padding: 0.15rem 0.45rem; border-radius: 100px;
+  background-color: #ecfdf5; color: #059669;
+  letter-spacing: 0.03em;
+}
+.area-pill.soon { background-color: #f1f3f5; color: #9ca3af; }
+
+/* ─── AREA PAGES ─── */
+.area-hero {
+  background-color: #1B3A6B;
+  padding: 1.75rem;
+  position: relative; overflow: hidden;
+}
+.area-hero::after {
+  content: '';
+  position: absolute; bottom: -1px; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, #3DB53D, #2563eb, #3DB53D);
+}
+.area-hero-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; gap: 1rem; }
+.area-hero-icon {
+  width: 52px; height: 52px; border-radius: 12px;
+  background-color: rgba(255,255,255,0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem; flex-shrink: 0;
+}
+.area-hero h2 { font-size: 1.35rem; font-weight: 800; color: #ffffff; letter-spacing: -0.3px; margin-bottom: 0.2rem; }
+.area-hero p { font-size: 0.83rem; color: #8fa8c8; }
+
+.back-btn {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  margin: 1.25rem 1.5rem 0;
+  padding: 0.38rem 0.85rem;
+  border: 1.5px solid #e0e3e7;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #6b7280;
+  font-size: 0.8rem; font-weight: 600;
+  cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: color 0.15s, border-color 0.15s;
+}
+.back-btn:hover { color: #1B3A6B; border-color: #1B3A6B; }
+
+.area-prompts { max-width: 900px; margin: 0 auto; padding: 1.25rem 1.5rem 3rem; display: flex; flex-direction: column; gap: 0.75rem; }
+
+.ap-card {
+  background-color: #ffffff;
+  border: 1px solid #e8eaed;
+  border-radius: 14px;
+  padding: 1.35rem 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  transition: box-shadow 0.2s;
+}
+.ap-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+.ap-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.ap-meta { flex: 1; }
+.ap-num { font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #3DB53D; margin-bottom: 0.3rem; }
+.ap-title { font-weight: 700; font-size: 0.97rem; color: #0f1923; letter-spacing: -0.2px; margin-bottom: 0.35rem; }
+.ap-desc { font-size: 0.8rem; color: #6b7280; line-height: 1.55; }
+.ap-box {
+  margin-top: 1rem;
+  background-color: #f8f9fb;
+  border-radius: 9px;
+  border-left: 3px solid #3DB53D;
+  padding: 0.9rem 1.1rem;
+  font-size: 0.8rem;
+  color: #374151;
+  line-height: 1.72;
+  white-space: pre-wrap;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  margin-bottom: 0.85rem;
+}
+
+/* ─── FOOTER ─── */
+footer {
+  text-align: center; padding: 2rem 1.5rem;
+  color: #9ca3af; font-size: 0.72rem;
+  border-top: 1px solid #e8eaed;
+}
+
+@media (max-width: 500px) {
+  .nav-links { display: none; }
+  .htp-grid { grid-template-columns: 1fr 1fr; }
+  .areas-grid { grid-template-columns: repeat(3, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo" onclick="goHome()">
+    <div class="logo-mark">G</div>
+    <span class="logo-text">Pomoca<span>GPT</span></span>
+    <span class="logo-badge">Uso interno</span>
+  </div>
+  <div class="nav-links">
+    <button class="nav-btn active" onclick="goHome()">Inicio</button>
+    <button class="nav-btn" onclick="goArea('compras')">Compras</button>
+    <button class="nav-btn" onclick="goArea('ventas')">Ventas</button>
+    <button class="nav-btn" onclick="goArea('contabilidad')">Contabilidad</button>
+  </div>
+</nav>
+
+<!-- ════════ HOME ════════ -->
+<div id="page-home" class="page active">
+
+  <div class="hero">
+    <div class="hero-inner">
+      <div style="display:inline-flex;align-items:center;gap:0.5rem;font-size:0.72rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:#3DB53D;margin-bottom:1rem;"><span style="width:6px;height:6px;border-radius:50%;background-color:#3DB53D;display:inline-block;"></span> Guía de uso interno · Pomoca</div>
+      <h1 style="font-size:1.9rem;font-weight:800;color:#ffffff;line-height:1.2;letter-spacing:-0.5px;margin-bottom:0.85rem;">Tu asistente de<br><span style="color:#3DB53D;">Inteligencia Artificial</span></h1>
+      <p style="font-size:0.95rem;color:#8fa8c8;font-weight:400;line-height:1.65;max-width:480px;">Encuentra el prompt que necesitas, cópialo en un clic y pégalo en ChatGPT o Claude. Sin buscar, sin adivinar.</p>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- HERRAMIENTAS -->
+    <div class="sh">
+      <span class="sh-label">Herramientas</span>
+      <div class="sh-title">¿Qué herramienta uso para cada tarea?</div>
+    </div>
+    <div class="tools-wrap">
+      <div class="tool-head">
+        <span>Tarea</span>
+        <span>Herramienta</span>
+        <span>Abrir</span>
+      </div>
+      <div class="tool-row"><span class="tool-task">Redactar correos, reportes, analizar textos</span><span class="tool-name">ChatGPT</span><a href="https://chat.openai.com" target="_blank" class="tool-link">Abrir ↗</a></div>
+      <div class="tool-row"><span class="tool-task">Documentos largos, contratos, PDFs extensos</span><span class="tool-name">Claude</span><a href="https://claude.ai" target="_blank" class="tool-link">Abrir ↗</a></div>
+      <div class="tool-row"><span class="tool-task">Notas de reuniones, resumen de grabaciones</span><span class="tool-name">NotebookLM</span><a href="https://notebooklm.google.com" target="_blank" class="tool-link">Abrir ↗</a></div>
+      <div class="tool-row"><span class="tool-task">Presentaciones con diseño automático</span><span class="tool-name">Gamma</span><a href="https://gamma.app" target="_blank" class="tool-link">Abrir ↗</a></div>
+      <div class="tool-row"><span class="tool-task">Imágenes, flyers, materiales de diseño</span><span class="tool-name">Canva IA</span><a href="https://canva.com" target="_blank" class="tool-link">Abrir ↗</a></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- CÓMO ESCRIBIR UN BUEN PROMPT -->
+    <div class="sh">
+      <span class="sh-label">Guía rápida</span>
+      <div class="sh-title">¿Cómo escribir un buen prompt?</div>
+      <div class="sh-sub">Un prompt bien construido da respuestas mucho mejores. Incluye siempre estos 4 elementos:</div>
+    </div>
+    <div class="htp-grid">
+      <div class="htp-card">
+        <div class="htp-num">1</div>
+        <div class="htp-title">Contexto</div>
+        <div class="htp-desc">Explica quién eres o en qué situación estás. La IA no sabe nada de tu trabajo si no se lo dices.</div>
+        <div class="htp-example">"Soy del área de compras de una empresa constructora..."</div>
+      </div>
+      <div class="htp-card">
+        <div class="htp-num">2</div>
+        <div class="htp-title">Tarea</div>
+        <div class="htp-desc">Di exactamente qué quieres que haga. Usa verbos concretos: resume, redacta, analiza, compara, explica.</div>
+        <div class="htp-example">"...compara estas 3 cotizaciones y dime cuál es mejor."</div>
+      </div>
+      <div class="htp-card">
+        <div class="htp-num">3</div>
+        <div class="htp-title">Tono</div>
+        <div class="htp-desc">Indica cómo quieres que suene: formal, simple, técnico, amable, directo, como para un directivo.</div>
+        <div class="htp-example">"Usa un lenguaje formal y sin tecnicismos."</div>
+      </div>
+      <div class="htp-card">
+        <div class="htp-num">4</div>
+        <div class="htp-title">Formato de salida</div>
+        <div class="htp-desc">Dile cómo quieres la respuesta: en lista, tabla, párrafos, pasos numerados, en máximo X líneas.</div>
+        <div class="htp-example">"Organízalo en 3 puntos con título y explicación breve."</div>
+      </div>
+    </div>
+    <div class="htp-full">
+      <span class="htp-full-label">✦ Ejemplo con los 4 elementos</span>
+      <div class="htp-full-text">"<mark>Soy del área de compras</mark> de una empresa constructora. <mark>Compara estas 3 cotizaciones</mark> que te voy a pegar y dime cuál es la mejor opción considerando precio, tiempo de entrega y condiciones de pago. <mark>Usa un lenguaje claro</mark> y <mark>preséntalo en una tabla</mark> con tu recomendación al final."</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- PROMPTS GENERALES -->
+    <div class="sh">
+      <span class="sh-label">Prompts generales</span>
+      <div class="sh-title">Los más usados — copia y pega directo</div>
+    </div>
+    <div class="prompts-grid">
+
+      <div class="prompt-card">
+        <div class="prompt-card-top"><span class="prompt-card-name">📄 Resumir un documento</span><button class="cbtn" onclick="doCopy(this,'pr1')">Copiar</button></div>
+        <div class="prompt-text" id="pr1">Quiero que resumas el siguiente documento. Organiza el resumen así: (1) idea principal, (2) puntos más importantes, (3) conclusiones o acciones a tomar. Usa lenguaje simple y directo.
+
+[Pega aquí el texto del documento]</div>
+      </div>
+
+      <div class="prompt-card">
+        <div class="prompt-card-top"><span class="prompt-card-name">📊 Analizar datos o Excel</span><button class="cbtn" onclick="doCopy(this,'pr2')">Copiar</button></div>
+        <div class="prompt-text" id="pr2">Analiza los siguientes datos y dime: (1) qué tendencias o patrones ves, (2) si hay algo inusual que llame la atención, (3) qué recomendarías hacer.
+
+[Pega aquí los datos o describe la información]</div>
+      </div>
+
+      <div class="prompt-card">
+        <div class="prompt-card-top"><span class="prompt-card-name">✉️ Redactar un correo profesional</span><button class="cbtn" onclick="doCopy(this,'pr3')">Copiar</button></div>
+        <div class="prompt-text" id="pr3">Redacta un correo profesional con estas características:
+- Para: [nombre o puesto del destinatario]
+- Objetivo del correo: [qué quiero lograr]
+- Tono: formal y respetuoso
+- Información adicional: [cualquier dato relevante]
+
+Que sea claro, breve y termine pidiendo una respuesta o acción.</div>
+      </div>
+
+      <div class="prompt-card">
+        <div class="prompt-card-top"><span class="prompt-card-name">📝 Generar un reporte</span><button class="cbtn" onclick="doCopy(this,'pr4')">Copiar</button></div>
+        <div class="prompt-text" id="pr4">Genera un reporte ejecutivo sobre el siguiente tema: [describe el tema]
+
+Debe incluir: introducción breve, puntos principales, conclusión y recomendaciones. Formato limpio, máximo una página.</div>
+      </div>
+
+      <div class="prompt-card">
+        <div class="prompt-card-top"><span class="prompt-card-name">🧠 Explicar algo que no entiendo</span><button class="cbtn" onclick="doCopy(this,'pr5')">Copiar</button></div>
+        <div class="prompt-text" id="pr5">Explícame esto de manera simple, como si fuera la primera vez que lo escucho. Usa ejemplos prácticos.
+
+Quiero entender: [escribe aquí el tema o concepto]</div>
+      </div>
+
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ÁREAS -->
+    <div class="sh">
+      <span class="sh-label">Por departamento</span>
+      <div class="sh-title">Selecciona tu área</div>
+      <div class="sh-sub">Cada área tiene 5 prompts listos, específicos para tus tareas diarias.</div>
+    </div>
+    <div class="areas-grid">
+      <button class="area-card ready" onclick="goArea('compras')"><span class="area-emoji">🛒</span><span class="area-name">Compras</span><span class="area-pill">5 prompts</span></button>
+      <button class="area-card ready" onclick="goArea('ventas')"><span class="area-emoji">📈</span><span class="area-name">Ventas</span><span class="area-pill">5 prompts</span></button>
+      <button class="area-card ready" onclick="goArea('contabilidad')"><span class="area-emoji">🧾</span><span class="area-name">Contabilidad</span><span class="area-pill">5 prompts</span></button>
+      <button class="area-card soon"><span class="area-emoji">📦</span><span class="area-name">Almacén</span><span class="area-pill soon">Pronto</span></button>
+      <button class="area-card soon"><span class="area-emoji">💰</span><span class="area-name">Tesorería</span><span class="area-pill soon">Pronto</span></button>
+      <button class="area-card soon"><span class="area-emoji">🤝</span><span class="area-name">Ctas x Pagar</span><span class="area-pill soon">Pronto</span></button>
+      <button class="area-card soon"><span class="area-emoji">👥</span><span class="area-name">Rec. Humanos</span><span class="area-pill soon">Pronto</span></button>
+      <button class="area-card soon"><span class="area-emoji">⚙️</span><span class="area-name">Administración</span><span class="area-pill soon">Pronto</span></button>
+      <button class="area-card soon"><span class="area-emoji">📐</span><span class="area-name">Proyectos</span><span class="area-pill soon">Pronto</span></button>
+    </div>
+
+  </div>
+  <footer>PomocaGPT v0.3.0 · Herramienta de uso interno · Grupo Pomoca</footer>
+</div>
+
+<!-- ════════ COMPRAS ════════ -->
+<div id="page-compras" class="page">
+  <div class="area-hero">
+    <div class="area-hero-inner">
+      <div class="area-hero-icon">🛒</div>
+      <div><h2>Compras</h2><p>Prompts para cotizaciones, evaluación de proveedores y negociaciones</p></div>
+    </div>
+  </div>
+  <button class="back-btn" onclick="goHome()">← Inicio</button>
+  <div class="area-prompts">
+
+    <div class="ap-card">
+      <div class="ap-top"><div class="ap-meta"><div class="ap-num">Prompt 1 de 5</div><div class="ap-title">Comparar cotizaciones de proveedores</div><div class="ap-desc">Cuando tienes varias propuestas y quieres saber cuál conviene más.</div></div><button class="cbtn" onclick="doCopy(this,'c1')">Copiar</button></div>
+      <div class="ap-box" id="c1">Analiza las siguientes cotizaciones y compáralas. Considera: precio total, plazo de entrega, condiciones de pago, garantías y diferencias importantes.
+
+Al final, dime cuál recomiendas y por qué. Si te falta información para decidir, indícamelo.
+
+Cotizaciones:
+[Pega aquí los datos de cada cotización]</div>
+    </div>
+
+    <div class="ap-card">
+      <div class="ap-top"><div class="ap-meta"><div class="ap-num">Prompt 2 de 5</div><div class="ap-title">Redactar solicitud de cotización</div><div class="ap-desc">Para pedir cotizaciones a proveedores de forma formal y completa.</div></div><button class="cbtn" onclick="doCopy(this,'c2')">Copiar</button></div>
+      <div class="ap-box" id="c2">Redacta una solicitud de cotización formal para enviar a un proveedor con estos datos:
+- Producto o servicio que necesito: [describe]
+- Cantidad: [cantidad]
+- Fecha límite de entrega: [fecha]
+- Condiciones de pago: [ej. 30 días]
+
+Tono formal y profesional.</div>
+    </div>
+
+    <div class="ap-card">
+      <div class="ap-top"><div class="ap-meta"><div class="ap-num">Prompt 3 de 5</div><div class="ap-title">Evaluar a un proveedor</div><div class="ap-desc">Para revisar si un proveedor es confiable antes de una compra importante.</div></div><button class="cbtn" onclick="doCopy(this,'c3')">Copiar</button></div>
+      <div class="ap-box" id="c3">Ayúdame a evaluar a este proveedor. Analiza: cumplimiento de entregas, calidad, precio, servicio y riesgos. Al final dame una calificación del 1 al 10 y tu recomendación.
+
+Información del proveedor:
+[Describe lo que sabes: historial, experiencia, referencias, datos relevantes]</div>
+    </div>
+
+    <div class="ap-card">
+      <div class="ap-top"><div class="ap-meta"><div class="ap-num">Prompt 4 de 5</div><div class="ap-title">Preparar negociación con proveedor</div><div class="ap-desc">Para entrar a una negociación con argumentos y estrategia clara.</div></div><button class="cbtn" onclick="doCopy(this,'c4')">Copiar</button></div>
+      <div class="ap-box" id="c4">Ayúdame a prepararme para negociar con un proveedor. Dame:
+1. Argumentos para conseguir mejor precio o condiciones
+2. Posibles respuestas del proveedor y cómo contestarlas
+3. Alternativas que puedo mencionar para tener más poder
+4. Un rango razonable de descuento que podría pedir
+
+Contexto:
+- Producto/servicio: [describe]
+- Precio ofertado: [precio]
+- Volumen de compra: [cantidad]
+- Relación con el proveedor: [nuevo / habitual]</div>
+    </div>
+
+    <div class="ap-card">
+      <div class="ap-top"><div class="ap-meta"><div class="ap-num">Prompt 5 de 5</div><div class="ap-title">Analizar gasto de compras</div><div class="ap-desc">Para revisar en qué se está gastando y encontrar oportunidades de ahorro.</div></div><button class="cbtn" onclick="doCopy(this,'c5')">Copiar</button></div>
+      <div class="ap-box" id="c5">Analiza este resumen de gasto en compras y dime:
+1. ¿Qué categorías tienen el mayor gasto?
+2. ¿Hay algún gasto inusual que llame la atención?
+3. ¿Dónde podría haber oportunidades de ahorro?
+4. ¿Qué recomendarías revisar o renegociar?
+
+Datos:
+[Pega aquí el resumen de compras o describe los montos por categoría]</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════ VENTAS ════════ -->
+<div id="page-ventas" class="page">
+  <div class="area-hero">
+    <div class="area-hero-inner">
+      <div class="area-hero-icon">📈</div>
+      <div><h2>Ventas</h2><p>Prompts para propuestas, seguimiento de clientes y análisis comercial</p></div>
+    </div>
+  </div>
+  <button class="back-btn" onclick="goHome()">← Inicio</button>
+  <div class="area-prompts">
+
+    <div class="ap-card">
+      <div class="ap-top"><div class="ap-meta"><div class="ap-num">Prompt 1 de 5</div><div class="ap-title">Redactar propuesta comercial</div><div class="ap-desc">Para preparar una propuesta profesional para un cliente.</div></div><button class="cbtn" onclick="doCopy(this,'v1')">Copiar</button></div>
+      <div class="ap-box" id="v1">Redacta una propuesta comercial con estos datos. Que sea clara, enfocada en los beneficios para el cliente y termine con una invitación a actuar.
+
+- Cliente o empresa: [nombre]
+- Lo que ofrecemos: [describe el producto o servicio]
+- Necesidad del cliente: [qué problema quiere resolver]
+- Precio o condiciones: [si aplica]
+- Por qué somos la mejor opción: [diferenciadores]
+
+Tono: profesional y orientado a resultados.</div>
+    </div>
+
+    <div class="ap-card">
+      <div class="ap-top"><div class="ap-meta"><div class="ap-num">Prompt 2 de 5</div><div class="ap-title">Correo de seguimiento a cliente</div><div class="ap-desc">Para retomar contacto con alguien que no ha respondido.</div></div><button class="cbtn" onclick="doCopy(this,'v2')">Copiar</button></div>
+      <div class="ap-box" id="v2">Redacta un correo de seguimiento para un cliente al que ya enviamos una propuesta pero no ha respondido. Tono amable, sin presión, con una pregunta concreta para reactivar la conversación.
+
+- Nombre del cliente: [nombre]
+- Propuesta enviada: [resume en una línea]
+- Fecha en que se envió: [fecha]
+- Algo adicional que quiero mencionar: [opcional]</div>
+    </div>
+
+    <div class="ap-card">
+      <div class="ap-top"><div class="ap-meta"><div class="ap-num">Prompt 3 de 5</div><div class="ap-title">Responder objeción de un cliente</div><div class="ap-desc">Cuando el cliente dice "está muy caro", "lo voy a pensar" u otra objeción.</div></div><button class="cbtn" onclick="doCopy(this,'v3')">Copiar</button></div>
+      <div class="ap-box" id="v3">Un cliente me dijo esto durante la negociación: "[escribe exactamente lo que dijo]"
+
+Ayúdame a responder de manera profesional y empática, sin sonar defensivo. Dame 2 o 3 formas distintas de responder. El objetivo es mantener la conversación y avanzar hacia el cierre.</div>
+    </div>
+
+    <div class="ap-card">
+      <div class="ap-top"><div class="ap-meta"><div class="ap-num">Prompt 4 de 5</div><div class="ap-title">Analizar resultados de ventas</div><div class="ap-desc">Para revisar el desempeño del periodo y encontrar áreas de mejora.</div></div><button class="cbtn" onclick="doCopy(this,'v4')">Copiar</button></div>
+      <div class="ap-box" id="v4">Analiza estos resultados de ventas del periodo. Dime:
+1. ¿Cómo estuvo el desempeño respecto a la meta?
+2. ¿Qué productos o servicios tuvieron mejor y peor resultado?
+3. ¿Qué factores podrían explicar los resultados?
+4. ¿Qué recomendarías para el siguiente periodo?
+
+Datos:
+[Pega aquí: metas, ventas reales, comparativos, lo que tengas]</div>
+    </div>
+
+    <div class="ap-card">
+      <div class="ap-top"><div class="ap-meta"><div class="ap-num">Prompt 5 de 5</div><div class="ap-title">Preparar presentación para cliente</div><div class="ap-desc">Para estructurar bien una reunión de ventas antes de que ocurra.</div></div><button class="cbtn" onclick="doCopy(this,'v5')">Copiar</button></div>
+      <div class="ap-box" id="v5">Ayúdame a estructurar una presentación de ventas. Dame el esquema de puntos a cubrir, en qué orden y el mensaje clave de cada sección.
+
+- Cliente: [nombre o tipo de empresa]
+- Duración de la reunión: [ej. 30 minutos]
+- Objetivo: [ej. cerrar venta, presentar nuevo servicio]
+- Lo que vamos a presentar: [describe]
+- Lo que más le importa al cliente: [si lo sabes]</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════ CONTABILIDAD ════════ -->
+<div id="page-contabilidad" class="page">
+  <div class="area-hero">
+    <div class="area-hero-inner">
+      <div class="area-hero-icon">🧾</div>
+      <div><h2>Contabilidad</h2><p>Prompts para estados financieros, conciliaciones e informes ejecutivos</p></div>
+    </div>
+  </div>
+  <button class="back-btn" onclick="goHome()">← Inicio</button>
+  <div class="area-prompts">
+
+    <div class="ap-card">
+      <div class="ap-top"><div class="ap-meta"><div class="ap-num">Prompt 1 de 5</div><div class="ap-title">Interpretar un estado financiero</div><div class="ap-desc">Para entender qué dice un balance o estado de resultados.</div></div><button class="cbtn" onclick="doCopy(this,'co1')">Copiar</button></div>
+      <div class="ap-box" id="co1">Analiza el siguiente estado financiero y explícame en lenguaje claro:
+1. ¿Cuál es la situación financiera general?
+2. ¿Qué indicadores están bien y cuáles son preocupantes?
+3. ¿Qué tendencias importantes hay?
+4. ¿Qué debería revisar con más detalle?
+
+Estado financiero:
+[Pega aquí los datos del balance o estado de resultados]</div>
+    </div>
+
+    <div class="ap-card">
+      <div class="ap-top"><div class="ap-meta"><div class="ap-num">Prompt 2 de 5</div><div class="ap-title">Detectar errores o inconsistencias</div><div class="ap-desc">Cuando algo no cuadra y quieres que la IA te ayude a encontrarlo.</div></div><button class="cbtn" onclick="doCopy(this,'co2')">Copiar</button></div>
+      <div class="ap-box" id="co2">Revisa estos registros contables y dime si encuentras errores, inconsistencias o valores que no cuadren. Señala exactamente qué está mal y cómo corregirlo. Si todo parece correcto, dímelo también.
+
+Registros:
+[Pega aquí los datos o describe las partidas que quieres revisar]</div>
+    </div>
+
+    <div class="ap-card">
+      <div class="ap-top"><div class="ap-meta"><div class="ap-num">Prompt 3 de 5</div><div class="ap-title">Preparar conciliación bancaria</div><div class="ap-desc">Para identificar diferencias entre el saldo del banco y el saldo en libros.</div></div><button class="cbtn" onclick="doCopy(this,'co3')">Copiar</button></div>
+      <div class="ap-box" id="co3">Ayúdame a preparar una conciliación bancaria. Dime:
+1. ¿Cuáles son las partidas en tránsito (depósitos o pagos aún no reflejados)?
+2. ¿Hay errores que corregir?
+3. ¿Cómo queda el saldo conciliado?
+
+- Saldo según banco: [monto]
+- Saldo según libros: [monto]
+- Diferencia: [monto]
+- Transacciones pendientes: [detalla aquí]</div>
+    </div>
+
+    <div class="ap-card">
+      <div class="ap-top"><div class="ap-meta"><div class="ap-num">Prompt 4 de 5</div><div class="ap-title">Explicar un concepto contable</div><div class="ap-desc">Cuando necesitas entender o explicarle algo contable a alguien más.</div></div><button class="cbtn" onclick="doCopy(this,'co4')">Copiar</button></div>
+      <div class="ap-box" id="co4">Explícame este concepto contable de forma simple y con un ejemplo práctico. Quiero poder explicárselo a alguien sin formación contable.
+
+Incluye: qué es, para qué sirve y cómo aplica en una empresa constructora o inmobiliaria.
+
+Concepto: [escribe aquí el término o proceso]</div>
+    </div>
+
+    <div class="ap-card">
+      <div class="ap-top"><div class="ap-meta"><div class="ap-num">Prompt 5 de 5</div><div class="ap-title">Informe contable para directivos</div><div class="ap-desc">Para comunicar resultados financieros de forma clara, sin tecnicismos.</div></div><button class="cbtn" onclick="doCopy(this,'co5')">Copiar</button></div>
+      <div class="ap-box" id="co5">Redacta un informe ejecutivo contable con estos datos. Que sea claro para directivos que no son contadores. Incluye: resumen del periodo, indicadores clave, variaciones respecto al periodo anterior y puntos de atención.
+
+Datos del periodo:
+[Pega aquí los números o describe los resultados]
+
+Periodo: [ej. Marzo 2025]</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function goHome() {
+    showPage('home');
+    setNav(0);
+  }
+  function goArea(area) {
+    showPage(area);
+    document.querySelectorAll('.nav-btn').forEach(b => {
+      b.classList.toggle('active', b.textContent.toLowerCase().trim() === area);
+    });
+  }
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const t = document.getElementById('page-' + name);
+    if (t) t.classList.add('active');
+    window.scrollTo(0, 0);
+  }
+  function setNav(idx) {
+    document.querySelectorAll('.nav-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  }
+  function doCopy(btn, id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    navigator.clipboard.writeText(el.innerText).then(() => {
+      btn.textContent = '✓ Copiado';
+      btn.classList.add('ok');
+      setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('ok'); }, 2000);
+    });
+  }
+</script>
+</body>
+</html>
