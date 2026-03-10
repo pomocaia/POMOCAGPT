@@ -119,12 +119,12 @@ footer { text-align: center; padding: 2rem 1.5rem; color: #9ca3af; font-size: 0.
 .acc-wrap.open .acc-arrow { transform: rotate(180deg); }
 .acc-body { display: none; padding: 0 1.25rem 1.1rem; }
 .acc-wrap.open .acc-body { display: block; }
-.free-card { background-color:#ffffff; border:1px solid #e8eaed; border-radius:12px; padding:0.9rem 1rem; display:flex; flex-direction:column; gap:0.3rem; transition:box-shadow 0.15s,transform 0.15s; }
+.free-card { background-color:#ffffff; border:1px solid #e8eaed; border-radius:12px; padding:0.9rem 1rem; display:flex; flex-direction:column; gap:0.3rem; transition:box-shadow 0.15s,transform 0.15s; height:100%; }
 .free-card:hover { box-shadow:0 4px 14px rgba(0,0,0,0.08); transform:translateY(-2px); }
-.free-card-top { display:flex; align-items:center; justify-content:space-between; }
-.free-card-name { font-weight:700; font-size:0.86rem; color:#0f1923; }
+.free-card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:0.4rem; flex-wrap:wrap; }
+.free-card-name { font-weight:700; font-size:0.86rem; color:#0f1923; white-space:nowrap; }
 .free-card-tag { font-size:0.62rem; font-weight:700; padding:0.15rem 0.45rem; border-radius:100px; background-color:#ecfdf5; color:#059669; white-space:nowrap; }
-.free-card-desc { font-size:0.75rem; color:#6b7280; line-height:1.5; }
+.free-card-desc { font-size:0.75rem; color:#6b7280; line-height:1.5; flex:1; }
 .free-card-link { margin-top:0.4rem; display:inline-flex; align-items:center; justify-content:center; padding:0.28rem 0; background-color:#f8f9fb; color:#1B3A6B; font-size:0.74rem; font-weight:700; border-radius:7px; text-decoration:none; border:1px solid #e8eaed; transition:background-color 0.15s; }
 .free-card-link:hover { background-color:#1B3A6B; color:#ffffff; }
 @media(min-width:768px){ #free-tools-container { grid-template-columns:repeat(4,1fr) !important; } }
@@ -203,7 +203,7 @@ footer { text-align: center; padding: 2rem 1.5rem; color: #9ca3af; font-size: 0.
     <!-- ALTERNATIVAS GRATUITAS -->
     <div style="margin-top:1.25rem;">
       <div class="sh"><span class="sh-label">Plan gratuito</span><div class="sh-title">¿Se acabaron tus preguntas gratis?</div><div class="sh-sub">Estas herramientas tienen uso gratuito generoso — sin tarjeta de crédito.</div></div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.55rem;" id="free-tools-container"></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.55rem;align-items:stretch;" id="free-tools-container"></div>
     </div>
 
     <div class="divider"></div>
