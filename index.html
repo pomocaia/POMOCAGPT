@@ -119,8 +119,15 @@ footer { text-align: center; padding: 2rem 1.5rem; color: #9ca3af; font-size: 0.
 .acc-wrap.open .acc-arrow { transform: rotate(180deg); }
 .acc-body { display: none; padding: 0 1.25rem 1.1rem; }
 .acc-wrap.open .acc-body { display: block; }
-.drop-item { display:block;width:100%;text-align:left;padding:0.6rem 1rem;background:none;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.84rem;font-weight:600;color:#0f1923;cursor:pointer;transition:background-color 0.12s; }
-.drop-item:hover { background-color:#f1f3f5; }
+.free-card { background-color:#ffffff; border:1px solid #e8eaed; border-radius:12px; padding:0.9rem 1rem; display:flex; flex-direction:column; gap:0.3rem; transition:box-shadow 0.15s,transform 0.15s; }
+.free-card:hover { box-shadow:0 4px 14px rgba(0,0,0,0.08); transform:translateY(-2px); }
+.free-card-top { display:flex; align-items:center; justify-content:space-between; }
+.free-card-name { font-weight:700; font-size:0.86rem; color:#0f1923; }
+.free-card-tag { font-size:0.62rem; font-weight:700; padding:0.15rem 0.45rem; border-radius:100px; background-color:#ecfdf5; color:#059669; white-space:nowrap; }
+.free-card-desc { font-size:0.75rem; color:#6b7280; line-height:1.5; }
+.free-card-link { margin-top:0.4rem; display:inline-flex; align-items:center; justify-content:center; padding:0.28rem 0; background-color:#f8f9fb; color:#1B3A6B; font-size:0.74rem; font-weight:700; border-radius:7px; text-decoration:none; border:1px solid #e8eaed; transition:background-color 0.15s; }
+.free-card-link:hover { background-color:#1B3A6B; color:#ffffff; }
+@media(min-width:768px){ #free-tools-container { grid-template-columns:repeat(4,1fr) !important; } }
 @media (min-width: 768px) {
   nav { padding: 0 2.5rem; }
   .hero { padding: 4rem 2.5rem 3.5rem; }
@@ -187,10 +194,16 @@ footer { text-align: center; padding: 2rem 1.5rem; color: #9ca3af; font-size: 0.
   <div class="container">
 
     <!-- HERRAMIENTAS -->
-    <div class="sh"><span class="sh-label">Herramientas</span><div class="sh-title">¿Qué herramienta uso para cada tarea?</div></div>
+    <div class="sh"><span class="sh-label">Herramientas recomendadas</span><div class="sh-title">¿Qué herramienta uso para cada tarea?</div></div>
     <div class="tools-wrap">
       <div class="tool-head"><span>Tarea</span><span style="text-align:center;">Herramienta</span><span style="text-align:center;">Abrir</span></div>
       <div id="tools-container"></div>
+    </div>
+
+    <!-- ALTERNATIVAS GRATUITAS -->
+    <div style="margin-top:1.25rem;">
+      <div class="sh"><span class="sh-label">Plan gratuito</span><div class="sh-title">¿Se acabaron tus preguntas gratis?</div><div class="sh-sub">Estas herramientas tienen uso gratuito generoso — sin tarjeta de crédito.</div></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.55rem;" id="free-tools-container"></div>
     </div>
 
     <div class="divider"></div>
@@ -277,6 +290,16 @@ const TOOLS = [
   { task: 'Notas de reuniones, resumen de grabaciones', name: 'NotebookLM', url: 'https://notebooklm.google.com' },
   { task: 'Presentaciones con diseño automático', name: 'Gamma', url: 'https://gamma.app' },
   { task: 'Imágenes, flyers y materiales de diseño', name: 'Canva IA', url: 'https://canva.com' },
+];
+
+const FREE_TOOLS = [
+  { name: 'Gemini', emoji: '🔷', desc: 'Bueno para redactar, resumir y analizar. De Google.', tag: 'Gratis con límite diario', url: 'https://gemini.google.com' },
+  { name: 'Copilot', emoji: '🔵', desc: 'Integrado en Windows y Edge. No necesitas cuenta.', tag: 'Gratis en Windows/Edge', url: 'https://copilot.microsoft.com' },
+  { name: 'DeepSeek', emoji: '🔍', desc: 'Muy capaz para análisis y redacción. Origen chino.', tag: 'Gratis con límite diario', url: 'https://chat.deepseek.com' },
+  { name: 'Grok', emoji: '⚡', desc: 'IA de X (Twitter). Acceso gratis con cuenta básica.', tag: 'Gratis limitado', url: 'https://grok.com' },
+  { name: 'Perplexity', emoji: '🔎', desc: 'Ideal para buscar información con fuentes citadas.', tag: 'Gratis con límite diario', url: 'https://perplexity.ai' },
+  { name: 'Manus', emoji: '🤖', desc: 'Agente IA que ejecuta tareas complejas paso a paso.', tag: 'Créditos gratuitos al inicio', url: 'https://manus.im' },
+  { name: 'Venice', emoji: '🔒', desc: 'Privado, sin registro de conversaciones.', tag: 'Gratis con límite diario', url: 'https://venice.ai' },
 ];
 
 const TRUCOS = [
@@ -405,6 +428,22 @@ function renderNav() {
   c.appendChild(b);
 }
 
+function renderFreeTools() {
+  const c = document.getElementById('free-tools-container');
+  FREE_TOOLS.forEach(t => {
+    const d = document.createElement('div');
+    d.className = 'free-card';
+    d.innerHTML = `
+      <div class="free-card-top">
+        <span class="free-card-name">${t.emoji} ${t.name}</span>
+        <span class="free-card-tag">${t.tag}</span>
+      </div>
+      <div class="free-card-desc">${t.desc}</div>
+      <a href="${t.url}" target="_blank" class="free-card-link">Abrir ↗</a>`;
+    c.appendChild(d);
+  });
+}
+
 function renderTools() {
   const c = document.getElementById('tools-container');
   TOOLS.forEach(t => {
@@ -506,6 +545,7 @@ function doCopy(btn, id) {
    ═══════════════════════════ */
 renderNav();
 renderTools();
+renderFreeTools();
 renderTrucos();
 renderRules();
 renderGeneralPrompts();
