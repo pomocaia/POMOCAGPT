@@ -112,6 +112,15 @@ nav { position: sticky; top: 0; z-index: 200; background-color: rgba(255,255,255
 .ap-desc { font-size: 0.8rem; color: #6b7280; line-height: 1.55; }
 .ap-box { margin-top: 1rem; background-color: #f8f9fb; border-radius: 9px; border-left: 3px solid #3DB53D; padding: 0.9rem 1.1rem; font-size: 0.8rem; color: #374151; line-height: 1.72; white-space: pre-wrap; font-family: 'Plus Jakarta Sans', sans-serif; margin-bottom: 0.85rem; }
 footer { text-align: center; padding: 2rem 1.5rem; color: #9ca3af; font-size: 0.72rem; border-top: 1px solid #e8eaed; }
+.acc-wrap { border: 1px solid #e8eaed; border-radius: 12px; overflow: hidden; background-color: #ffffff; }
+.acc-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1.25rem; background: none; border: none; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.88rem; font-weight: 700; color: #0f1923; cursor: pointer; text-align: left; transition: background-color 0.15s; }
+.acc-btn:hover { background-color: #f8f9fb; }
+.acc-arrow { font-size: 0.75rem; color: #9ca3af; transition: transform 0.2s; display: inline-block; }
+.acc-wrap.open .acc-arrow { transform: rotate(180deg); }
+.acc-body { display: none; padding: 0 1.25rem 1.1rem; }
+.acc-wrap.open .acc-body { display: block; }
+.drop-item { display:block;width:100%;text-align:left;padding:0.6rem 1rem;background:none;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.84rem;font-weight:600;color:#0f1923;cursor:pointer;transition:background-color 0.12s; }
+.drop-item:hover { background-color:#f1f3f5; }
 @media (min-width: 768px) {
   nav { padding: 0 2.5rem; }
   .hero { padding: 4rem 2.5rem 3.5rem; }
@@ -140,7 +149,26 @@ footer { text-align: center; padding: 2rem 1.5rem; color: #9ca3af; font-size: 0.
     <span class="logo-text">Pomoca<span>GPT</span></span>
     <span class="logo-badge">Uso interno</span>
   </div>
-  <div class="nav-links" id="nav-links"></div>
+  <div style="display:flex;align-items:center;gap:0.5rem;">
+    <div class="nav-links" id="nav-links"></div>
+    <!-- Menú desplegable -->
+    <div style="position:relative;">
+      <button id="menu-btn" onclick="toggleMenu()" style="display:flex;align-items:center;gap:0.4rem;padding:0.38rem 0.85rem;border-radius:8px;border:1.5px solid #e0e3e7;background:#ffffff;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.82rem;font-weight:700;color:#0f1923;cursor:pointer;transition:border-color 0.15s;">
+        ☰ Menú
+      </button>
+      <div id="dropdown" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:#ffffff;border:1px solid #e8eaed;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.12);min-width:220px;z-index:999;overflow:hidden;">
+        <div style="padding:0.5rem 0.75rem;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#9ca3af;border-bottom:1px solid #f1f3f5;">Ir a sección</div>
+        <button class="drop-item" onclick="goHome();closeMenu()">🏠 &nbsp;Inicio</button>
+        <div style="padding:0.3rem 0.75rem;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#9ca3af;background:#f8f9fb;">Áreas</div>
+        <div id="dropdown-areas"></div>
+        <div style="padding:0.3rem 0.75rem;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#9ca3af;background:#f8f9fb;">Guías</div>
+        <button class="drop-item" onclick="goHome();setTimeout(()=>toggleAccordion('acc-guia'),100);closeMenu()">📖 &nbsp;Cómo escribir un prompt</button>
+        <button class="drop-item" onclick="goHome();setTimeout(()=>toggleAccordion('acc-trucos'),100);closeMenu()">💡 &nbsp;Trucos de uso</button>
+        <button class="drop-item" onclick="goHome();setTimeout(()=>toggleAccordion('acc-reglas'),100);closeMenu()">🚦 &nbsp;Buenas prácticas</button>
+        <button class="drop-item" onclick="goHome();setTimeout(()=>toggleAccordion('acc-herramientas'),100);closeMenu()">🛠️ &nbsp;Herramientas</button>
+      </div>
+    </div>
+  </div>
 </nav>
 
 <!-- HOME -->
@@ -153,16 +181,15 @@ footer { text-align: center; padding: 2rem 1.5rem; color: #9ca3af; font-size: 0.
     </div>
   </div>
 
+  <!-- AVISO COMPACTO -->
+  <div style="background-color:#fffbeb;border-bottom:1px solid #fde68a;padding:0.6rem 1.75rem;display:flex;align-items:center;gap:0.6rem;">
+    <span style="font-size:0.95rem;">⚠️</span>
+    <span style="font-size:0.78rem;color:#92400e;line-height:1.5;"><strong>Antes de usar:</strong> Verifica siempre las respuestas — la IA comete errores. No pegues datos confidenciales (cuentas bancarias, RFC, contraseñas, estados financieros). <button onclick="toggleAccordion('acc-reglas')" style="background:none;border:none;color:#b45309;font-weight:700;font-size:0.78rem;cursor:pointer;text-decoration:underline;font-family:inherit;padding:0;">Ver reglas completas ↓</button></span>
+  </div>
+
   <div class="container">
 
-    <div class="warn-banner">
-      <div class="warn-icon">⚠️</div>
-      <div class="warn-text">
-        <strong>Antes de usar: lee esto</strong>
-        La IA comete errores. Nunca uses sus respuestas sin verificarlas, especialmente en temas financieros, legales o técnicos. Nunca pegues datos confidenciales de la empresa (contraseñas, estados financieros, datos de clientes, RFC, cuentas bancarias). Más detalle en la sección <strong>"Reglas de uso"</strong> más abajo.
-      </div>
-    </div>
-
+    <!-- HERRAMIENTAS -->
     <div class="sh"><span class="sh-label">Herramientas</span><div class="sh-title">¿Qué herramienta uso para cada tarea?</div></div>
     <div class="tools-wrap">
       <div class="tool-head"><span>Tarea</span><span style="text-align:center;">Herramienta</span><span style="text-align:center;">Abrir</span></div>
@@ -171,40 +198,60 @@ footer { text-align: center; padding: 2rem 1.5rem; color: #9ca3af; font-size: 0.
 
     <div class="divider"></div>
 
-    <div class="sh"><span class="sh-label">Guía rápida</span><div class="sh-title">¿Cómo escribir un buen prompt?</div><div class="sh-sub">Incluye siempre estos 4 elementos para obtener mejores respuestas:</div></div>
-    <div class="htp-grid">
-      <div class="htp-card"><div class="htp-num">1</div><div class="htp-title">Rol</div><div class="htp-desc">Dile a la IA quién debe ser. Cambia mucho la calidad de la respuesta.</div><div class="htp-example">"Actúa como gerente de compras con experiencia en construcción..."</div></div>
-      <div class="htp-card"><div class="htp-num">2</div><div class="htp-title">Contexto y tarea</div><div class="htp-desc">Explica la situación y qué quieres que haga. Verbos concretos: analiza, redacta, compara.</div><div class="htp-example">"Trabajo en compras. Necesito comparar estas 3 cotizaciones."</div></div>
-      <div class="htp-card"><div class="htp-num">3</div><div class="htp-title">Datos</div><div class="htp-desc">Pega la información que tiene que analizar. Si no le das datos, los inventa.</div><div class="htp-example">"Aquí están las 3 cotizaciones: [pega los datos]"</div></div>
-      <div class="htp-card"><div class="htp-num">4</div><div class="htp-title">Formato de salida</div><div class="htp-desc">Dile cómo quieres la respuesta: tabla, lista, párrafos, máximo X líneas.</div><div class="htp-example">"Preséntalo en tabla con recomendación final al pie."</div></div>
+    <!-- ACORDEONES: guía, trucos, buenas prácticas -->
+    <div style="display:flex;flex-direction:column;gap:0.5rem;">
+
+      <div class="acc-wrap" id="acc-guia">
+        <button class="acc-btn" onclick="toggleAccordion('acc-guia')">
+          <span>📖 &nbsp;¿Cómo escribir un buen prompt?</span><span class="acc-arrow">↓</span>
+        </button>
+        <div class="acc-body">
+          <div style="margin-top:0.75rem;">
+            <div class="htp-grid">
+              <div class="htp-card"><div class="htp-num">1</div><div class="htp-title">Rol</div><div class="htp-desc">Dile a la IA quién debe ser. Cambia mucho la calidad.</div><div class="htp-example">"Actúa como gerente de compras con experiencia en construcción..."</div></div>
+              <div class="htp-card"><div class="htp-num">2</div><div class="htp-title">Contexto y tarea</div><div class="htp-desc">Explica la situación y qué quieres. Verbos concretos: analiza, redacta, compara.</div><div class="htp-example">"Trabajo en compras. Necesito comparar estas 3 cotizaciones."</div></div>
+              <div class="htp-card"><div class="htp-num">3</div><div class="htp-title">Datos</div><div class="htp-desc">Pega la información. Si no le das datos, los inventa.</div><div class="htp-example">"Aquí están las 3 cotizaciones: [pega los datos]"</div></div>
+              <div class="htp-card"><div class="htp-num">4</div><div class="htp-title">Formato</div><div class="htp-desc">Dile cómo quieres la respuesta: tabla, lista, párrafos.</div><div class="htp-example">"Preséntalo en tabla con recomendación final."</div></div>
+            </div>
+            <div class="htp-full" style="margin-top:0.65rem;">
+              <span class="htp-full-label">✦ Ejemplo completo</span>
+              <div class="htp-full-text">"<mark>Actúa como gerente de compras con experiencia en construcción.</mark> <mark>Trabajo en el área de compras y necesito comparar estas 3 cotizaciones</mark> para decidir cuál conviene más. <mark>[Pega aquí las cotizaciones]</mark> <mark>Preséntalo en tabla comparativa con precio, tiempo de entrega y recomendación final.</mark>"</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-wrap" id="acc-trucos">
+        <button class="acc-btn" onclick="toggleAccordion('acc-trucos')">
+          <span>💡 &nbsp;Trucos de uso — ¿no sabes por dónde empezar?</span><span class="acc-arrow">↓</span>
+        </button>
+        <div class="acc-body">
+          <div style="display:flex;flex-direction:column;gap:0.5rem;margin-top:0.75rem;" id="trucos-container"></div>
+        </div>
+      </div>
+
+      <div class="acc-wrap" id="acc-reglas">
+        <button class="acc-btn" onclick="toggleAccordion('acc-reglas')">
+          <span>🚦 &nbsp;Buenas prácticas — qué sí y qué no hacer</span><span class="acc-arrow">↓</span>
+        </button>
+        <div class="acc-body">
+          <div class="rules-grid" style="margin-top:0.75rem;" id="rules-container"></div>
+        </div>
+      </div>
+
     </div>
-    <div class="htp-full">
-      <span class="htp-full-label">✦ Ejemplo completo con los 4 elementos</span>
-      <div class="htp-full-text">"<mark>Actúa como gerente de compras con experiencia en construcción.</mark> <mark>Trabajo en el área de compras y necesito comparar estas 3 cotizaciones</mark> para decidir cuál conviene más. <mark>[Pega aquí las cotizaciones]</mark> <mark>Preséntalo en tabla comparativa con precio, tiempo de entrega y recomendación final.</mark>"</div>
-    </div>
 
     <div class="divider"></div>
 
-    <div class="sh"><span class="sh-label">Trucos de uso</span><div class="sh-title">¿No sabes por dónde empezar?</div><div class="sh-sub">Cosas que la gente aprende sola después de meses. Aquí las tienes desde el día uno.</div></div>
-    <div style="display:flex;flex-direction:column;gap:0.6rem;" id="trucos-container"></div>
-
-    <div class="divider"></div>
-
-    <div class="sh"><span class="sh-label">Reglas de uso</span><div class="sh-title">Qué sí y qué no hacer con la IA</div><div class="sh-sub">La IA es poderosa pero tiene límites. Léelos antes de usarla.</div></div>
-    <div class="rules-grid" id="rules-container"></div>
-
-    <div class="divider"></div>
-
-    <div class="sh"><span class="sh-label">Prompts generales</span><div class="sh-title">Los más usados — copia y pega directo</div></div>
+    <!-- PROMPTS GENERALES -->
+    <div class="sh"><span class="sh-label">Prompts generales</span><div class="sh-title">Los más usados — para cualquier área</div><div class="sh-sub">Copia, pega en ChatGPT o Claude, y llena los campos en corchetes.</div></div>
     <div class="prompts-grid" id="general-prompts-container"></div>
 
     <div class="divider"></div>
 
+    <!-- ÁREAS -->
     <div class="sh"><span class="sh-label">Por departamento</span><div class="sh-title">Selecciona tu área</div><div class="sh-sub">Cada área tiene prompts listos, específicos para tus tareas diarias.</div></div>
     <div class="areas-grid" id="areas-grid-container"></div>
-
-  </div>
-  <footer>PomocaGPT v0.4.0 · Herramienta de uso interno · Grupo Pomoca</footer>
 </div>
 
 <!-- ÁREA DINÁMICA -->
@@ -424,6 +471,38 @@ renderTrucos();
 renderRules();
 renderGeneralPrompts();
 renderAreasGrid();
+populateDropdownAreas();
+
+function toggleAccordion(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('open');
+}
+
+function toggleMenu() {
+  const d = document.getElementById('dropdown');
+  d.style.display = d.style.display === 'none' ? 'block' : 'none';
+}
+
+function closeMenu() {
+  document.getElementById('dropdown').style.display = 'none';
+}
+
+// Cerrar al clickear fuera
+document.addEventListener('click', e => {
+  if (!e.target.closest('#menu-btn') && !e.target.closest('#dropdown')) closeMenu();
+});
+
+// Poblar áreas en el dropdown
+function populateDropdownAreas() {
+  const c = document.getElementById('dropdown-areas');
+  AREAS.filter(a => !a.soon).forEach(a => {
+    const b = document.createElement('button');
+    b.className = 'drop-item';
+    b.innerHTML = `${a.emoji} &nbsp;${a.name}`;
+    b.onclick = () => { openArea(a.key); closeMenu(); };
+    c.appendChild(b);
+  });
+}
 </script>
 </body>
 </html>
