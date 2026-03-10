@@ -419,32 +419,32 @@ footer {
     <div class="htp-grid">
       <div class="htp-card">
         <div class="htp-num">1</div>
-        <div class="htp-title">Contexto</div>
-        <div class="htp-desc">Explica quién eres o en qué situación estás. La IA no sabe nada de tu trabajo si no se lo dices.</div>
-        <div class="htp-example">"Soy del área de compras de una empresa constructora..."</div>
+        <div class="htp-title">Rol</div>
+        <div class="htp-desc">Dile a la IA quién debe ser. Esto cambia mucho la calidad de la respuesta — no es lo mismo pedirle a "alguien" que a un experto específico.</div>
+        <div class="htp-example">"Actúa como gerente de compras con experiencia en construcción..."</div>
       </div>
       <div class="htp-card">
         <div class="htp-num">2</div>
-        <div class="htp-title">Tarea</div>
-        <div class="htp-desc">Di exactamente qué quieres que haga. Usa verbos concretos: resume, redacta, analiza, compara, explica.</div>
-        <div class="htp-example">"...compara estas 3 cotizaciones y dime cuál es mejor."</div>
+        <div class="htp-title">Contexto y tarea</div>
+        <div class="htp-desc">Explica en qué situación estás y qué quieres que haga. Usa verbos concretos: resume, analiza, compara, redacta, explica.</div>
+        <div class="htp-example">"Trabajo en el área de compras. Necesito comparar estas 3 cotizaciones y saber cuál conviene más."</div>
       </div>
       <div class="htp-card">
         <div class="htp-num">3</div>
-        <div class="htp-title">Tono</div>
-        <div class="htp-desc">Indica cómo quieres que suene: formal, simple, técnico, amable, directo, como para un directivo.</div>
-        <div class="htp-example">"Usa un lenguaje formal y sin tecnicismos."</div>
+        <div class="htp-title">Datos</div>
+        <div class="htp-desc">Pega la información que necesita para trabajar. Si no le das datos, la IA los inventa. Siempre incluye lo que tengas: tablas, textos, números.</div>
+        <div class="htp-example">"Aquí están las 3 cotizaciones: [pega los datos]"</div>
       </div>
       <div class="htp-card">
         <div class="htp-num">4</div>
         <div class="htp-title">Formato de salida</div>
-        <div class="htp-desc">Dile cómo quieres la respuesta: en lista, tabla, párrafos, pasos numerados, en máximo X líneas.</div>
-        <div class="htp-example">"Organízalo en 3 puntos con título y explicación breve."</div>
+        <div class="htp-desc">Dile cómo quieres recibir la respuesta: tabla, lista, párrafos, pasos numerados, máximo X líneas, resumen ejecutivo.</div>
+        <div class="htp-example">"Preséntalo en una tabla con tu recomendación final al pie."</div>
       </div>
     </div>
     <div class="htp-full">
       <span class="htp-full-label">✦ Ejemplo con los 4 elementos</span>
-      <div class="htp-full-text">"<mark>Soy del área de compras</mark> de una empresa constructora. <mark>Compara estas 3 cotizaciones</mark> que te voy a pegar y dime cuál es la mejor opción considerando precio, tiempo de entrega y condiciones de pago. <mark>Usa un lenguaje claro</mark> y <mark>preséntalo en una tabla</mark> con tu recomendación al final."</div>
+      <div class="htp-full-text">"<mark>Actúa como gerente de compras con experiencia en construcción.</mark> <mark>Trabajo en el área de compras y necesito comparar estas 3 cotizaciones</mark> para decidir cuál es la mejor opción. <mark>[Pega aquí las cotizaciones]</mark> <mark>Preséntalo en una tabla comparativa con precio, tiempo de entrega y una recomendación final.</mark>"</div>
     </div>
 
     <div class="divider"></div>
@@ -495,11 +495,22 @@ Debe incluir: introducción breve, puntos principales, conclusión y recomendaci
 Quiero entender: [escribe aquí el tema o concepto]</div>
       </div>
 
+      <div class="prompt-card">
+        <div class="prompt-card-top"><span class="prompt-card-name">⚙️ Generar un prompt optimizado</span><button class="cbtn" onclick="doCopy(this,'pr6')">Copiar</button></div>
+        <div class="prompt-text" id="pr6">Actúa como experto en ingeniería de prompts.
+
+Quiero crear un prompt para esta tarea: [describe lo que quieres hacer]
+
+Contexto de mi trabajo: [describe tu área o puesto]
+
+Datos que voy a usar: [describe qué información vas a pegar]
+
+Resultado que necesito: [describe cómo quieres que te responda]
+
+Crea un prompt optimizado que pueda usar directamente en ChatGPT.</div>
+      </div>
+
     </div>
-
-    <div class="divider"></div>
-
-    <!-- ÁREAS -->
     <div class="sh">
       <span class="sh-label">Por departamento</span>
       <div class="sh-title">Selecciona tu área</div>
