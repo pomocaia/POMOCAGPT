@@ -4,171 +4,220 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex">
-<title>PomocaGPT · Guía de uso interno</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<title>PomocaGPT · Guía de IA Interna</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color: #f8f9fb; color: #0f1923; font-size: 15px; -webkit-font-smoothing: antialiased; }
-nav { position: sticky; top: 0; z-index: 200; background-color: rgba(255,255,255,0.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid #e8eaed; height: 58px; display: flex; align-items: center; justify-content: space-between; padding: 0 1.75rem; }
-.logo { display: flex; align-items: center; gap: 0.6rem; cursor: pointer; }
-.logo-mark { width: 30px; height: 30px; border-radius: 8px; background-color: #1B3A6B; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; color: #3DB53D; flex-shrink: 0; }
-.logo-text { font-weight: 700; font-size: 1rem; color: #0f1923; letter-spacing: -0.3px; }
-.logo-text span { color: #3DB53D; }
-.logo-badge { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.05em; color: #6b7280; background-color: #f1f3f5; padding: 0.18rem 0.5rem; border-radius: 100px; text-transform: uppercase; }
-.nav-links { display: flex; gap: 0.15rem; }
-.nav-btn { padding: 0.38rem 0.85rem; border-radius: 8px; font-size: 0.82rem; font-weight: 600; color: #6b7280; cursor: pointer; border: none; background: none; font-family: 'Plus Jakarta Sans', sans-serif; transition: background-color 0.15s, color 0.15s; }
-.nav-btn:hover { background-color: #f1f3f5; color: #0f1923; }
-.nav-btn.active { background-color: #1B3A6B; color: #ffffff; }
-.page { display: none; }
-.page.active { display: block; }
-@keyframes pageIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-.hero { background-color: #1B3A6B; padding: 3rem 1.75rem 2.75rem; position: relative; overflow: hidden; }
-.hero::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(circle at 80% 50%, rgba(61,181,61,0.12) 0%, transparent 60%); pointer-events: none; }
-.hero::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, #3DB53D 0%, #2563eb 50%, #3DB53D 100%); }
-.hero-inner { max-width: 720px; position: relative; }
-.warn-banner { background-color: #fffbeb; border: 1px solid #f59e0b; border-radius: 10px; padding: 0.9rem 1.1rem; display: flex; gap: 0.75rem; align-items: flex-start; margin-bottom: 1.5rem; }
-.warn-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 0.05rem; }
-.warn-text { font-size: 0.8rem; color: #92400e; line-height: 1.6; }
-.warn-text strong { font-weight: 700; color: #78350f; display: block; margin-bottom: 0.2rem; }
-.container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
-.sh { margin-bottom: 1.25rem; }
-.sh-label { font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #3DB53D; display: block; margin-bottom: 0.3rem; }
-.sh-title { font-size: 1.15rem; font-weight: 700; color: #0f1923; letter-spacing: -0.3px; }
-.sh-sub { font-size: 0.83rem; color: #6b7280; margin-top: 0.25rem; line-height: 1.55; }
-.divider { height: 1px; background-color: #e8eaed; margin: 2.25rem 0; }
-.tools-wrap { background-color: #ffffff; border-radius: 14px; border: 1px solid #e8eaed; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
-.tool-head { display: grid; grid-template-columns: 1fr 130px 80px; background-color: #1B3A6B; padding: 0.65rem 1.25rem; gap: 0.75rem; }
-.tool-head span { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: rgba(255,255,255,0.6); }
-.tool-row { display: grid; grid-template-columns: 1fr 130px 80px; align-items: center; padding: 0.9rem 1.25rem; border-bottom: 1px solid #f1f3f5; gap: 0.75rem; transition: background-color 0.15s; }
-.tool-row:last-child { border-bottom: none; }
-.tool-row:hover { background-color: #fafbfc; }
-.tool-task { font-size: 0.84rem; color: #374151; }
-.tool-name { font-size: 0.84rem; font-weight: 700; color: #1B3A6B; text-align: center; white-space: nowrap; }
-.tool-link { display: inline-flex; align-items: center; justify-content: center; padding: 0.3rem 0.5rem; background-color: #3DB53D; color: #ffffff; font-size: 0.74rem; font-weight: 700; border-radius: 7px; text-decoration: none; width: 100%; transition: background-color 0.15s; }
-.tool-link:hover { background-color: #2ea32e; }
-.prompts-grid { display: flex; flex-direction: column; gap: 0.6rem; }
-.prompt-card { background-color: #ffffff; border: 1px solid #e8eaed; border-radius: 12px; padding: 1.1rem 1.25rem; transition: box-shadow 0.2s, border-color 0.2s; }
-.prompt-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); border-color: #d0d5dd; }
-.prompt-card-top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 0.6rem; }
-.prompt-card-name { font-weight: 700; font-size: 0.88rem; color: #0f1923; }
-.prompt-text { background-color: #f8f9fb; border-radius: 8px; border-left: 3px solid #3DB53D; padding: 0.75rem 1rem; font-size: 0.79rem; color: #4b5563; line-height: 1.7; white-space: pre-wrap; font-family: 'Plus Jakarta Sans', sans-serif; }
-.cbtn { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.3rem 0.75rem; border: 1.5px solid #e0e3e7; border-radius: 7px; background-color: #ffffff; color: #6b7280; font-size: 0.74rem; font-weight: 700; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; white-space: nowrap; transition: border-color 0.15s, color 0.15s, background-color 0.15s; }
-.cbtn:hover { border-color: #3DB53D; color: #3DB53D; }
-.cbtn.ok { border-color: #3DB53D; color: #3DB53D; background-color: #f0faf0; }
-.htp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; margin-bottom: 1rem; }
-.htp-card { background-color: #ffffff; border: 1px solid #e8eaed; border-radius: 12px; padding: 1.1rem; }
-.htp-num { width: 24px; height: 24px; border-radius: 7px; background-color: #1B3A6B; color: #ffffff; font-size: 0.72rem; font-weight: 800; display: flex; align-items: center; justify-content: center; margin-bottom: 0.65rem; }
-.htp-title { font-weight: 700; font-size: 0.86rem; color: #0f1923; margin-bottom: 0.3rem; }
-.htp-desc { font-size: 0.77rem; color: #6b7280; line-height: 1.55; margin-bottom: 0.65rem; }
-.htp-example { background-color: #f8f9fb; border-left: 2px solid #3DB53D; border-radius: 4px; padding: 0.45rem 0.65rem; font-size: 0.73rem; color: #4b5563; font-style: italic; line-height: 1.5; }
-.htp-full { background-color: #1B3A6B; border-radius: 12px; padding: 1.2rem 1.35rem; }
-.htp-full-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #3DB53D; margin-bottom: 0.55rem; display: block; }
-.htp-full-text { font-size: 0.82rem; color: #8fa8c8; line-height: 1.75; }
-.htp-full-text mark { background: none; color: #3DB53D; font-weight: 600; }
-.truco-card { background-color: #ffffff; border: 1px solid #e8eaed; border-radius: 12px; padding: 1.1rem 1.25rem; display: flex; gap: 1rem; align-items: flex-start; }
-.truco-icon { font-size: 1.3rem; flex-shrink: 0; }
-.truco-title { font-weight: 700; font-size: 0.88rem; color: #0f1923; margin-bottom: 0.3rem; }
-.truco-body { font-size: 0.81rem; color: #6b7280; line-height: 1.6; }
-.truco-tag { background-color: #f0faf0; color: #059669; font-weight: 600; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.78rem; }
-.rules-grid { display: flex; flex-direction: column; gap: 0.5rem; }
-.rule-card { border-radius: 12px; padding: 1rem 1.25rem; display: flex; gap: 1rem; align-items: flex-start; }
-.rule-card.danger { background-color: #fff1f2; border: 1px solid #fecdd3; }
-.rule-card.warning { background-color: #fffbeb; border: 1px solid #fde68a; }
-.rule-card.info { background-color: #eff6ff; border: 1px solid #bfdbfe; }
-.rule-icon { font-size: 1.2rem; flex-shrink: 0; }
-.rule-title { font-weight: 700; font-size: 0.86rem; margin-bottom: 0.25rem; }
-.rule-card.danger .rule-title { color: #9f1239; }
-.rule-card.warning .rule-title { color: #92400e; }
-.rule-card.info .rule-title { color: #1e40af; }
-.rule-body { font-size: 0.79rem; line-height: 1.6; }
-.rule-card.danger .rule-body { color: #be123c; }
-.rule-card.warning .rule-body { color: #92400e; }
-.rule-card.info .rule-body { color: #1d4ed8; }
-.areas-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
-.area-card { background-color: #ffffff; border-top: 3px solid #3DB53D; border-left: 1px solid #e8eaed; border-right: 1px solid #e8eaed; border-bottom: 1px solid #e8eaed; border-radius: 12px; padding: 1.1rem 0.9rem; cursor: pointer; display: flex; flex-direction: column; gap: 0.4rem; font-family: 'Plus Jakarta Sans', sans-serif; text-align: left; transition: box-shadow 0.2s, transform 0.15s; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-.area-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
-.area-card.soon { opacity: 0.45; cursor: default; background-color: #f8f9fb; border-top: 3px solid #e0e3e7; }
-.area-card.soon:hover { transform: none; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-.area-emoji { font-size: 1.35rem; }
-.area-name { font-weight: 700; font-size: 0.83rem; color: #0f1923; }
-.area-pill { display: inline-block; font-size: 0.63rem; font-weight: 700; padding: 0.15rem 0.45rem; border-radius: 100px; background-color: #ecfdf5; color: #059669; }
-.area-pill.soon { background-color: #f1f3f5; color: #9ca3af; }
-.area-hero { background-color: #1B3A6B; padding: 1.75rem; position: relative; overflow: hidden; }
-.area-hero::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, #3DB53D, #2563eb, #3DB53D); }
-.area-hero-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; gap: 1rem; }
-.area-hero-icon { width: 52px; height: 52px; border-radius: 12px; background-color: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; flex-shrink: 0; }
-.area-hero h2 { font-size: 1.35rem; font-weight: 800; color: #ffffff; letter-spacing: -0.3px; margin-bottom: 0.2rem; }
-.area-hero p { font-size: 0.83rem; color: #8fa8c8; }
-.back-btn { display: inline-flex; align-items: center; gap: 0.4rem; margin: 1.25rem 1.5rem 0; padding: 0.38rem 0.85rem; border: 1.5px solid #e0e3e7; border-radius: 8px; background-color: #ffffff; color: #6b7280; font-size: 0.8rem; font-weight: 600; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: color 0.15s, border-color 0.15s; }
-.back-btn:hover { color: #1B3A6B; border-color: #1B3A6B; }
-.area-prompts { max-width: 900px; margin: 0 auto; padding: 1.25rem 1.5rem 3rem; display: flex; flex-direction: column; gap: 0.75rem; }
-.ap-card { background-color: #ffffff; border: 1px solid #e8eaed; border-radius: 14px; padding: 1.35rem 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: box-shadow 0.2s; }
-.ap-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-.ap-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
-.ap-meta { flex: 1; }
-.ap-num { font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #3DB53D; margin-bottom: 0.3rem; }
-.ap-title { font-weight: 700; font-size: 0.97rem; color: #0f1923; letter-spacing: -0.2px; margin-bottom: 0.35rem; }
-.ap-desc { font-size: 0.8rem; color: #6b7280; line-height: 1.55; }
-.ap-box { margin-top: 1rem; background-color: #f8f9fb; border-radius: 9px; border-left: 3px solid #3DB53D; padding: 0.9rem 1.1rem; font-size: 0.8rem; color: #374151; line-height: 1.72; white-space: pre-wrap; font-family: 'Plus Jakarta Sans', sans-serif; margin-bottom: 0.85rem; }
-footer { text-align: center; padding: 2rem 1.5rem; color: #9ca3af; font-size: 0.72rem; border-top: 1px solid #e8eaed; }
-.acc-wrap { border: 1px solid #e8eaed; border-radius: 12px; overflow: hidden; background-color: #ffffff; }
-.acc-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1.25rem; background: none; border: none; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.88rem; font-weight: 700; color: #0f1923; cursor: pointer; text-align: left; transition: background-color 0.15s; }
-.acc-btn:hover { background-color: #f8f9fb; }
-.acc-arrow { font-size: 0.75rem; color: #9ca3af; transition: transform 0.2s; display: inline-block; }
-.acc-wrap.open .acc-arrow { transform: rotate(180deg); }
-.acc-body { display: none; padding: 0 1.25rem 1.1rem; }
-.acc-wrap.open .acc-body { display: block; }
-.drop-item { display:block;width:100%;text-align:left;padding:0.55rem 1rem;background:none;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.84rem;font-weight:600;color:#0f1923;cursor:pointer;transition:background-color 0.12s;white-space:nowrap; }
-.drop-item:hover { background-color:#f1f3f5; }
-.free-card { background-color:#ffffff; border:1px solid #e8eaed; border-radius:12px; padding:0.9rem 1rem; display:flex; flex-direction:column; gap:0.3rem; transition:box-shadow 0.15s,transform 0.15s; height:100%; }
-.free-card:hover { box-shadow:0 4px 14px rgba(0,0,0,0.08); transform:translateY(-2px); }
-.free-card-top { display:flex; flex-direction:column; gap:0.3rem; }
-.free-card-name { font-weight:700; font-size:0.86rem; color:#0f1923; }
-.free-card-tag { font-size:0.62rem; font-weight:700; padding:0.15rem 0.45rem; border-radius:100px; background-color:#ecfdf5; color:#059669; white-space:nowrap; align-self:flex-start; }
-.free-card-desc { font-size:0.75rem; color:#6b7280; line-height:1.5; flex:1; }
-.free-card-link { margin-top:0.4rem; display:inline-flex; align-items:center; justify-content:center; padding:0.28rem 0; background-color:#f8f9fb; color:#1B3A6B; font-size:0.74rem; font-weight:700; border-radius:7px; text-decoration:none; border:1px solid #e8eaed; transition:background-color 0.15s; }
-.free-card-link:hover { background-color:#1B3A6B; color:#ffffff; }
-@media(min-width:768px){ #free-tools-container { grid-template-columns:repeat(4,1fr) !important; } }
-@media (min-width: 768px) {
-  nav { padding: 0 2.5rem; }
-  .hero { padding: 4rem 2.5rem 3.5rem; }
-  .container { padding: 2.5rem; }
-  .tool-head { grid-template-columns: 1fr 160px 90px; }
-  .tool-row { grid-template-columns: 1fr 160px 90px; }
-  .prompts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-  .htp-grid { grid-template-columns: repeat(4, 1fr); }
-  .areas-grid { grid-template-columns: repeat(5, 1fr); gap: 0.75rem; }
-  .area-hero { padding: 2.5rem; }
-  .area-prompts { padding: 1.75rem 2.5rem 4rem; }
-  .ap-card { padding: 1.6rem 1.75rem; }
-  .back-btn { margin: 1.5rem 2.5rem 0; }
-  .rules-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+:root {
+  --bg:#060C18; --surface:#0D1526; --surface2:#132038;
+  --border:#1A2E4A; --border2:#243D5E;
+  --text:#E8F0FF; --text2:#6B85A8; --text3:#3D5070;
+  --green:#3DB53D; --green-dim:rgba(61,181,61,0.12); --green-glow:rgba(61,181,61,0.25);
+  --blue:#1B3A6B; --blue-bright:#2A5699;
+  --fh:'Syne',sans-serif; --fb:'DM Sans',sans-serif; --fm:'JetBrains Mono',monospace;
+  --r:10px; --rl:14px;
 }
-@media (max-width: 500px) {
-  .nav-links .nav-btn { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--bg);color:var(--text);font-size:15px;-webkit-font-smoothing:antialiased;min-height:100vh}
+
+nav{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;background:rgba(6,12,24,0.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:.65rem;cursor:pointer}
+.logo-mark{width:28px;height:28px;border-radius:7px;background:var(--green);display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:.72rem;font-weight:800;color:var(--bg);flex-shrink:0}
+.logo-text{font-family:var(--fh);font-weight:700;font-size:.98rem;color:var(--text);letter-spacing:-.3px}
+.logo-text span{color:var(--green)}
+.logo-badge{font-size:.6rem;font-weight:500;letter-spacing:.06em;color:var(--text3);background:var(--surface2);border:1px solid var(--border);padding:.15rem .5rem;border-radius:100px;text-transform:uppercase}
+.nav-right{display:flex;align-items:center;gap:.5rem}
+.nav-btn{padding:.35rem .8rem;border-radius:7px;font-size:.8rem;font-weight:600;color:var(--text2);cursor:pointer;border:1px solid transparent;background:none;font-family:var(--fb);transition:color .15s,background .15s,border-color .15s}
+.nav-btn:hover{color:var(--text);background:var(--surface2)}
+.nav-btn.active{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:700}
+.menu-btn{display:flex;align-items:center;gap:.4rem;padding:.35rem .8rem;border-radius:7px;border:1px solid var(--border2);background:var(--surface);font-family:var(--fb);font-size:.8rem;font-weight:600;color:var(--text2);cursor:pointer;transition:border-color .15s,color .15s}
+.menu-btn:hover{border-color:var(--green);color:var(--green)}
+
+.dropdown-wrap{position:relative}
+#dropdown{display:none;position:absolute;right:0;top:calc(100% + 8px);background:var(--surface);border:1px solid var(--border2);border-radius:var(--rl);box-shadow:0 16px 48px rgba(0,0,0,.5);min-width:200px;width:max-content;z-index:999;overflow:hidden}
+.drop-label{padding:.5rem .9rem;font-family:var(--fm);font-size:.6rem;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);background:var(--surface2);border-bottom:1px solid var(--border)}
+.drop-item{display:block;width:100%;text-align:left;padding:.6rem .9rem;background:none;border:none;font-family:var(--fb);font-size:.83rem;font-weight:500;color:var(--text2);cursor:pointer;transition:background .12s,color .12s;white-space:nowrap}
+.drop-item:hover{background:var(--surface2);color:var(--text)}
+
+.page{display:none}
+.page.active{display:block}
+
+/* HERO */
+.hero{position:relative;overflow:hidden;padding:4rem 1.75rem 3.5rem;background:var(--bg)}
+.hero-grid{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(var(--green-dim) 1px,transparent 1px),linear-gradient(90deg,var(--green-dim) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse 80% 80% at 50% 0%,black 0%,transparent 100%);-webkit-mask-image:radial-gradient(ellipse 80% 80% at 50% 0%,black 0%,transparent 100%)}
+.hero-glow{position:absolute;top:-40%;right:-10%;width:600px;height:600px;background:radial-gradient(circle,rgba(27,58,107,.35) 0%,transparent 70%);pointer-events:none}
+.hero-inner{max-width:680px;position:relative}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--fm);font-size:.68rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin-bottom:1.25rem}
+.hero-eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-family:var(--fh);font-size:clamp(2rem,5vw,3rem);font-weight:800;color:var(--text);line-height:1.1;letter-spacing:-1px;margin-bottom:1rem}
+.hero h1 em{font-style:normal;color:var(--green)}
+.hero-sub{font-size:.95rem;color:var(--text2);line-height:1.7;max-width:460px}
+.hero-line{position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--green),var(--blue-bright),var(--green),transparent)}
+
+/* WARN */
+.warn-strip{background:rgba(245,158,11,.08);border-bottom:1px solid rgba(245,158,11,.2);padding:.55rem 1.75rem;display:flex;align-items:center;gap:.6rem;font-size:.77rem;color:rgba(251,191,36,.85);line-height:1.5}
+.warn-strip strong{color:rgba(251,191,36,1)}
+.warn-strip button{background:none;border:none;color:rgba(251,191,36,.9);font-weight:600;font-size:.77rem;cursor:pointer;text-decoration:underline;font-family:var(--fb);padding:0}
+
+.container{max-width:960px;margin:0 auto;padding:2.25rem 1.5rem}
+.sh{margin-bottom:1.25rem}
+.sh-label{font-family:var(--fm);font-size:.62rem;font-weight:500;text-transform:uppercase;letter-spacing:.12em;color:var(--green);display:block;margin-bottom:.4rem}
+.sh-title{font-family:var(--fh);font-size:1.2rem;font-weight:700;color:var(--text);letter-spacing:-.3px}
+.sh-sub{font-size:.82rem;color:var(--text2);margin-top:.3rem;line-height:1.55}
+.divider{height:1px;background:var(--border);margin:2.5rem 0}
+
+/* TOOLS */
+.tools-wrap{background:var(--surface);border-radius:var(--rl);border:1px solid var(--border);overflow:hidden}
+.tool-head{display:grid;grid-template-columns:1fr 140px 80px;background:var(--surface2);padding:.6rem 1.25rem;gap:.75rem;border-bottom:1px solid var(--border)}
+.tool-head span{font-family:var(--fm);font-size:.62rem;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--text3)}
+.tool-row{display:grid;grid-template-columns:1fr 140px 80px;align-items:center;padding:.85rem 1.25rem;border-bottom:1px solid var(--border);gap:.75rem;transition:background .15s}
+.tool-row:last-child{border-bottom:none}
+.tool-row:hover{background:var(--surface2)}
+.tool-task{font-size:.83rem;color:var(--text2)}
+.tool-name{font-family:var(--fh);font-size:.82rem;font-weight:700;color:var(--green);text-align:center;white-space:nowrap}
+.tool-link{display:inline-flex;align-items:center;justify-content:center;padding:.28rem .5rem;background:var(--green-dim);color:var(--green);font-size:.72rem;font-weight:600;border-radius:6px;text-decoration:none;width:100%;border:1px solid rgba(61,181,61,.25);transition:background .15s,border-color .15s}
+.tool-link:hover{background:var(--green);color:var(--bg)}
+
+/* FREE TOOLS */
+.free-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.4rem;transition:border-color .2s,box-shadow .2s;height:100%}
+.free-card:hover{border-color:var(--green);box-shadow:0 0 20px var(--green-dim)}
+.free-card-top{display:flex;flex-direction:column;gap:.35rem}
+.free-card-name{font-family:var(--fh);font-weight:700;font-size:.88rem;color:var(--text)}
+.free-card-tag{font-family:var(--fm);font-size:.58rem;font-weight:500;padding:.12rem .45rem;border-radius:100px;background:var(--green-dim);color:var(--green);white-space:nowrap;align-self:flex-start;border:1px solid rgba(61,181,61,.2)}
+.free-card-desc{font-size:.76rem;color:var(--text2);line-height:1.5;flex:1}
+.free-card-link{margin-top:.5rem;display:inline-flex;align-items:center;justify-content:center;padding:.3rem 0;background:var(--surface2);color:var(--text2);font-size:.72rem;font-weight:600;border-radius:7px;text-decoration:none;border:1px solid var(--border2);transition:background .15s,color .15s,border-color .15s}
+.free-card-link:hover{background:var(--green);color:var(--bg);border-color:var(--green)}
+@media(min-width:768px){#free-tools-container{grid-template-columns:repeat(4,1fr)!important}}
+
+/* ACCORDIONS */
+.acc-wrap{border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;background:var(--surface)}
+.acc-btn{width:100%;display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.25rem;background:none;border:none;font-family:var(--fb);font-size:.87rem;font-weight:600;color:var(--text2);cursor:pointer;text-align:left;transition:background .15s,color .15s}
+.acc-btn:hover{background:var(--surface2);color:var(--text)}
+.acc-arrow{font-size:.7rem;color:var(--text3);transition:transform .2s;display:inline-block}
+.acc-wrap.open .acc-arrow{transform:rotate(180deg)}
+.acc-wrap.open .acc-btn{color:var(--text)}
+.acc-body{display:none;padding:0 1.25rem 1.1rem}
+.acc-wrap.open .acc-body{display:block}
+
+/* HTP */
+.htp-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.75rem}
+.htp-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:1rem}
+.htp-num{width:22px;height:22px;border-radius:6px;background:var(--green);color:var(--bg);font-family:var(--fh);font-size:.7rem;font-weight:800;display:flex;align-items:center;justify-content:center;margin-bottom:.6rem}
+.htp-title{font-family:var(--fh);font-weight:700;font-size:.85rem;color:var(--text);margin-bottom:.3rem}
+.htp-desc{font-size:.76rem;color:var(--text2);line-height:1.55;margin-bottom:.6rem}
+.htp-example{background:var(--bg);border-left:2px solid var(--green);border-radius:4px;padding:.4rem .65rem;font-family:var(--fm);font-size:.68rem;color:var(--text2);line-height:1.5}
+.htp-full{background:var(--blue);border:1px solid var(--blue-bright);border-radius:var(--r);padding:1.1rem 1.25rem}
+.htp-full-label{font-family:var(--fm);font-size:.62rem;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:.55rem;display:block}
+.htp-full-text{font-size:.82rem;color:rgba(232,240,255,.7);line-height:1.8}
+.htp-full-text mark{background:none;color:var(--green);font-weight:600}
+
+/* TRUCOS */
+.truco-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.1rem;display:flex;gap:.85rem;align-items:flex-start}
+.truco-icon{font-size:1.2rem;flex-shrink:0;margin-top:.05rem}
+.truco-title{font-weight:600;font-size:.86rem;color:var(--text);margin-bottom:.25rem}
+.truco-body{font-size:.79rem;color:var(--text2);line-height:1.65}
+.truco-tag{background:var(--green-dim);color:var(--green);font-weight:600;padding:.08rem .4rem;border-radius:4px;font-size:.76rem;border:1px solid rgba(61,181,61,.2);font-family:var(--fm)}
+
+/* RULES */
+.rules-grid{display:flex;flex-direction:column;gap:.5rem}
+.rule-card{border-radius:var(--r);padding:.9rem 1.1rem;display:flex;gap:.85rem;align-items:flex-start}
+.rule-card.danger{background:rgba(159,18,57,.1);border:1px solid rgba(159,18,57,.25)}
+.rule-card.warning{background:rgba(180,120,0,.1);border:1px solid rgba(245,158,11,.2)}
+.rule-card.info{background:rgba(27,58,107,.2);border:1px solid rgba(42,86,153,.3)}
+.rule-icon{font-size:1.1rem;flex-shrink:0}
+.rule-title{font-weight:600;font-size:.84rem;margin-bottom:.2rem}
+.rule-card.danger .rule-title{color:#f87171}
+.rule-card.warning .rule-title{color:#fbbf24}
+.rule-card.info .rule-title{color:#7db3ff}
+.rule-body{font-size:.77rem;line-height:1.6}
+.rule-card.danger .rule-body{color:rgba(248,113,113,.75)}
+.rule-card.warning .rule-body{color:rgba(251,191,36,.75)}
+.rule-card.info .rule-body{color:rgba(125,179,255,.75)}
+
+/* PROMPT CARDS */
+.prompts-grid{display:flex;flex-direction:column;gap:.6rem}
+.prompt-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:1.1rem 1.25rem;transition:border-color .2s,box-shadow .2s}
+.prompt-card:hover{border-color:var(--border2);box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.prompt-card-top{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.7rem}
+.prompt-card-name{font-family:var(--fh);font-weight:700;font-size:.87rem;color:var(--text)}
+.prompt-text{background:var(--bg);border-radius:8px;border:1px solid var(--border);border-left:2px solid var(--green);padding:.8rem 1rem;font-family:var(--fm);font-size:.74rem;color:var(--text2);line-height:1.8;white-space:pre-wrap}
+
+/* COPY BTN */
+.cbtn{display:inline-flex;align-items:center;gap:.3rem;padding:.28rem .7rem;border:1px solid var(--border2);border-radius:6px;background:var(--surface2);color:var(--text2);font-size:.72rem;font-weight:600;cursor:pointer;font-family:var(--fb);white-space:nowrap;transition:border-color .15s,color .15s,background .15s}
+.cbtn:hover{border-color:var(--green);color:var(--green);background:var(--green-dim)}
+.cbtn.ok{border-color:var(--green);color:var(--green);background:var(--green-dim)}
+
+/* AREAS */
+.areas-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
+.area-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:1.1rem 1rem;cursor:pointer;display:flex;flex-direction:column;gap:.45rem;font-family:var(--fb);text-align:left;transition:border-color .2s,box-shadow .2s,transform .15s;position:relative;overflow:hidden}
+.area-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--green);transform:scaleX(0);transform-origin:left;transition:transform .25s ease}
+.area-card:hover::before{transform:scaleX(1)}
+.area-card:hover{border-color:var(--border2);box-shadow:0 0 24px var(--green-dim);transform:translateY(-2px)}
+.area-card.soon{opacity:.35;cursor:default}
+.area-card.soon:hover{transform:none;box-shadow:none;border-color:var(--border)}
+.area-card.soon::before{display:none}
+.area-emoji{font-size:1.4rem}
+.area-name{font-family:var(--fh);font-weight:700;font-size:.84rem;color:var(--text)}
+.area-pill{display:inline-block;font-family:var(--fm);font-size:.6rem;font-weight:500;padding:.12rem .45rem;border-radius:100px;background:var(--green-dim);color:var(--green);border:1px solid rgba(61,181,61,.2)}
+.area-pill.soon{background:var(--surface2);color:var(--text3);border-color:var(--border)}
+
+/* AREA PAGE */
+.area-hero{background:var(--surface);padding:2rem 1.75rem;position:relative;overflow:hidden;border-bottom:1px solid var(--border)}
+.area-hero-bg{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(var(--green-dim) 1px,transparent 1px),linear-gradient(90deg,var(--green-dim) 1px,transparent 1px);background-size:36px 36px;mask-image:radial-gradient(ellipse 60% 100% at 100% 50%,black 0%,transparent 100%);-webkit-mask-image:radial-gradient(ellipse 60% 100% at 100% 50%,black 0%,transparent 100%)}
+.area-hero-line{position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--green),transparent)}
+.area-hero-inner{max-width:960px;margin:0 auto;display:flex;align-items:center;gap:1.25rem;position:relative}
+.area-hero-icon{width:56px;height:56px;border-radius:var(--rl);background:var(--green-dim);border:1px solid rgba(61,181,61,.25);display:flex;align-items:center;justify-content:center;font-size:1.75rem;flex-shrink:0}
+.area-hero h2{font-family:var(--fh);font-size:1.5rem;font-weight:800;color:var(--text);letter-spacing:-.5px;margin-bottom:.25rem}
+.area-hero p{font-size:.82rem;color:var(--text2)}
+.back-btn{display:inline-flex;align-items:center;gap:.4rem;margin:1.25rem 1.5rem 0;padding:.35rem .8rem;border:1px solid var(--border2);border-radius:7px;background:var(--surface);color:var(--text2);font-size:.78rem;font-weight:600;cursor:pointer;font-family:var(--fb);transition:color .15s,border-color .15s}
+.back-btn:hover{color:var(--green);border-color:var(--green)}
+.area-prompts{max-width:960px;margin:0 auto;padding:1.5rem 1.5rem 4rem;display:flex;flex-direction:column;gap:.75rem}
+.ap-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:1.4rem 1.5rem;transition:border-color .2s,box-shadow .2s}
+.ap-card:hover{border-color:var(--border2);box-shadow:0 4px 24px rgba(0,0,0,.3)}
+.ap-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.ap-meta{flex:1}
+.ap-num{font-family:var(--fm);font-size:.6rem;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:.3rem}
+.ap-title{font-family:var(--fh);font-weight:700;font-size:.97rem;color:var(--text);letter-spacing:-.2px;margin-bottom:.3rem}
+.ap-desc{font-size:.79rem;color:var(--text2);line-height:1.55}
+.ap-box{margin-top:1rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);border-left:2px solid var(--green);padding:.9rem 1.1rem;font-family:var(--fm);font-size:.75rem;color:var(--text2);line-height:1.8;white-space:pre-wrap;margin-bottom:.5rem}
+
+footer{text-align:center;padding:2rem 1.5rem;color:var(--text3);font-family:var(--fm);font-size:.65rem;letter-spacing:.05em;border-top:1px solid var(--border)}
+
+@media(min-width:768px){
+  nav{padding:0 2.5rem}
+  .hero{padding:5rem 2.5rem 4rem}
+  .container{padding:2.5rem}
+  .tool-head,.tool-row{grid-template-columns:1fr 160px 90px}
+  .prompts-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+  .htp-grid{grid-template-columns:repeat(4,1fr)}
+  .areas-grid{grid-template-columns:repeat(5,1fr);gap:.75rem}
+  .area-hero{padding:2.75rem 2.5rem}
+  .area-prompts{padding:2rem 2.5rem 5rem}
+  .ap-card{padding:1.6rem 1.75rem}
+  .back-btn{margin:1.5rem 2.5rem 0}
+  .rules-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+  .hero h1{font-size:3rem}
 }
+@media(max-width:500px){.logo-badge{display:none}}
 </style>
 </head>
 <body>
 
 <nav>
   <div class="logo" onclick="goHome()">
-    <div class="logo-mark">G</div>
+    <div class="logo-mark">P</div>
     <span class="logo-text">Pomoca<span>GPT</span></span>
     <span class="logo-badge">Uso interno</span>
   </div>
-  <div style="display:flex;align-items:center;gap:0.5rem;">
-    <div class="nav-links" id="nav-links"></div>
-    <!-- Menú desplegable -->
-    <div style="position:relative;">
-      <button id="menu-btn" style="display:flex;align-items:center;gap:0.4rem;padding:0.38rem 0.85rem;border-radius:8px;border:1.5px solid #e0e3e7;background:#ffffff;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.82rem;font-weight:700;color:#0f1923;cursor:pointer;transition:border-color 0.15s;">
-        ☰ Menú
-      </button>
-      <div id="dropdown" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:#ffffff;border:1px solid #e8eaed;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.12);min-width:200px;width:max-content;z-index:999;overflow:hidden;">
-        <div style="padding:0.5rem 0.75rem;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#9ca3af;border-bottom:1px solid #f1f3f5;">Áreas</div>
+  <div class="nav-right">
+    <div id="nav-links"></div>
+    <div class="dropdown-wrap">
+      <button id="menu-btn" class="menu-btn">☰ Menú</button>
+      <div id="dropdown">
+        <div class="drop-label">Áreas</div>
         <div id="dropdown-areas"></div>
-        <div style="padding:0.3rem 0.75rem;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#9ca3af;background:#f8f9fb;">Guías</div>
+        <div class="drop-label">Guías</div>
         <button class="drop-item" id="drop-guia">📖 &nbsp;Cómo escribir un prompt</button>
         <button class="drop-item" id="drop-trucos">💡 &nbsp;Trucos de uso</button>
         <button class="drop-item" id="drop-reglas">🚦 &nbsp;Buenas prácticas</button>
@@ -177,463 +226,216 @@ footer { text-align: center; padding: 2rem 1.5rem; color: #9ca3af; font-size: 0.
   </div>
 </nav>
 
-<!-- HOME -->
 <div id="page-home" class="page active">
   <div class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
     <div class="hero-inner">
-      <div style="display:inline-flex;align-items:center;gap:0.5rem;font-size:0.72rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:#3DB53D;margin-bottom:1rem;"><span style="width:6px;height:6px;border-radius:50%;background-color:#3DB53D;display:inline-block;"></span> Guía de uso interno · Pomoca</div>
-      <h1 style="font-size:2rem;font-weight:800;color:#ffffff;line-height:1.2;letter-spacing:-0.5px;margin-bottom:0.85rem;">Tu asistente de<br><span style="color:#3DB53D;">Inteligencia Artificial</span></h1>
-      <p style="font-size:0.95rem;color:#8fa8c8;line-height:1.65;max-width:480px;">Encuentra el prompt que necesitas, cópialo en un clic y pégalo en ChatGPT o Claude.</p>
+      <div class="hero-eyebrow">Guía de uso interno · Pomoca</div>
+      <h1>Tu asistente de<br><em>Inteligencia Artificial</em></h1>
+      <p class="hero-sub">Encuentra el prompt que necesitas, cópialo en un clic y pégalo en ChatGPT o Claude. Sin conocimientos técnicos.</p>
     </div>
+    <div class="hero-line"></div>
   </div>
 
-  <!-- AVISO COMPACTO -->
-  <div style="background-color:#fffbeb;border-bottom:1px solid #fde68a;padding:0.6rem 1.75rem;display:flex;align-items:center;gap:0.6rem;">
-    <span style="font-size:0.95rem;">⚠️</span>
-    <span style="font-size:0.78rem;color:#92400e;line-height:1.5;"><strong>Antes de usar:</strong> Verifica siempre las respuestas — la IA comete errores. No pegues datos confidenciales (cuentas bancarias, RFC, contraseñas, estados financieros). <button onclick="abrirBuenasPracticas()" style="background:none;border:none;color:#b45309;font-weight:700;font-size:0.78rem;cursor:pointer;text-decoration:underline;font-family:inherit;padding:0;">Ver buenas prácticas ↓</button></span>
+  <div class="warn-strip">
+    <span>⚠️</span>
+    <span><strong>Antes de usar:</strong> Verifica siempre las respuestas — la IA comete errores. No pegues datos confidenciales (cuentas bancarias, RFC, contraseñas, estados financieros). <button onclick="abrirBuenasPracticas()">Ver buenas prácticas ↓</button></span>
   </div>
 
   <div class="container">
-
-    <!-- HERRAMIENTAS -->
-    <div class="sh"><span class="sh-label">Herramientas recomendadas</span><div class="sh-title">¿Qué herramienta uso para cada tarea?</div></div>
+    <div class="sh"><span class="sh-label">// herramientas recomendadas</span><div class="sh-title">¿Qué herramienta uso para cada tarea?</div></div>
     <div class="tools-wrap">
-      <div class="tool-head"><span>Tarea</span><span style="text-align:center;">Herramienta</span><span style="text-align:center;">Abrir</span></div>
+      <div class="tool-head"><span>Tarea</span><span style="text-align:center">Herramienta</span><span style="text-align:center">Abrir</span></div>
       <div id="tools-container"></div>
     </div>
 
-    <!-- ALTERNATIVAS GRATUITAS -->
-    <div style="margin-top:1.25rem;">
-      <div class="sh"><span class="sh-label">Plan gratuito</span><div class="sh-title">¿Se acabaron tus preguntas gratis?</div><div class="sh-sub">Estas herramientas tienen uso gratuito generoso — sin tarjeta de crédito.</div></div>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:0.55rem;align-items:stretch;" id="free-tools-container"></div>
+    <div style="margin-top:1.5rem">
+      <div class="sh"><span class="sh-label">// plan gratuito</span><div class="sh-title">¿Se acabaron tus preguntas gratis?</div><div class="sh-sub">Estas herramientas tienen uso gratuito generoso — sin tarjeta de crédito.</div></div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem;align-items:stretch" id="free-tools-container"></div>
     </div>
 
     <div class="divider"></div>
 
-    <!-- ACORDEONES: guía, trucos, buenas prácticas -->
-    <div style="display:flex;flex-direction:column;gap:0.5rem;">
-
+    <div style="display:flex;flex-direction:column;gap:.5rem">
       <div class="acc-wrap" id="acc-guia">
-        <button class="acc-btn" onclick="toggleAccordion('acc-guia')">
-          <span>📖 &nbsp;¿Cómo escribir un buen prompt?</span><span class="acc-arrow">↓</span>
-        </button>
+        <button class="acc-btn" onclick="toggleAccordion('acc-guia')"><span>📖 &nbsp;¿Cómo escribir un buen prompt?</span><span class="acc-arrow">↓</span></button>
         <div class="acc-body">
-          <div style="margin-top:0.75rem;">
+          <div style="margin-top:.75rem">
             <div class="htp-grid">
               <div class="htp-card"><div class="htp-num">1</div><div class="htp-title">Rol</div><div class="htp-desc">Dile a la IA quién debe ser. Cambia mucho la calidad.</div><div class="htp-example">"Actúa como gerente de compras con experiencia en construcción..."</div></div>
               <div class="htp-card"><div class="htp-num">2</div><div class="htp-title">Contexto y tarea</div><div class="htp-desc">Explica la situación y qué quieres. Verbos concretos: analiza, redacta, compara.</div><div class="htp-example">"Trabajo en compras. Necesito comparar estas 3 cotizaciones."</div></div>
               <div class="htp-card"><div class="htp-num">3</div><div class="htp-title">Datos</div><div class="htp-desc">Pega la información. Si no le das datos, los inventa.</div><div class="htp-example">"Aquí están las 3 cotizaciones: [pega los datos]"</div></div>
               <div class="htp-card"><div class="htp-num">4</div><div class="htp-title">Formato</div><div class="htp-desc">Dile cómo quieres la respuesta: tabla, lista, párrafos.</div><div class="htp-example">"Preséntalo en tabla con recomendación final."</div></div>
             </div>
-            <div class="htp-full" style="margin-top:0.65rem;">
+            <div class="htp-full" style="margin-top:.65rem">
               <span class="htp-full-label">✦ Ejemplo completo</span>
               <div class="htp-full-text">"<mark>Actúa como gerente de compras con experiencia en construcción.</mark> <mark>Trabajo en el área de compras y necesito comparar estas 3 cotizaciones</mark> para decidir cuál conviene más. <mark>[Pega aquí las cotizaciones]</mark> <mark>Preséntalo en tabla comparativa con precio, tiempo de entrega y recomendación final.</mark>"</div>
             </div>
           </div>
         </div>
       </div>
-
       <div class="acc-wrap" id="acc-trucos">
-        <button class="acc-btn" onclick="toggleAccordion('acc-trucos')">
-          <span>💡 &nbsp;Trucos de uso — ¿no sabes por dónde empezar?</span><span class="acc-arrow">↓</span>
-        </button>
-        <div class="acc-body">
-          <div style="display:flex;flex-direction:column;gap:0.5rem;margin-top:0.75rem;" id="trucos-container"></div>
-        </div>
+        <button class="acc-btn" onclick="toggleAccordion('acc-trucos')"><span>💡 &nbsp;Trucos de uso — ¿no sabes por dónde empezar?</span><span class="acc-arrow">↓</span></button>
+        <div class="acc-body"><div style="display:flex;flex-direction:column;gap:.5rem;margin-top:.75rem" id="trucos-container"></div></div>
       </div>
-
       <div class="acc-wrap" id="acc-reglas">
-        <button class="acc-btn" onclick="toggleAccordion('acc-reglas')">
-          <span>🚦 &nbsp;Buenas prácticas — qué sí y qué no hacer</span><span class="acc-arrow">↓</span>
-        </button>
-        <div class="acc-body">
-          <div class="rules-grid" style="margin-top:0.75rem;" id="rules-container"></div>
-        </div>
+        <button class="acc-btn" onclick="toggleAccordion('acc-reglas')"><span>🚦 &nbsp;Buenas prácticas — qué sí y qué no hacer</span><span class="acc-arrow">↓</span></button>
+        <div class="acc-body"><div class="rules-grid" style="margin-top:.75rem" id="rules-container"></div></div>
       </div>
-
     </div>
 
     <div class="divider"></div>
 
-    <!-- PROMPTS GENERALES -->
-    <div class="sh"><span class="sh-label">Prompts generales</span><div class="sh-title">Los más usados — para cualquier área</div><div class="sh-sub">Copia, pega en ChatGPT o Claude, y llena los campos en corchetes.</div></div>
+    <div class="sh"><span class="sh-label">// prompts generales</span><div class="sh-title">Los más usados — para cualquier área</div><div class="sh-sub">Copia, pega en ChatGPT o Claude, y llena los campos en corchetes.</div></div>
     <div class="prompts-grid" id="general-prompts-container"></div>
 
     <div class="divider"></div>
 
-    <!-- ÁREAS -->
-    <div class="sh"><span class="sh-label">Por departamento</span><div class="sh-title">Selecciona tu área</div><div class="sh-sub">Cada área tiene prompts listos, específicos para tus tareas diarias.</div></div>
+    <div class="sh"><span class="sh-label">// por departamento</span><div class="sh-title">Selecciona tu área</div><div class="sh-sub">Cada área tiene prompts listos, específicos para tus tareas diarias.</div></div>
     <div class="areas-grid" id="areas-grid-container"></div>
+  </div>
+  <footer>POMOCAGPT v1.0.0 &nbsp;·&nbsp; USO INTERNO &nbsp;·&nbsp; GRUPO POMOCA</footer>
+</div>
 
-  </div><!-- /container -->
-  <footer>PomocaGPT v1.0.0 · Herramienta de uso interno · Grupo Pomoca</footer>
-</div><!-- /page-home -->
-
-<!-- ÁREA DINÁMICA -->
 <div id="page-area" class="page">
   <div class="area-hero">
+    <div class="area-hero-bg"></div>
     <div class="area-hero-inner">
       <div class="area-hero-icon" id="area-icon"></div>
       <div><h2 id="area-title"></h2><p id="area-desc"></p></div>
     </div>
+    <div class="area-hero-line"></div>
   </div>
   <button class="back-btn" onclick="goHome()">← Inicio</button>
   <div class="area-prompts" id="area-prompts-container"></div>
 </div>
 
 <script>
-/* ═══════════════════════════
-   DATOS — edita aquí
-   ═══════════════════════════ */
-
-const TOOLS = [
-  { task: 'Redactar correos, reportes, analizar textos', name: 'ChatGPT', url: 'https://chat.openai.com' },
-  { task: 'Documentos largos, contratos, PDFs extensos', name: 'Claude', url: 'https://claude.ai' },
-  { task: 'Notas de reuniones, resumen de grabaciones', name: 'NotebookLM', url: 'https://notebooklm.google.com' },
-  { task: 'Presentaciones con diseño automático', name: 'Gamma', url: 'https://gamma.app' },
-  { task: 'Imágenes, flyers y materiales de diseño', name: 'Canva IA', url: 'https://canva.com' },
+const TOOLS=[
+  {task:'Redactar correos, reportes, analizar textos',name:'ChatGPT',url:'https://chat.openai.com'},
+  {task:'Documentos largos, contratos, PDFs extensos',name:'Claude',url:'https://claude.ai'},
+  {task:'Notas de reuniones, resumen de grabaciones',name:'NotebookLM',url:'https://notebooklm.google.com'},
+  {task:'Presentaciones con diseño automático',name:'Gamma',url:'https://gamma.app'},
+  {task:'Imágenes, flyers y materiales de diseño',name:'Canva IA',url:'https://canva.com'},
+];
+const FREE_TOOLS=[
+  {name:'Manus',emoji:'🤖',desc:'Agente IA que ejecuta tareas complejas paso a paso.',tag:'Créditos gratuitos al inicio',url:'https://manus.im/invitation/JSMP0GFTU0DJCM?utm_source=invitation&utm_medium=social&utm_campaign=copy_link'},
+  {name:'Gemini',emoji:'🔷',desc:'Bueno para redactar, resumir y analizar. De Google.',tag:'Gratis con límite diario',url:'https://gemini.google.com'},
+  {name:'Copilot',emoji:'🔵',desc:'Integrado en Windows y Edge. No necesitas cuenta.',tag:'Gratis en Windows/Edge',url:'https://copilot.microsoft.com'},
+  {name:'DeepSeek',emoji:'🔍',desc:'Muy capaz para análisis y redacción. Origen chino.',tag:'Gratis con límite diario',url:'https://chat.deepseek.com'},
+  {name:'Grok',emoji:'⚡',desc:'IA de X (Twitter). Acceso gratis con cuenta básica.',tag:'Gratis con límite diario',url:'https://grok.com'},
+  {name:'Perplexity',emoji:'🔎',desc:'Ideal para buscar información con fuentes citadas.',tag:'Gratis con límite diario',url:'https://perplexity.ai'},
+  {name:'Venice',emoji:'🔒',desc:'Privado, sin registro de conversaciones.',tag:'Gratis con límite diario',url:'https://venice.ai'},
+  {name:'Qwen',emoji:'🌐',desc:'IA de Alibaba. Muy capaz para texto y análisis en español.',tag:'Gratis con límite diario',url:'https://chat.qwen.ai'},
+];
+const TRUCOS=[
+  {icon:'🤷',title:'No sabes qué preguntarle',body:'Dile: <span class="truco-tag">"Necesito hacer [tarea]. ¿Qué información necesitas de mi parte para ayudarme mejor?"</span> — la IA te dice exactamente qué darle.'},
+  {icon:'😕',title:'La respuesta no te gustó',body:'No empieces de cero. En el mismo chat dile qué cambiar: <span class="truco-tag">"Hazlo más corto"</span>, <span class="truco-tag">"Usa tono más formal"</span>, <span class="truco-tag">"Dame solo los puntos clave"</span>.'},
+  {icon:'📄',title:'Tienes un documento muy largo',body:'Primero pídele que lo resuma, luego haz preguntas sobre ese resumen. Funciona mejor que pegar todo de golpe.'},
+  {icon:'🔁',title:'Usas el mismo tipo de tarea seguido',body:'Guarda el prompt que te funcionó en un bloc de notas. La próxima vez solo cambias los datos y listo.'},
+  {icon:'🧠',title:'No sabes si la respuesta es correcta',body:'Agrégale al final: <span class="truco-tag">"¿Qué tan seguro estás de esto? ¿Hay algo que deba verificar?"</span> — la IA te avisa cuando puede estar equivocada.'},
+  {icon:'✍️',title:'No sabes cómo explicar lo que necesitas',body:'Escríbelo con tus palabras, aunque sea desordenado. Al final agrega: <span class="truco-tag">"¿Entendiste lo que necesito? Confirma antes de responder."</span>'},
+];
+const RULES=[
+  {type:'danger',icon:'🚫',title:'Nunca pegues datos confidenciales',body:'No incluyas contraseñas, cuentas bancarias, RFC de terceros, datos personales de empleados o clientes, ni estados financieros completos. Una vez que lo pegas, ese dato sale de tus manos.'},
+  {type:'danger',icon:'⛔',title:'No bases decisiones importantes solo en la IA',body:'Ninguna decisión financiera, legal o contractual debe tomarse únicamente con lo que dice la IA. Es un punto de partida para analizar, no una respuesta definitiva.'},
+  {type:'warning',icon:'⚠️',title:'Siempre verifica los números',body:'La IA puede inventar cifras, fechas o cálculos que parecen correctos pero no lo son. Si te da un número, verifícalo tú mismo antes de usarlo o compartirlo.'},
+  {type:'warning',icon:'⚠️',title:'Cuidado con referencias legales o normativas',body:'Puede citar artículos de ley, normas o reglamentos que no existen o están desactualizados. Si necesitas algo legal o fiscal, confirma en la fuente oficial.'},
+  {type:'warning',icon:'🔍',title:'Revisa todo antes de enviar o compartir',body:'Si la IA redactó un correo, reporte o documento, léelo completo antes de mandarlo. Puede incluir errores, datos incorrectos o frases que no aplican a tu caso.'},
+  {type:'info',icon:'ℹ️',title:'La IA no conoce datos internos de Pomoca',body:'No sabe tu estructura, proveedores, contratos ni procesos. Solo trabaja con lo que tú le das en el chat — nunca tiene acceso a información actual de la empresa.'},
+  {type:'info',icon:'💬',title:'Cada chat empieza desde cero',body:'La IA no recuerda conversaciones anteriores. Si necesitas contexto de sesiones pasadas, inclúyelo nuevamente en el prompt.'},
+  {type:'info',icon:'✅',title:'Tú eres quien revisa, decide y firma',body:'La IA ayuda a redactar, analizar y organizar. La responsabilidad siempre es de la persona — úsala como asistente, no como responsable.'},
+];
+const PROMPTS_GENERAL=[
+  {id:'pg1',icon:'📄',title:'Resumir un documento',text:`Quiero que resumas el siguiente documento. Organiza el resumen así: (1) idea principal, (2) puntos más importantes, (3) conclusiones o acciones a tomar. Usa lenguaje simple y directo.\n\n[Pega aquí el texto del documento]`},
+  {id:'pg2',icon:'📊',title:'Analizar datos o Excel',text:`Analiza los siguientes datos y dime: (1) qué tendencias o patrones ves, (2) si hay algo inusual que llame la atención, (3) qué recomendarías hacer.\n\n[Pega aquí los datos o describe la información]`},
+  {id:'pg3',icon:'✉️',title:'Redactar un correo profesional',text:`Redacta un correo profesional con estas características:\n- Para: [nombre o puesto del destinatario]\n- Objetivo del correo: [qué quiero lograr]\n- Tono: formal y respetuoso\n- Información adicional: [cualquier dato relevante]\n\nQue sea claro, breve y termine pidiendo una respuesta o acción.`},
+  {id:'pg4',icon:'📝',title:'Generar un reporte ejecutivo',text:`Genera un reporte ejecutivo sobre el siguiente tema: [describe el tema]\n\nDebe incluir: introducción breve, puntos principales, conclusión y recomendaciones. Formato limpio, máximo una página.`},
+  {id:'pg5',icon:'🧠',title:'Explicar algo que no entiendo',text:`Explícame esto de manera simple, como si fuera la primera vez que lo escucho. Usa ejemplos prácticos.\n\nQuiero entender: [escribe aquí el tema o concepto]`},
+  {id:'pg6',icon:'⚙️',title:'Generar un prompt optimizado',text:`Actúa como experto en ingeniería de prompts.\n\nQuiero crear un prompt para esta tarea: [describe lo que quieres hacer]\n\nContexto de mi trabajo: [describe tu área o puesto]\n\nDatos que voy a usar: [describe qué información vas a pegar]\n\nResultado que necesito: [describe cómo quieres que te responda]\n\nCrea un prompt optimizado que pueda usar directamente en ChatGPT.`},
+];
+const AREAS=[
+  {key:'compras',name:'Compras',emoji:'🛒',badge:'5 prompts',desc:'Cotizaciones, evaluación de proveedores y negociaciones',prompts:[
+    {id:'c1',title:'Comparar cotizaciones de proveedores',desc:'Cuando tienes varias propuestas y quieres saber cuál conviene más.',text:`Analiza las siguientes cotizaciones y compáralas. Considera: precio total, plazo de entrega, condiciones de pago, garantías y diferencias importantes.\n\nAl final, dime cuál recomiendas y por qué. Si te falta información para decidir, indícamelo.\n\nCotizaciones:\n[Pega aquí los datos de cada cotización]`},
+    {id:'c2',title:'Redactar solicitud de cotización',desc:'Para pedir cotizaciones a proveedores de forma formal y completa.',text:`Redacta una solicitud de cotización formal para enviar a un proveedor con estos datos:\n- Producto o servicio que necesito: [describe]\n- Cantidad: [cantidad]\n- Fecha límite de entrega: [fecha]\n- Condiciones de pago: [ej. 30 días]\n\nTono formal y profesional.`},
+    {id:'c3',title:'Evaluar a un proveedor',desc:'Para revisar si un proveedor es confiable antes de una compra importante.',text:`Ayúdame a evaluar a este proveedor. Analiza: cumplimiento de entregas, calidad, precio, servicio y riesgos. Al final dame una calificación del 1 al 10 y tu recomendación.\n\nInformación del proveedor:\n[Describe lo que sabes: historial, experiencia, referencias, datos relevantes]`},
+    {id:'c4',title:'Preparar negociación con proveedor',desc:'Para entrar a una negociación con argumentos y estrategia clara.',text:`Ayúdame a prepararme para negociar con un proveedor. Dame:\n1. Argumentos para conseguir mejor precio o condiciones\n2. Posibles respuestas del proveedor y cómo contestarlas\n3. Alternativas que puedo mencionar para tener más poder\n4. Un rango razonable de descuento que podría pedir\n\nContexto:\n- Producto/servicio: [describe]\n- Precio ofertado: [precio]\n- Volumen de compra: [cantidad]\n- Relación con el proveedor: [nuevo / habitual]`},
+    {id:'c5',title:'Analizar gasto de compras',desc:'Para revisar en qué se está gastando y encontrar oportunidades de ahorro.',text:`Analiza este resumen de gasto en compras y dime:\n1. ¿Qué categorías tienen el mayor gasto?\n2. ¿Hay algún gasto inusual que llame la atención?\n3. ¿Dónde podría haber oportunidades de ahorro?\n4. ¿Qué recomendarías revisar o renegociar?\n\nDatos:\n[Pega aquí el resumen de compras o describe los montos por categoría]`},
+  ]},
+  {key:'ventas',name:'Ventas',emoji:'📈',badge:'5 prompts',desc:'Propuestas, seguimiento de clientes y análisis comercial',prompts:[
+    {id:'v1',title:'Redactar propuesta comercial',desc:'Para preparar una propuesta profesional para un cliente.',text:`Redacta una propuesta comercial con estos datos. Que sea clara, enfocada en los beneficios para el cliente y termine con una invitación a actuar.\n\n- Cliente o empresa: [nombre]\n- Lo que ofrecemos: [describe el producto o servicio]\n- Necesidad del cliente: [qué problema quiere resolver]\n- Precio o condiciones: [si aplica]\n- Por qué somos la mejor opción: [diferenciadores]\n\nTono: profesional y orientado a resultados.`},
+    {id:'v2',title:'Correo de seguimiento a cliente',desc:'Para retomar contacto con alguien que no ha respondido.',text:`Redacta un correo de seguimiento para un cliente al que ya enviamos una propuesta pero no ha respondido. Tono amable, sin presión, con una pregunta concreta para reactivar la conversación.\n\n- Nombre del cliente: [nombre]\n- Propuesta enviada: [resume en una línea]\n- Fecha en que se envió: [fecha]\n- Algo adicional que quiero mencionar: [opcional]`},
+    {id:'v3',title:'Responder objeción de un cliente',desc:'Cuando el cliente dice "está muy caro" u otra objeción.',text:`Un cliente me dijo esto durante la negociación: "[escribe exactamente lo que dijo]"\n\nAyúdame a responder de manera profesional y empática, sin sonar defensivo. Dame 2 o 3 formas distintas de responder. El objetivo es mantener la conversación y avanzar hacia el cierre.`},
+    {id:'v4',title:'Analizar resultados de ventas',desc:'Para revisar el desempeño del periodo y encontrar áreas de mejora.',text:`Analiza estos resultados de ventas del periodo. Dime:\n1. ¿Cómo estuvo el desempeño respecto a la meta?\n2. ¿Qué productos o servicios tuvieron mejor y peor resultado?\n3. ¿Qué factores podrían explicar los resultados?\n4. ¿Qué recomendarías para el siguiente periodo?\n\nDatos:\n[Pega aquí: metas, ventas reales, comparativos, lo que tengas]`},
+    {id:'v5',title:'Preparar presentación para cliente',desc:'Para estructurar bien una reunión de ventas antes de que ocurra.',text:`Ayúdame a estructurar una presentación de ventas. Dame el esquema de puntos a cubrir, en qué orden y el mensaje clave de cada sección.\n\n- Cliente: [nombre o tipo de empresa]\n- Duración de la reunión: [ej. 30 minutos]\n- Objetivo: [ej. cerrar venta, presentar nuevo servicio]\n- Lo que vamos a presentar: [describe]\n- Lo que más le importa al cliente: [si lo sabes]`},
+  ]},
+  {key:'contabilidad',name:'Contabilidad',emoji:'🧾',badge:'5 prompts',desc:'Estados financieros, conciliaciones e informes ejecutivos',prompts:[
+    {id:'co1',title:'Interpretar un estado financiero',desc:'Para entender qué dice un balance o estado de resultados.',text:`Analiza el siguiente estado financiero y explícame en lenguaje claro:\n1. ¿Cuál es la situación financiera general?\n2. ¿Qué indicadores están bien y cuáles son preocupantes?\n3. ¿Qué tendencias importantes hay?\n4. ¿Qué debería revisar con más detalle?\n\nEstado financiero:\n[Pega aquí los datos del balance o estado de resultados]`},
+    {id:'co2',title:'Detectar errores o inconsistencias',desc:'Cuando algo no cuadra y quieres que la IA te ayude a encontrarlo.',text:`Revisa estos registros contables y dime si encuentras errores, inconsistencias o valores que no cuadren. Señala exactamente qué está mal y cómo corregirlo. Si todo parece correcto, dímelo también.\n\nRegistros:\n[Pega aquí los datos o describe las partidas que quieres revisar]`},
+    {id:'co3',title:'Preparar conciliación bancaria',desc:'Para identificar diferencias entre el saldo del banco y el saldo en libros.',text:`Ayúdame a preparar una conciliación bancaria. Dime:\n1. ¿Cuáles son las partidas en tránsito (depósitos o pagos aún no reflejados)?\n2. ¿Hay errores que corregir?\n3. ¿Cómo queda el saldo conciliado?\n\n- Saldo según banco: [monto]\n- Saldo según libros: [monto]\n- Diferencia: [monto]\n- Transacciones pendientes: [detalla aquí]`},
+    {id:'co4',title:'Explicar un concepto contable',desc:'Cuando necesitas entender o explicarle algo contable a alguien más.',text:`Explícame este concepto contable de forma simple y con un ejemplo práctico. Quiero poder explicárselo a alguien sin formación contable.\n\nIncluye: qué es, para qué sirve y cómo aplica en una empresa constructora o inmobiliaria.\n\nConcepto: [escribe aquí el término o proceso]`},
+    {id:'co5',title:'Informe contable para directivos',desc:'Para comunicar resultados financieros de forma clara, sin tecnicismos.',text:`Redacta un informe ejecutivo contable con estos datos. Que sea claro para directivos que no son contadores. Incluye: resumen del periodo, indicadores clave, variaciones respecto al periodo anterior y puntos de atención.\n\nDatos del periodo:\n[Pega aquí los números o describe los resultados]\n\nPeriodo: [ej. Marzo 2025]`},
+  ]},
+  {key:'almacen',name:'Almacén',emoji:'📦',badge:'5 prompts',desc:'Control de inventario, entradas, salidas y reportes de materiales',prompts:[
+    {id:'al1',title:'Analizar niveles de inventario',desc:'Para identificar materiales con exceso, escasez o movimiento irregular.',text:`Analiza este reporte de inventario y dime:\n1. ¿Qué materiales tienen stock por debajo del mínimo?\n2. ¿Hay materiales con exceso o sin movimiento en los últimos 30 días?\n3. ¿Qué artículos deberían reabastecerse de inmediato?\n4. ¿Alguna inconsistencia o dato que llame la atención?\n\nDatos del inventario:\n[Pega aquí el listado con cantidades, mínimos y últimos movimientos]`},
+    {id:'al2',title:'Redactar reporte de entradas y salidas',desc:'Para documentar los movimientos del período de forma clara.',text:`Redacta un reporte de movimientos de almacén para el período indicado. Incluye: resumen de entradas, resumen de salidas, materiales con mayor rotación y observaciones relevantes.\n\n- Período: [ej. marzo 2025]\n- Entradas del período: [describe o pega los datos]\n- Salidas del período: [describe o pega los datos]\n- Observaciones que quiero incluir: [opcional]`},
+    {id:'al3',title:'Detectar diferencias en conteo físico',desc:'Cuando el inventario físico no cuadra con el sistema.',text:`Compara este conteo físico contra el inventario en sistema y dime:\n1. ¿Qué artículos tienen diferencias?\n2. ¿Las diferencias son por faltante o sobrante?\n3. ¿Cuáles son las diferencias más significativas por valor o cantidad?\n4. ¿Qué posibles causas podrían explicarlo?\n\nConteo físico:\n[Pega aquí los datos del conteo]\n\nInventario en sistema:\n[Pega aquí los datos del sistema]`},
+    {id:'al4',title:'Redactar solicitud de materiales',desc:'Para pedir materiales a compras de forma clara y completa.',text:`Redacta una solicitud formal de materiales para el área de compras con estos datos:\n- Solicitante: [nombre y área]\n- Obra o proyecto destino: [nombre]\n- Fecha requerida: [fecha]\n- Materiales solicitados:\n[Lista aquí cada material con cantidad y unidad de medida]\n\nTono formal. Que quede claro el motivo y la urgencia si aplica.`},
+    {id:'al5',title:'Organizar y clasificar lista de materiales',desc:'Para ordenar un listado desordenado por categoría, prioridad o uso.',text:`Toma esta lista de materiales y organízala así:\n1. Agrúpalos por categoría (ferretería, acabados, estructura, etc.)\n2. Dentro de cada categoría, ordénalos por cantidad descendente\n3. Identifica cuáles podrían considerarse materiales críticos\n\nLista de materiales:\n[Pega aquí la lista sin orden]`},
+  ]},
+  {key:'tesoreria',name:'Tesorería',emoji:'💰',badge:'5 prompts',desc:'Flujo de caja, pagos, posición bancaria y proyecciones',prompts:[
+    {id:'te1',title:'Analizar flujo de caja del período',desc:'Para entender entradas, salidas y posición de liquidez actual.',text:`Analiza este flujo de caja y dime:\n1. ¿Cuál es la posición de liquidez actual?\n2. ¿Los ingresos cubren los egresos del período?\n3. ¿Hay semanas o días críticos con riesgo de déficit?\n4. ¿Qué recomendarías para mejorar la posición?\n\nDatos del flujo:\n[Pega aquí el resumen de ingresos y egresos por fecha]`},
+    {id:'te2',title:'Proyectar flujo de caja a 30 días',desc:'Para anticipar necesidades de liquidez en el próximo mes.',text:`Ayúdame a proyectar el flujo de caja de los próximos 30 días. Organízalo por semana e identifica en qué momentos podría haber déficit.\n\n- Saldo inicial: [monto]\n- Ingresos esperados (con fechas aproximadas): [describe]\n- Pagos comprometidos (con fechas): [describe: nómina, proveedores, impuestos, etc.]\n- Pagos probables pero no confirmados: [describe]`},
+    {id:'te3',title:'Priorizar pagos pendientes',desc:'Cuando hay más compromisos que liquidez disponible.',text:`Tengo los siguientes pagos pendientes y liquidez limitada. Ayúdame a priorizarlos considerando: vencimiento, consecuencias de no pagar, impacto en operaciones y relación con el proveedor.\n\n- Liquidez disponible: [monto]\n- Pagos pendientes:\n[Lista cada uno con: destinatario, monto, fecha de vencimiento, consecuencia si no se paga]`},
+    {id:'te4',title:'Redactar aviso de pago a proveedor',desc:'Para notificar que un pago fue realizado o programado.',text:`Redacta un correo formal para notificar a un proveedor sobre un pago. Tono profesional y cordial.\n\n- Proveedor: [nombre]\n- Monto pagado: [monto]\n- Fecha del pago: [fecha]\n- Número de transferencia o referencia: [referencia]\n- Banco origen: [banco]\n- Concepto del pago: [describe la factura o servicio]\n- Algún comentario adicional: [opcional]`},
+    {id:'te5',title:'Resumir posición bancaria',desc:'Para consolidar saldos de múltiples cuentas en un reporte claro.',text:`Resume esta posición bancaria de forma clara para presentarla a dirección. Incluye: saldo total consolidado, saldo por cuenta, variación respecto al período anterior y observaciones relevantes.\n\nCuentas y saldos actuales:\n[Pega aquí: banco, cuenta, saldo actual, saldo período anterior]\n\nFecha del corte: [fecha]`},
+  ]},
+  {key:'cxp',name:'Ctas x Pagar',emoji:'🤝',badge:'5 prompts',desc:'Gestión de facturas, vencimientos y relación con proveedores',prompts:[
+    {id:'cx1',title:'Analizar cartera de cuentas por pagar',desc:'Para ver qué se debe, a quién y qué está vencido.',text:`Analiza esta cartera de cuentas por pagar y dime:\n1. ¿Cuánto se debe en total?\n2. ¿Qué facturas están vencidas y por cuánto tiempo?\n3. ¿Cuáles son los proveedores con mayor saldo?\n4. ¿Qué pagos son urgentes para evitar consecuencias?\n\nCartera actual:\n[Pega aquí: proveedor, número de factura, monto, fecha de vencimiento]`},
+    {id:'cx2',title:'Redactar solicitud de prórroga de pago',desc:'Para pedir más tiempo a un proveedor de forma profesional.',text:`Redacta una carta formal para solicitar prórroga de pago a un proveedor. Tono respetuoso, sin excusas innecesarias, con fecha concreta de compromiso.\n\n- Proveedor: [nombre]\n- Monto adeudado: [monto]\n- Fecha original de vencimiento: [fecha]\n- Nueva fecha propuesta: [fecha]\n- Motivo breve (opcional): [describe si quieres mencionarlo]\n- Quién firma: [nombre y puesto]`},
+    {id:'cx3',title:'Conciliar facturas con órdenes de compra',desc:'Para verificar que las facturas recibidas correspondan a lo solicitado.',text:`Compara estas facturas recibidas contra las órdenes de compra y dime:\n1. ¿Hay facturas sin orden de compra correspondiente?\n2. ¿Hay diferencias en montos, cantidades o conceptos?\n3. ¿Alguna factura duplicada o con datos incorrectos?\n4. ¿Qué facturas están listas para procesar y cuáles tienen pendientes?\n\nFacturas recibidas:\n[Pega aquí los datos]\n\nÓrdenes de compra:\n[Pega aquí los datos]`},
+    {id:'cx4',title:'Preparar relación de pagos para autorización',desc:'Para presentar a dirección o tesorería los pagos que necesitan aprobación.',text:`Prepara una relación de pagos lista para autorización con estos datos. Que sea clara, ordenada y con la información necesaria para que quien aprueba pueda decidir rápido.\n\nPagos a incluir:\n[Lista: proveedor, concepto, monto, fecha de vencimiento, banco a pagar]\n\nFecha de la relación: [fecha]\nElaboró: [nombre]`},
+    {id:'cx5',title:'Responder reclamación de proveedor',desc:'Cuando un proveedor reclama un pago pendiente o con retraso.',text:`Redacta una respuesta profesional a la reclamación de un proveedor sobre un pago pendiente. Tono cordial, transparente y con compromiso concreto.\n\n- Proveedor: [nombre]\n- Qué reclama: [describe la situación]\n- Estado actual del pago: [describe: en proceso, pendiente de autorización, etc.]\n- Fecha compromiso de pago: [fecha]\n- Quién responde: [nombre y puesto]`},
+  ]},
+  {key:'rrhh',name:'Rec. Humanos',emoji:'👥',badge:'5 prompts',desc:'Nómina, comunicados, descripciones de puesto y gestión de personal',prompts:[
+    {id:'rh1',title:'Redactar descripción de puesto',desc:'Para definir claramente un rol, sus responsabilidades y perfil requerido.',text:`Redacta una descripción de puesto profesional con esta información. Que sea clara, atractiva y completa.\n\n- Nombre del puesto: [nombre]\n- Área: [área]\n- Objetivo del puesto: [describe para qué existe este rol]\n- Responsabilidades principales: [lista las actividades clave]\n- Perfil requerido (escolaridad, experiencia, habilidades): [describe]\n- Tipo de contrato y horario: [describe]\n- Empresa: Grupo Pomoca`},
+    {id:'rh2',title:'Redactar comunicado interno',desc:'Para informar algo a los colaboradores de forma clara y profesional.',text:`Redacta un comunicado interno para los colaboradores de Grupo Pomoca. Tono profesional, directo y cordial.\n\n- Asunto del comunicado: [describe de qué trata]\n- A quién va dirigido: [todos / área específica]\n- Mensaje principal: [qué quieres comunicar]\n- Fecha de vigencia o acción requerida: [si aplica]\n- Quién firma: [nombre y puesto]`},
+    {id:'rh3',title:'Analizar indicadores de nómina',desc:'Para revisar el gasto de nómina, variaciones y alertas del período.',text:`Analiza estos datos de nómina del período y dime:\n1. ¿Cuál fue el gasto total y cómo se compara con el período anterior?\n2. ¿Hay variaciones inusuales en algún concepto (horas extra, bajas, altas)?\n3. ¿Qué áreas concentran mayor gasto?\n4. ¿Alguna alerta o punto de atención?\n\nDatos del período:\n[Pega aquí el resumen de nómina por área o concepto]`},
+    {id:'rh4',title:'Redactar carta de oferta de trabajo',desc:'Para formalizar una oferta a un candidato seleccionado.',text:`Redacta una carta de oferta de trabajo formal y profesional con estos datos:\n\n- Nombre del candidato: [nombre]\n- Puesto ofrecido: [puesto]\n- Área: [área]\n- Sueldo mensual bruto: [monto]\n- Prestaciones: [lista: IMSS, vacaciones, aguinaldo, otras]\n- Fecha de inicio propuesta: [fecha]\n- A quién reporta: [puesto del jefe directo]\n- Empresa: Grupo Pomoca / Vive Pomoca`},
+    {id:'rh5',title:'Preparar preguntas para entrevista',desc:'Para evaluar bien a un candidato según el puesto.',text:`Prepárame una guía de preguntas para entrevista de trabajo. Incluye preguntas técnicas, de experiencia y de competencias conductuales. Que sean preguntas abiertas que inviten al candidato a dar ejemplos concretos.\n\n- Puesto a entrevistar: [nombre del puesto]\n- Habilidades clave que quiero evaluar: [lista 3-5 habilidades]\n- Experiencia mínima requerida: [describe]\n- Algo específico que quiero explorar: [opcional]`},
+  ]},
+  {key:'admin',name:'Administración',emoji:'⚙️',badge:'Próximamente',soon:true},
+  {key:'proyectos',name:'Proyectos',emoji:'📐',badge:'Próximamente',soon:true},
+  {key:'obras',name:'Obras',emoji:'🏗️',badge:'Próximamente',soon:true},
 ];
 
-const FREE_TOOLS = [
-  { name: 'Gemini', emoji: '🔷', desc: 'Bueno para redactar, resumir y analizar. De Google.', tag: 'Gratis con límite diario', url: 'https://gemini.google.com' },
-  { name: 'Copilot', emoji: '🔵', desc: 'Integrado en Windows y Edge. No necesitas cuenta.', tag: 'Gratis en Windows/Edge', url: 'https://copilot.microsoft.com' },
-  { name: 'DeepSeek', emoji: '🔍', desc: 'Muy capaz para análisis y redacción. Origen chino.', tag: 'Gratis con límite diario', url: 'https://chat.deepseek.com' },
-  { name: 'Grok', emoji: '⚡', desc: 'IA de X (Twitter). Acceso gratis con cuenta básica.', tag: 'Gratis con límite diario', url: 'https://grok.com' },
-  { name: 'Perplexity', emoji: '🔎', desc: 'Ideal para buscar información con fuentes citadas.', tag: 'Gratis con límite diario', url: 'https://perplexity.ai' },
-  { name: 'Manus', emoji: '🤖', desc: 'Agente IA que ejecuta tareas complejas paso a paso.', tag: 'Créditos gratuitos al inicio', url: 'https://manus.im' },
-  { name: 'Venice', emoji: '🔒', desc: 'Privado, sin registro de conversaciones.', tag: 'Gratis con límite diario', url: 'https://venice.ai' },
-  { name: 'Qwen', emoji: '🌐', desc: 'IA de Alibaba. Muy capaz para texto y análisis en español.', tag: 'Gratis con límite diario', url: 'https://chat.qwen.ai' },
-];
+function renderNav(){const c=document.getElementById('nav-links');const b=document.createElement('button');b.className='nav-btn active';b.textContent='Inicio';b.dataset.area='home';b.onclick=()=>goHome();c.appendChild(b);}
+function renderFreeTools(){const c=document.getElementById('free-tools-container');FREE_TOOLS.forEach(t=>{const d=document.createElement('div');d.className='free-card';d.innerHTML=`<div class="free-card-top"><span class="free-card-name">${t.emoji} ${t.name}</span><span class="free-card-tag">${t.tag}</span></div><div class="free-card-desc">${t.desc}</div><a href="${t.url}" target="_blank" class="free-card-link">Abrir ↗</a>`;c.appendChild(d);});}
+function renderTools(){const c=document.getElementById('tools-container');TOOLS.forEach(t=>{const r=document.createElement('div');r.className='tool-row';r.innerHTML=`<span class="tool-task">${t.task}</span><span class="tool-name">${t.name}</span><a href="${t.url}" target="_blank" class="tool-link">Abrir ↗</a>`;c.appendChild(r);});}
+function renderTrucos(){const c=document.getElementById('trucos-container');TRUCOS.forEach(t=>{const d=document.createElement('div');d.className='truco-card';d.innerHTML=`<div class="truco-icon">${t.icon}</div><div><div class="truco-title">${t.title}</div><div class="truco-body">${t.body}</div></div>`;c.appendChild(d);});}
+function renderRules(){const c=document.getElementById('rules-container');RULES.forEach(r=>{const d=document.createElement('div');d.className=`rule-card ${r.type}`;d.innerHTML=`<div class="rule-icon">${r.icon}</div><div><div class="rule-title">${r.title}</div><div class="rule-body">${r.body}</div></div>`;c.appendChild(d);});}
+function renderGeneralPrompts(){const c=document.getElementById('general-prompts-container');PROMPTS_GENERAL.forEach(p=>{const d=document.createElement('div');d.className='prompt-card';d.innerHTML=`<div class="prompt-card-top"><span class="prompt-card-name">${p.icon} ${p.title}</span><button class="cbtn" onclick="doCopy(this,'${p.id}')">Copiar</button></div><div class="prompt-text" id="${p.id}">${p.text}</div>`;c.appendChild(d);});}
+function renderAreasGrid(){const c=document.getElementById('areas-grid-container');AREAS.forEach(a=>{const b=document.createElement('button');b.className='area-card'+(a.soon?' soon':'');b.innerHTML=`<span class="area-emoji">${a.emoji}</span><span class="area-name">${a.name}</span><span class="area-pill${a.soon?' soon':''}">${a.badge}</span>`;if(!a.soon)b.onclick=()=>openArea(a.key);c.appendChild(b);});}
 
-const TRUCOS = [
-  { icon: '🤷', title: 'No sabes qué preguntarle', body: 'Dile: <span class="truco-tag">"Necesito hacer [tarea]. ¿Qué información necesitas de mi parte para ayudarme mejor?"</span> — la IA te dice exactamente qué darle.' },
-  { icon: '😕', title: 'La respuesta no te gustó', body: 'No empieces de cero. En el mismo chat dile qué cambiar: <span class="truco-tag">"Hazlo más corto"</span>, <span class="truco-tag">"Usa tono más formal"</span>, <span class="truco-tag">"Dame solo los puntos clave"</span>.' },
-  { icon: '📄', title: 'Tienes un documento muy largo', body: 'Primero pídele que lo resuma, luego haz preguntas sobre ese resumen. Funciona mejor que pegar todo de golpe.' },
-  { icon: '🔁', title: 'Usas el mismo tipo de tarea seguido', body: 'Guarda el prompt que te funcionó en un bloc de notas. La próxima vez solo cambias los datos y listo.' },
-  { icon: '🧠', title: 'No sabes si la respuesta es correcta', body: 'Agrégale al final: <span class="truco-tag">"¿Qué tan seguro estás de esto? ¿Hay algo que deba verificar?"</span> — la IA te avisa cuando puede estar equivocada.' },
-  { icon: '✍️', title: 'No sabes cómo explicar lo que necesitas', body: 'Escríbelo con tus palabras, aunque sea desordenado. Al final agrega: <span class="truco-tag">"¿Entendiste lo que necesito? Confirma antes de responder."</span>' },
-];
+function goHome(){document.getElementById('page-home').classList.add('active');document.getElementById('page-area').classList.remove('active');document.querySelectorAll('.nav-btn').forEach(b=>b.classList.add('active'));window.scrollTo(0,0);}
+function openArea(key){const area=AREAS.find(a=>a.key===key);if(!area||area.soon)return;document.getElementById('area-icon').textContent=area.emoji;document.getElementById('area-title').textContent=area.name;document.getElementById('area-desc').textContent=area.desc;const c=document.getElementById('area-prompts-container');c.innerHTML='';area.prompts.forEach((p,i)=>{const d=document.createElement('div');d.className='ap-card';d.innerHTML=`<div class="ap-top"><div class="ap-meta"><div class="ap-num">// prompt ${i+1} de ${area.prompts.length}</div><div class="ap-title">${p.title}</div><div class="ap-desc">${p.desc}</div></div><button class="cbtn" onclick="doCopy(this,'${p.id}')">Copiar</button></div><div class="ap-box" id="${p.id}">${p.text}</div>`;c.appendChild(d);});document.getElementById('page-home').classList.remove('active');document.getElementById('page-area').classList.add('active');document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.area===key));window.scrollTo(0,0);}
+function doCopy(btn,id){const el=document.getElementById(id);if(!el)return;navigator.clipboard.writeText(el.innerText).then(()=>{btn.textContent='✓ Copiado';btn.classList.add('ok');setTimeout(()=>{btn.textContent='Copiar';btn.classList.remove('ok');},2000);});}
+function toggleAccordion(id){const el=document.getElementById(id);if(el)el.classList.toggle('open');}
+function abrirBuenasPracticas(){const el=document.getElementById('acc-reglas');if(!el)return;if(!el.classList.contains('open'))el.classList.add('open');setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'start'}),50);}
+function abrirSeccion(id){closeMenu();const enArea=document.getElementById('page-area').classList.contains('active');if(enArea)goHome();setTimeout(()=>{const el=document.getElementById(id);if(!el)return;if(!el.classList.contains('open'))el.classList.add('open');el.scrollIntoView({behavior:'smooth',block:'start'});},enArea?120:20);}
+function toggleMenu(){const d=document.getElementById('dropdown');d.style.display=d.style.display==='none'?'block':'none';}
+function closeMenu(){document.getElementById('dropdown').style.display='none';}
+function populateDropdownAreas(){const c=document.getElementById('dropdown-areas');AREAS.filter(a=>!a.soon).forEach(a=>{const b=document.createElement('button');b.className='drop-item';b.innerHTML=`${a.emoji} \u00a0${a.name}`;b.addEventListener('click',function(e){e.stopPropagation();document.getElementById('dropdown').style.display='none';openArea(a.key);});c.appendChild(b);});}
 
-const RULES = [
-  { type: 'danger', icon: '🚫', title: 'Nunca pegues datos confidenciales', body: 'No incluyas contraseñas, cuentas bancarias, RFC de terceros, datos personales de empleados o clientes, ni estados financieros completos. Una vez que lo pegas, ese dato sale de tus manos.' },
-  { type: 'danger', icon: '⛔', title: 'No bases decisiones importantes solo en la IA', body: 'Ninguna decisión financiera, legal o contractual debe tomarse únicamente con lo que dice la IA. Es un punto de partida para analizar, no una respuesta definitiva.' },
-  { type: 'warning', icon: '⚠️', title: 'Siempre verifica los números', body: 'La IA puede inventar cifras, fechas o cálculos que parecen correctos pero no lo son. Si te da un número, verifícalo tú mismo antes de usarlo o compartirlo.' },
-  { type: 'warning', icon: '⚠️', title: 'Cuidado con referencias legales o normativas', body: 'Puede citar artículos de ley, normas o reglamentos que no existen o están desactualizados. Si necesitas algo legal o fiscal, confirma en la fuente oficial.' },
-  { type: 'warning', icon: '🔍', title: 'Revisa todo antes de enviar o compartir', body: 'Si la IA redactó un correo, reporte o documento, léelo completo antes de mandarlo. Puede incluir errores, datos incorrectos o frases que no aplican a tu caso.' },
-  { type: 'info', icon: 'ℹ️', title: 'La IA no conoce datos internos de Pomoca', body: 'No sabe tu estructura, proveedores, contratos ni procesos. Solo trabaja con lo que tú le das en el chat — nunca tiene acceso a información actual de la empresa.' },
-  { type: 'info', icon: '💬', title: 'Cada chat empieza desde cero', body: 'La IA no recuerda conversaciones anteriores. Si necesitas contexto de sesiones pasadas, inclúyelo nuevamente en el prompt.' },
-  { type: 'info', icon: '✅', title: 'Tú eres quien revisa, decide y firma', body: 'La IA ayuda a redactar, analizar y organizar. La responsabilidad siempre es de la persona — úsala como asistente, no como responsable.' },
-];
+renderNav();renderTools();renderFreeTools();renderTrucos();renderRules();renderGeneralPrompts();renderAreasGrid();populateDropdownAreas();
 
-const PROMPTS_GENERAL = [
-  { id: 'pg1', icon: '📄', title: 'Resumir un documento', text: `Quiero que resumas el siguiente documento. Organiza el resumen así: (1) idea principal, (2) puntos más importantes, (3) conclusiones o acciones a tomar. Usa lenguaje simple y directo.\n\n[Pega aquí el texto del documento]` },
-  { id: 'pg2', icon: '📊', title: 'Analizar datos o Excel', text: `Analiza los siguientes datos y dime: (1) qué tendencias o patrones ves, (2) si hay algo inusual que llame la atención, (3) qué recomendarías hacer.\n\n[Pega aquí los datos o describe la información]` },
-  { id: 'pg3', icon: '✉️', title: 'Redactar un correo profesional', text: `Redacta un correo profesional con estas características:\n- Para: [nombre o puesto del destinatario]\n- Objetivo del correo: [qué quiero lograr]\n- Tono: formal y respetuoso\n- Información adicional: [cualquier dato relevante]\n\nQue sea claro, breve y termine pidiendo una respuesta o acción.` },
-  { id: 'pg4', icon: '📝', title: 'Generar un reporte ejecutivo', text: `Genera un reporte ejecutivo sobre el siguiente tema: [describe el tema]\n\nDebe incluir: introducción breve, puntos principales, conclusión y recomendaciones. Formato limpio, máximo una página.` },
-  { id: 'pg5', icon: '🧠', title: 'Explicar algo que no entiendo', text: `Explícame esto de manera simple, como si fuera la primera vez que lo escucho. Usa ejemplos prácticos.\n\nQuiero entender: [escribe aquí el tema o concepto]` },
-  { id: 'pg6', icon: '⚙️', title: 'Generar un prompt optimizado', text: `Actúa como experto en ingeniería de prompts.\n\nQuiero crear un prompt para esta tarea: [describe lo que quieres hacer]\n\nContexto de mi trabajo: [describe tu área o puesto]\n\nDatos que voy a usar: [describe qué información vas a pegar]\n\nResultado que necesito: [describe cómo quieres que te responda]\n\nCrea un prompt optimizado que pueda usar directamente en ChatGPT.` },
-];
-
-const AREAS = [
-  {
-    key: 'compras', name: 'Compras', emoji: '🛒', badge: '5 prompts',
-    desc: 'Cotizaciones, evaluación de proveedores y negociaciones',
-    prompts: [
-      { id: 'c1', title: 'Comparar cotizaciones de proveedores', desc: 'Cuando tienes varias propuestas y quieres saber cuál conviene más.', text: `Analiza las siguientes cotizaciones y compáralas. Considera: precio total, plazo de entrega, condiciones de pago, garantías y diferencias importantes.\n\nAl final, dime cuál recomiendas y por qué. Si te falta información para decidir, indícamelo.\n\nCotizaciones:\n[Pega aquí los datos de cada cotización]` },
-      { id: 'c2', title: 'Redactar solicitud de cotización', desc: 'Para pedir cotizaciones a proveedores de forma formal y completa.', text: `Redacta una solicitud de cotización formal para enviar a un proveedor con estos datos:\n- Producto o servicio que necesito: [describe]\n- Cantidad: [cantidad]\n- Fecha límite de entrega: [fecha]\n- Condiciones de pago: [ej. 30 días]\n\nTono formal y profesional.` },
-      { id: 'c3', title: 'Evaluar a un proveedor', desc: 'Para revisar si un proveedor es confiable antes de una compra importante.', text: `Ayúdame a evaluar a este proveedor. Analiza: cumplimiento de entregas, calidad, precio, servicio y riesgos. Al final dame una calificación del 1 al 10 y tu recomendación.\n\nInformación del proveedor:\n[Describe lo que sabes: historial, experiencia, referencias, datos relevantes]` },
-      { id: 'c4', title: 'Preparar negociación con proveedor', desc: 'Para entrar a una negociación con argumentos y estrategia clara.', text: `Ayúdame a prepararme para negociar con un proveedor. Dame:\n1. Argumentos para conseguir mejor precio o condiciones\n2. Posibles respuestas del proveedor y cómo contestarlas\n3. Alternativas que puedo mencionar para tener más poder\n4. Un rango razonable de descuento que podría pedir\n\nContexto:\n- Producto/servicio: [describe]\n- Precio ofertado: [precio]\n- Volumen de compra: [cantidad]\n- Relación con el proveedor: [nuevo / habitual]` },
-      { id: 'c5', title: 'Analizar gasto de compras', desc: 'Para revisar en qué se está gastando y encontrar oportunidades de ahorro.', text: `Analiza este resumen de gasto en compras y dime:\n1. ¿Qué categorías tienen el mayor gasto?\n2. ¿Hay algún gasto inusual que llame la atención?\n3. ¿Dónde podría haber oportunidades de ahorro?\n4. ¿Qué recomendarías revisar o renegociar?\n\nDatos:\n[Pega aquí el resumen de compras o describe los montos por categoría]` },
-    ]
-  },
-  {
-    key: 'ventas', name: 'Ventas', emoji: '📈', badge: '5 prompts',
-    desc: 'Propuestas, seguimiento de clientes y análisis comercial',
-    prompts: [
-      { id: 'v1', title: 'Redactar propuesta comercial', desc: 'Para preparar una propuesta profesional para un cliente.', text: `Redacta una propuesta comercial con estos datos. Que sea clara, enfocada en los beneficios para el cliente y termine con una invitación a actuar.\n\n- Cliente o empresa: [nombre]\n- Lo que ofrecemos: [describe el producto o servicio]\n- Necesidad del cliente: [qué problema quiere resolver]\n- Precio o condiciones: [si aplica]\n- Por qué somos la mejor opción: [diferenciadores]\n\nTono: profesional y orientado a resultados.` },
-      { id: 'v2', title: 'Correo de seguimiento a cliente', desc: 'Para retomar contacto con alguien que no ha respondido.', text: `Redacta un correo de seguimiento para un cliente al que ya enviamos una propuesta pero no ha respondido. Tono amable, sin presión, con una pregunta concreta para reactivar la conversación.\n\n- Nombre del cliente: [nombre]\n- Propuesta enviada: [resume en una línea]\n- Fecha en que se envió: [fecha]\n- Algo adicional que quiero mencionar: [opcional]` },
-      { id: 'v3', title: 'Responder objeción de un cliente', desc: 'Cuando el cliente dice "está muy caro" u otra objeción.', text: `Un cliente me dijo esto durante la negociación: "[escribe exactamente lo que dijo]"\n\nAyúdame a responder de manera profesional y empática, sin sonar defensivo. Dame 2 o 3 formas distintas de responder. El objetivo es mantener la conversación y avanzar hacia el cierre.` },
-      { id: 'v4', title: 'Analizar resultados de ventas', desc: 'Para revisar el desempeño del periodo y encontrar áreas de mejora.', text: `Analiza estos resultados de ventas del periodo. Dime:\n1. ¿Cómo estuvo el desempeño respecto a la meta?\n2. ¿Qué productos o servicios tuvieron mejor y peor resultado?\n3. ¿Qué factores podrían explicar los resultados?\n4. ¿Qué recomendarías para el siguiente periodo?\n\nDatos:\n[Pega aquí: metas, ventas reales, comparativos, lo que tengas]` },
-      { id: 'v5', title: 'Preparar presentación para cliente', desc: 'Para estructurar bien una reunión de ventas antes de que ocurra.', text: `Ayúdame a estructurar una presentación de ventas. Dame el esquema de puntos a cubrir, en qué orden y el mensaje clave de cada sección.\n\n- Cliente: [nombre o tipo de empresa]\n- Duración de la reunión: [ej. 30 minutos]\n- Objetivo: [ej. cerrar venta, presentar nuevo servicio]\n- Lo que vamos a presentar: [describe]\n- Lo que más le importa al cliente: [si lo sabes]` },
-    ]
-  },
-  {
-    key: 'contabilidad', name: 'Contabilidad', emoji: '🧾', badge: '5 prompts',
-    desc: 'Estados financieros, conciliaciones e informes ejecutivos',
-    prompts: [
-      { id: 'co1', title: 'Interpretar un estado financiero', desc: 'Para entender qué dice un balance o estado de resultados.', text: `Analiza el siguiente estado financiero y explícame en lenguaje claro:\n1. ¿Cuál es la situación financiera general?\n2. ¿Qué indicadores están bien y cuáles son preocupantes?\n3. ¿Qué tendencias importantes hay?\n4. ¿Qué debería revisar con más detalle?\n\nEstado financiero:\n[Pega aquí los datos del balance o estado de resultados]` },
-      { id: 'co2', title: 'Detectar errores o inconsistencias', desc: 'Cuando algo no cuadra y quieres que la IA te ayude a encontrarlo.', text: `Revisa estos registros contables y dime si encuentras errores, inconsistencias o valores que no cuadren. Señala exactamente qué está mal y cómo corregirlo. Si todo parece correcto, dímelo también.\n\nRegistros:\n[Pega aquí los datos o describe las partidas que quieres revisar]` },
-      { id: 'co3', title: 'Preparar conciliación bancaria', desc: 'Para identificar diferencias entre el saldo del banco y el saldo en libros.', text: `Ayúdame a preparar una conciliación bancaria. Dime:\n1. ¿Cuáles son las partidas en tránsito (depósitos o pagos aún no reflejados)?\n2. ¿Hay errores que corregir?\n3. ¿Cómo queda el saldo conciliado?\n\n- Saldo según banco: [monto]\n- Saldo según libros: [monto]\n- Diferencia: [monto]\n- Transacciones pendientes: [detalla aquí]` },
-      { id: 'co4', title: 'Explicar un concepto contable', desc: 'Cuando necesitas entender o explicarle algo contable a alguien más.', text: `Explícame este concepto contable de forma simple y con un ejemplo práctico. Quiero poder explicárselo a alguien sin formación contable.\n\nIncluye: qué es, para qué sirve y cómo aplica en una empresa constructora o inmobiliaria.\n\nConcepto: [escribe aquí el término o proceso]` },
-      { id: 'co5', title: 'Informe contable para directivos', desc: 'Para comunicar resultados financieros de forma clara, sin tecnicismos.', text: `Redacta un informe ejecutivo contable con estos datos. Que sea claro para directivos que no son contadores. Incluye: resumen del periodo, indicadores clave, variaciones respecto al periodo anterior y puntos de atención.\n\nDatos del periodo:\n[Pega aquí los números o describe los resultados]\n\nPeriodo: [ej. Marzo 2025]` },
-    ]
-  },
-  {
-    key: 'almacen', name: 'Almacén', emoji: '📦', badge: '5 prompts',
-    desc: 'Control de inventario, entradas, salidas y reportes de materiales',
-    prompts: [
-      { id: 'al1', title: 'Analizar niveles de inventario', desc: 'Para identificar materiales con exceso, escasez o movimiento irregular.', text: `Analiza este reporte de inventario y dime:\n1. ¿Qué materiales tienen stock por debajo del mínimo?\n2. ¿Hay materiales con exceso o sin movimiento en los últimos 30 días?\n3. ¿Qué artículos deberían reabastecerse de inmediato?\n4. ¿Alguna inconsistencia o dato que llame la atención?\n\nDatos del inventario:\n[Pega aquí el listado con cantidades, mínimos y últimos movimientos]` },
-      { id: 'al2', title: 'Redactar reporte de entradas y salidas', desc: 'Para documentar los movimientos del período de forma clara.', text: `Redacta un reporte de movimientos de almacén para el período indicado. Incluye: resumen de entradas, resumen de salidas, materiales con mayor rotación y observaciones relevantes.\n\n- Período: [ej. marzo 2025]\n- Entradas del período: [describe o pega los datos]\n- Salidas del período: [describe o pega los datos]\n- Observaciones que quiero incluir: [opcional]` },
-      { id: 'al3', title: 'Detectar diferencias en conteo físico', desc: 'Cuando el inventario físico no cuadra con el sistema.', text: `Compara este conteo físico contra el inventario en sistema y dime:\n1. ¿Qué artículos tienen diferencias?\n2. ¿Las diferencias son por faltante o sobrante?\n3. ¿Cuáles son las diferencias más significativas por valor o cantidad?\n4. ¿Qué posibles causas podrían explicarlo?\n\nConteo físico:\n[Pega aquí los datos del conteo]\n\nInventario en sistema:\n[Pega aquí los datos del sistema]` },
-      { id: 'al4', title: 'Redactar solicitud de materiales', desc: 'Para pedir materiales a compras de forma clara y completa.', text: `Redacta una solicitud formal de materiales para el área de compras con estos datos:\n- Solicitante: [nombre y área]\n- Obra o proyecto destino: [nombre]\n- Fecha requerida: [fecha]\n- Materiales solicitados:\n[Lista aquí cada material con cantidad y unidad de medida]\n\nTono formal. Que quede claro el motivo y la urgencia si aplica.` },
-      { id: 'al5', title: 'Organizar y clasificar lista de materiales', desc: 'Para ordenar un listado desordenado por categoría, prioridad o uso.', text: `Toma esta lista de materiales y organízala así:\n1. Agrúpalos por categoría (ferretería, acabados, estructura, etc.)\n2. Dentro de cada categoría, ordénalos por cantidad descendente\n3. Identifica cuáles podrían considerarse materiales críticos\n\nLista de materiales:\n[Pega aquí la lista sin orden]` },
-    ]
-  },
-  {
-    key: 'tesoreria', name: 'Tesorería', emoji: '💰', badge: '5 prompts',
-    desc: 'Flujo de caja, pagos, posición bancaria y proyecciones',
-    prompts: [
-      { id: 'te1', title: 'Analizar flujo de caja del período', desc: 'Para entender entradas, salidas y posición de liquidez actual.', text: `Analiza este flujo de caja y dime:\n1. ¿Cuál es la posición de liquidez actual?\n2. ¿Los ingresos cubren los egresos del período?\n3. ¿Hay semanas o días críticos con riesgo de déficit?\n4. ¿Qué recomendarías para mejorar la posición?\n\nDatos del flujo:\n[Pega aquí el resumen de ingresos y egresos por fecha]` },
-      { id: 'te2', title: 'Proyectar flujo de caja a 30 días', desc: 'Para anticipar necesidades de liquidez en el próximo mes.', text: `Ayúdame a proyectar el flujo de caja de los próximos 30 días. Organízalo por semana e identifica en qué momentos podría haber déficit.\n\n- Saldo inicial: [monto]\n- Ingresos esperados (con fechas aproximadas): [describe]\n- Pagos comprometidos (con fechas): [describe: nómina, proveedores, impuestos, etc.]\n- Pagos probables pero no confirmados: [describe]` },
-      { id: 'te3', title: 'Priorizar pagos pendientes', desc: 'Cuando hay más compromisos que liquidez disponible.', text: `Tengo los siguientes pagos pendientes y liquidez limitada. Ayúdame a priorizarlos considerando: vencimiento, consecuencias de no pagar, impacto en operaciones y relación con el proveedor.\n\n- Liquidez disponible: [monto]\n- Pagos pendientes:\n[Lista cada uno con: destinatario, monto, fecha de vencimiento, consecuencia si no se paga]` },
-      { id: 'te4', title: 'Redactar aviso de pago a proveedor', desc: 'Para notificar que un pago fue realizado o programado.', text: `Redacta un correo formal para notificar a un proveedor sobre un pago. Tono profesional y cordial.\n\n- Proveedor: [nombre]\n- Monto pagado: [monto]\n- Fecha del pago: [fecha]\n- Número de transferencia o referencia: [referencia]\n- Banco origen: [banco]\n- Concepto del pago: [describe la factura o servicio]\n- Algún comentario adicional: [opcional]` },
-      { id: 'te5', title: 'Resumir posición bancaria', desc: 'Para consolidar saldos de múltiples cuentas en un reporte claro.', text: `Resume esta posición bancaria de forma clara para presentarla a dirección. Incluye: saldo total consolidado, saldo por cuenta, variación respecto al período anterior y observaciones relevantes.\n\nCuentas y saldos actuales:\n[Pega aquí: banco, cuenta, saldo actual, saldo período anterior]\n\nFecha del corte: [fecha]` },
-    ]
-  },
-  {
-    key: 'cxp', name: 'Ctas x Pagar', emoji: '🤝', badge: '5 prompts',
-    desc: 'Gestión de facturas, vencimientos y relación con proveedores',
-    prompts: [
-      { id: 'cx1', title: 'Analizar cartera de cuentas por pagar', desc: 'Para ver qué se debe, a quién y qué está vencido.', text: `Analiza esta cartera de cuentas por pagar y dime:\n1. ¿Cuánto se debe en total?\n2. ¿Qué facturas están vencidas y por cuánto tiempo?\n3. ¿Cuáles son los proveedores con mayor saldo?\n4. ¿Qué pagos son urgentes para evitar consecuencias?\n\nCartera actual:\n[Pega aquí: proveedor, número de factura, monto, fecha de vencimiento]` },
-      { id: 'cx2', title: 'Redactar solicitud de prórroga de pago', desc: 'Para pedir más tiempo a un proveedor de forma profesional.', text: `Redacta una carta formal para solicitar prórroga de pago a un proveedor. Tono respetuoso, sin excusas innecesarias, con fecha concreta de compromiso.\n\n- Proveedor: [nombre]\n- Monto adeudado: [monto]\n- Fecha original de vencimiento: [fecha]\n- Nueva fecha propuesta: [fecha]\n- Motivo breve (opcional): [describe si quieres mencionarlo]\n- Quién firma: [nombre y puesto]` },
-      { id: 'cx3', title: 'Conciliar facturas con órdenes de compra', desc: 'Para verificar que las facturas recibidas correspondan a lo solicitado.', text: `Compara estas facturas recibidas contra las órdenes de compra y dime:\n1. ¿Hay facturas sin orden de compra correspondiente?\n2. ¿Hay diferencias en montos, cantidades o conceptos?\n3. ¿Alguna factura duplicada o con datos incorrectos?\n4. ¿Qué facturas están listas para procesar y cuáles tienen pendientes?\n\nFacturas recibidas:\n[Pega aquí los datos]\n\nÓrdenes de compra:\n[Pega aquí los datos]` },
-      { id: 'cx4', title: 'Preparar relación de pagos para autorización', desc: 'Para presentar a dirección o tesorería los pagos que necesitan aprobación.', text: `Prepara una relación de pagos lista para autorización con estos datos. Que sea clara, ordenada y con la información necesaria para que quien aprueba pueda decidir rápido.\n\nPagos a incluir:\n[Lista: proveedor, concepto, monto, fecha de vencimiento, banco a pagar]\n\nFecha de la relación: [fecha]\nElaboró: [nombre]` },
-      { id: 'cx5', title: 'Responder reclamación de proveedor', desc: 'Cuando un proveedor reclama un pago pendiente o con retraso.', text: `Redacta una respuesta profesional a la reclamación de un proveedor sobre un pago pendiente. Tono cordial, transparente y con compromiso concreto.\n\n- Proveedor: [nombre]\n- Qué reclama: [describe la situación]\n- Estado actual del pago: [describe: en proceso, pendiente de autorización, etc.]\n- Fecha compromiso de pago: [fecha]\n- Quién responde: [nombre y puesto]` },
-    ]
-  },
-  {
-    key: 'rrhh', name: 'Rec. Humanos', emoji: '👥', badge: '5 prompts',
-    desc: 'Nómina, comunicados, descripciones de puesto y gestión de personal',
-    prompts: [
-      { id: 'rh1', title: 'Redactar descripción de puesto', desc: 'Para definir claramente un rol, sus responsabilidades y perfil requerido.', text: `Redacta una descripción de puesto profesional con esta información. Que sea clara, atractiva y completa.\n\n- Nombre del puesto: [nombre]\n- Área: [área]\n- Objetivo del puesto: [describe para qué existe este rol]\n- Responsabilidades principales: [lista las actividades clave]\n- Perfil requerido (escolaridad, experiencia, habilidades): [describe]\n- Tipo de contrato y horario: [describe]\n- Empresa: Grupo Pomoca` },
-      { id: 'rh2', title: 'Redactar comunicado interno', desc: 'Para informar algo a los colaboradores de forma clara y profesional.', text: `Redacta un comunicado interno para los colaboradores de Grupo Pomoca. Tono profesional, directo y cordial.\n\n- Asunto del comunicado: [describe de qué trata]\n- A quién va dirigido: [todos / área específica]\n- Mensaje principal: [qué quieres comunicar]\n- Fecha de vigencia o acción requerida: [si aplica]\n- Quién firma: [nombre y puesto]` },
-      { id: 'rh3', title: 'Analizar indicadores de nómina', desc: 'Para revisar el gasto de nómina, variaciones y alertas del período.', text: `Analiza estos datos de nómina del período y dime:\n1. ¿Cuál fue el gasto total y cómo se compara con el período anterior?\n2. ¿Hay variaciones inusuales en algún concepto (horas extra, bajas, altas)?\n3. ¿Qué áreas concentran mayor gasto?\n4. ¿Alguna alerta o punto de atención?\n\nDatos del período:\n[Pega aquí el resumen de nómina por área o concepto]` },
-      { id: 'rh4', title: 'Redactar carta de oferta de trabajo', desc: 'Para formalizar una oferta a un candidato seleccionado.', text: `Redacta una carta de oferta de trabajo formal y profesional con estos datos:\n\n- Nombre del candidato: [nombre]\n- Puesto ofrecido: [puesto]\n- Área: [área]\n- Sueldo mensual bruto: [monto]\n- Prestaciones: [lista: IMSS, vacaciones, aguinaldo, otras]\n- Fecha de inicio propuesta: [fecha]\n- A quién reporta: [puesto del jefe directo]\n- Empresa: Grupo Pomoca / Vive Pomoca` },
-      { id: 'rh5', title: 'Preparar preguntas para entrevista', desc: 'Para evaluar bien a un candidato según el puesto.', text: `Prepárame una guía de preguntas para entrevista de trabajo. Incluye preguntas técnicas, de experiencia y de competencias conductuales. Que sean preguntas abiertas que inviten al candidato a dar ejemplos concretos.\n\n- Puesto a entrevistar: [nombre del puesto]\n- Habilidades clave que quiero evaluar: [lista 3-5 habilidades]\n- Experiencia mínima requerida: [describe]\n- Algo específico que quiero explorar: [opcional]` },
-    ]
-  },
-  { key: 'admin',     name: 'Administración', emoji: '⚙️', badge: 'Próximamente', soon: true },
-  { key: 'proyectos', name: 'Proyectos',       emoji: '📐', badge: 'Próximamente', soon: true },
-  { key: 'obras',     name: 'Obras',           emoji: '🏗️', badge: 'Próximamente', soon: true },
-];
-
-/* ═══════════════════════════
-   RENDER
-   ═══════════════════════════ */
-
-function renderNav() {
-  const c = document.getElementById('nav-links');
-  const b = document.createElement('button');
-  b.className = 'nav-btn active';
-  b.textContent = 'Inicio';
-  b.dataset.area = 'home';
-  b.onclick = () => goHome();
-  c.appendChild(b);
-}
-
-function renderFreeTools() {
-  const c = document.getElementById('free-tools-container');
-  FREE_TOOLS.forEach(t => {
-    const d = document.createElement('div');
-    d.className = 'free-card';
-    d.innerHTML = `
-      <div class="free-card-top">
-        <span class="free-card-name">${t.emoji} ${t.name}</span>
-        <span class="free-card-tag">${t.tag}</span>
-      </div>
-      <div class="free-card-desc">${t.desc}</div>
-      <a href="${t.url}" target="_blank" class="free-card-link">Abrir ↗</a>`;
-    c.appendChild(d);
-  });
-}
-
-function renderTools() {
-  const c = document.getElementById('tools-container');
-  TOOLS.forEach(t => {
-    const row = document.createElement('div');
-    row.className = 'tool-row';
-    row.innerHTML = `<span class="tool-task">${t.task}</span><span class="tool-name">${t.name}</span><a href="${t.url}" target="_blank" class="tool-link">Abrir ↗</a>`;
-    c.appendChild(row);
-  });
-}
-
-function renderTrucos() {
-  const c = document.getElementById('trucos-container');
-  TRUCOS.forEach(t => {
-    const d = document.createElement('div');
-    d.className = 'truco-card';
-    d.innerHTML = `<div class="truco-icon">${t.icon}</div><div><div class="truco-title">${t.title}</div><div class="truco-body">${t.body}</div></div>`;
-    c.appendChild(d);
-  });
-}
-
-function renderRules() {
-  const c = document.getElementById('rules-container');
-  RULES.forEach(r => {
-    const d = document.createElement('div');
-    d.className = `rule-card ${r.type}`;
-    d.innerHTML = `<div class="rule-icon">${r.icon}</div><div><div class="rule-title">${r.title}</div><div class="rule-body">${r.body}</div></div>`;
-    c.appendChild(d);
-  });
-}
-
-function renderGeneralPrompts() {
-  const c = document.getElementById('general-prompts-container');
-  PROMPTS_GENERAL.forEach(p => {
-    const d = document.createElement('div');
-    d.className = 'prompt-card';
-    d.innerHTML = `<div class="prompt-card-top"><span class="prompt-card-name">${p.icon} ${p.title}</span><button class="cbtn" onclick="doCopy(this,'${p.id}')">Copiar</button></div><div class="prompt-text" id="${p.id}">${p.text}</div>`;
-    c.appendChild(d);
-  });
-}
-
-function renderAreasGrid() {
-  const c = document.getElementById('areas-grid-container');
-  AREAS.forEach(a => {
-    const b = document.createElement('button');
-    b.className = 'area-card' + (a.soon ? ' soon' : '');
-    b.innerHTML = `<span class="area-emoji">${a.emoji}</span><span class="area-name">${a.name}</span><span class="area-pill${a.soon ? ' soon' : ''}">${a.badge}</span>`;
-    if (!a.soon) b.onclick = () => openArea(a.key);
-    c.appendChild(b);
-  });
-}
-
-/* ═══════════════════════════
-   NAVIGATION
-   ═══════════════════════════ */
-
-function goHome() {
-  document.getElementById('page-home').classList.add('active');
-  document.getElementById('page-area').classList.remove('active');
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.add('active'));
-  window.scrollTo(0, 0);
-}
-
-function openArea(key) {
-  const area = AREAS.find(a => a.key === key);
-  if (!area || area.soon) return;
-  document.getElementById('area-icon').textContent = area.emoji;
-  document.getElementById('area-title').textContent = area.name;
-  document.getElementById('area-desc').textContent = area.desc;
-  const c = document.getElementById('area-prompts-container');
-  c.innerHTML = '';
-  area.prompts.forEach((p, i) => {
-    const d = document.createElement('div');
-    d.className = 'ap-card';
-    d.innerHTML = `<div class="ap-top"><div class="ap-meta"><div class="ap-num">Prompt ${i+1} de ${area.prompts.length}</div><div class="ap-title">${p.title}</div><div class="ap-desc">${p.desc}</div></div><button class="cbtn" onclick="doCopy(this,'${p.id}')">Copiar</button></div><div class="ap-box" id="${p.id}">${p.text}</div>`;
-    c.appendChild(d);
-  });
-  document.getElementById('page-home').classList.remove('active');
-  document.getElementById('page-area').classList.add('active');
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.area === key));
-  window.scrollTo(0, 0);
-}
-
-/* ═══════════════════════════
-   COPY
-   ═══════════════════════════ */
-
-function doCopy(btn, id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  navigator.clipboard.writeText(el.innerText).then(() => {
-    btn.textContent = '✓ Copiado';
-    btn.classList.add('ok');
-    setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('ok'); }, 2000);
-  });
-}
-
-/* ═══════════════════════════
-   INIT
-   ═══════════════════════════ */
-renderNav();
-renderTools();
-renderFreeTools();
-renderTrucos();
-renderRules();
-renderGeneralPrompts();
-renderAreasGrid();
-populateDropdownAreas();
-
-document.getElementById('menu-btn').addEventListener('click', function(e) {
-  e.stopPropagation();
-  toggleMenu();
-});
-
-// Botones estáticos del dropdown
-['drop-guia','drop-trucos','drop-reglas'].forEach(id => {
-  const el = document.getElementById(id);
-  if (el) el.addEventListener('click', function(e) { e.stopPropagation(); });
-});
-document.getElementById('drop-guia').addEventListener('click', function(e) {
-  e.stopPropagation();
-  abrirSeccion('acc-guia');
-});
-document.getElementById('drop-trucos').addEventListener('click', function(e) {
-  e.stopPropagation();
-  abrirSeccion('acc-trucos');
-});
-document.getElementById('drop-reglas').addEventListener('click', function(e) {
-  e.stopPropagation();
-  abrirSeccion('acc-reglas');
-});
-
-function abrirSeccion(id) {
-  closeMenu();
-  // Si estamos en un área, volver al home primero
-  const enArea = document.getElementById('page-area').classList.contains('active');
-  if (enArea) goHome();
-  setTimeout(() => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    if (!el.classList.contains('open')) el.classList.add('open');
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, enArea ? 120 : 20);
-}
-
-function abrirBuenasPracticas() {
-  const el = document.getElementById('acc-reglas');
-  if (!el) return;
-  if (!el.classList.contains('open')) el.classList.add('open');
-  setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
-}
-
-function toggleAccordion(id) {
-  const el = document.getElementById(id);
-  if (el) el.classList.toggle('open');
-}
-
-function toggleMenu() {
-  const d = document.getElementById('dropdown');
-  d.style.display = d.style.display === 'none' ? 'block' : 'none';
-}
-
-function closeMenu() {
-  document.getElementById('dropdown').style.display = 'none';
-}
-
-// Cerrar al clickear fuera
-document.addEventListener('click', e => {
-  if (!e.target.closest('#menu-btn') && !e.target.closest('#dropdown')) {
-    document.getElementById('dropdown').style.display = 'none';
-  }
-});
-
-// Poblar áreas en el dropdown
-function populateDropdownAreas() {
-  const c = document.getElementById('dropdown-areas');
-  AREAS.filter(a => !a.soon).forEach(a => {
-    const b = document.createElement('button');
-    b.className = 'drop-item';
-    b.innerHTML = `${a.emoji} &nbsp;${a.name}`;
-    b.addEventListener('click', function(e) {
-      e.stopPropagation();
-      document.getElementById('dropdown').style.display = 'none';
-      openArea(a.key);
-    });
-    c.appendChild(b);
-  });
-}
+document.getElementById('menu-btn').addEventListener('click',function(e){e.stopPropagation();toggleMenu();});
+['drop-guia','drop-trucos','drop-reglas'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('click',function(e){e.stopPropagation();});});
+document.getElementById('drop-guia').addEventListener('click',function(e){e.stopPropagation();abrirSeccion('acc-guia');});
+document.getElementById('drop-trucos').addEventListener('click',function(e){e.stopPropagation();abrirSeccion('acc-trucos');});
+document.getElementById('drop-reglas').addEventListener('click',function(e){e.stopPropagation();abrirSeccion('acc-reglas');});
+document.addEventListener('click',e=>{if(!e.target.closest('#menu-btn')&&!e.target.closest('#dropdown')){document.getElementById('dropdown').style.display='none';}});
 </script>
 </body>
 </html>
