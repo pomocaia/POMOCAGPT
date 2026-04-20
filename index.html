@@ -325,14 +325,25 @@ const AREAS = [
 ];
 
 const IT_MODULES = [
-  { id:'m1', nombre:'Plan Maestro', color:'#6B7280', desc:'Planificación general, control de proyectos y seguimiento maestro.', lecciones:[]},
-  { id:'m2', nombre:'Ventas CRM', color:'#1B3A6B', desc:'Gestión de clientes, prospectos, cotizaciones y pipeline comercial.', lecciones:[]},
-  { id:'m3', nombre:'Construcción', color:'#C2621A', desc:'Captura de avance, estimaciones y números generadores en campo.', lecciones:[]},
-  { id:'m4', nombre:'Abastecimientos', color:'#C0392B', desc:'Órdenes de compra, alta de proveedores y requisiciones.', lecciones:[]},
-  { id:'m5', nombre:'Contabilidad', color:'#1A6B3A', desc:'Registro de pólizas, conciliación bancaria e informes contables.', lecciones:[]},
-  { id:'m6', nombre:'Control Presupuestal', color:'#B8860B', desc:'Control presupuestal vs real por proyecto y por partida.', lecciones:[]},
-  { id:'m7', nombre:'Tableros BI', color:'#5B2181', desc:'Navegación, filtros y lectura de tableros de inteligencia de negocio.', lecciones:[]},
-  { id:'m8', nombre:'Portal del Cliente', color:'#9F1239', desc:'Acceso, consulta de avance y comunicación con el cliente final.', lecciones:[]},
+  { id:'m1', nombre:'Plan Maestro', color:'#6B7280', desc:'Planificación general, control de proyectos y seguimiento maestro.', lecciones:[] },
+  { id:'m2', nombre:'Ventas CRM', color:'#1B3A6B', desc:'Gestión de clientes, prospectos, cotizaciones y pipeline comercial.', lecciones:[] },
+  { id:'m3', nombre:'Construcción', color:'#C2621A', desc:'Captura de avance, estimaciones y números generadores en campo.', lecciones:[] },
+  { id:'m4', nombre:'Abastecimientos', color:'#C0392B', desc:'Catálogos, usuarios, almacenes, compras y cuentas por pagar.', lecciones:[
+    { grupo:'Catálogos, Usuarios', t:'Administración seguridad', dur:'', yt:'fi9PqUy86dQ' },
+    { grupo:'Catálogos, Usuarios', t:'Administración catálogo', dur:'', yt:'DOGHpWBVBoU' },
+    { grupo:'Almacenes', t:'Código de barras', dur:'', yt:'nl1FEu6kWZI' },
+    { grupo:'Almacenes', t:'Inventario y almacenes', dur:'', yt:'qsHnLwEpLAM' },
+    { grupo:'Compras', t:'Ordenes de compra', dur:'', yt:'tx9ScqlP2Us' },
+    { grupo:'Compras', t:'Ordenes de compra directa a un contrato', dur:'', yt:'QFbq_l2U6_4' },
+    { grupo:'Cuentas por Pagar', t:'Cuentas por pagar', dur:'', yt:'8lqSmBlgW6E' },
+    { grupo:'Cuentas por Pagar', t:'Programación de pagos', dur:'', yt:'EeugX70NriM' },
+    { grupo:'Cuentas por Pagar', t:'Manejo repositorios CFDIs', dur:'', yt:'L-Soh6h1hw4' },
+    { grupo:'Pagos Antes de Factura', t:'Solicitud de pago antes de factura', dur:'', yt:'KINguSUvBHc' },
+  ]},
+  { id:'m5', nombre:'Contabilidad', color:'#1A6B3A', desc:'Registro de pólizas, conciliación bancaria e informes contables.', lecciones:[] },
+  { id:'m6', nombre:'Control Presupuestal', color:'#B8860B', desc:'Control presupuestal vs real por proyecto y por partida.', lecciones:[] },
+  { id:'m7', nombre:'Tableros BI', color:'#5B2181', desc:'Navegación, filtros y lectura de tableros de inteligencia de negocio.', lecciones:[] },
+  { id:'m8', nombre:'Portal del Cliente', color:'#9F1239', desc:'Acceso, consulta de avance y comunicación con el cliente final.', lecciones:[] },
 ];
 
 /* ═══════════════════════
@@ -634,7 +645,7 @@ function AreaPromptCard({ prompt, index, total }) {
 
 function InfotoolsPage() {
   const [video, setVideo] = useState(null);
-  const openVideo = (l) => { if (l.yt) setVideo(l); };
+  const openVideo = (l) => { if (l.yt) window.open(`https://www.youtube.com/watch?v=${l.yt}`, '_blank'); };
 
   return (
     <>
@@ -665,22 +676,65 @@ function InfotoolsPage() {
                 <div className="it-mod-meta-k">en este módulo</div>
               </div>
             </div>
-            <div className="it-lessons">
-              {m.lecciones.map((l,j)=>(
-                <div key={j} className="it-lesson" onClick={()=>openVideo(l)}>
-                  <div className="it-lesson-title">
-                    <span className="it-lesson-code">{String(i+1).padStart(2,'0')}.{String(j+1).padStart(2,'0')}</span>
-                    {l.t}
-                  </div>
-                  <div className="it-lesson-right">
-                    <span className="it-lesson-dur">{l.dur}</span>
-                    <button className="it-lesson-play" aria-label="ver video">
-                      <svg width="11" height="11" viewBox="0 0 10 10"><path d="M2 1l7 4-7 4V1z" fill="currentColor"/></svg>
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {m.lecciones.length === 0
+              ? <div style={{padding:'20px 0',fontFamily:"'JetBrains Mono',monospace",fontSize:'12px',color:'var(--ink-mute)'}}>Videos próximamente disponibles.</div>
+              : (() => {
+                  const hasGroups = m.lecciones.some(l => l.grupo);
+                  if (!hasGroups) {
+                    return (
+                      <div className="it-lessons">
+                        {m.lecciones.map((l,j)=>(
+                          <div key={j} className="it-lesson" onClick={()=>openVideo(l)}>
+                            <div className="it-lesson-title">
+                              <span className="it-lesson-code">{String(i+1).padStart(2,'0')}.{String(j+1).padStart(2,'0')}</span>
+                              {l.t}
+                            </div>
+                            <div className="it-lesson-right">
+                              <span className="it-lesson-dur">{l.dur}</span>
+                              <button className="it-lesson-play" aria-label="ver video">
+                                <svg width="11" height="11" viewBox="0 0 10 10"><path d="M2 1l7 4-7 4V1z" fill="currentColor"/></svg>
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  }
+                  // Render with subgroups
+                  const grupos = [...new Set(m.lecciones.map(l=>l.grupo))];
+                  let globalIdx = 0;
+                  return grupos.map(g => {
+                    const items = m.lecciones.filter(l=>l.grupo===g);
+                    return (
+                      <div key={g} style={{marginBottom:'24px'}}>
+                        <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:'10px',textTransform:'uppercase',letterSpacing:'0.12em',color:'var(--mod-color)',marginBottom:'10px',fontWeight:'500',display:'flex',alignItems:'center',gap:'8px'}}>
+                          <span style={{height:'1px',width:'20px',background:'var(--mod-color)',opacity:0.4,display:'inline-block'}}/>
+                          {g}
+                        </div>
+                        <div className="it-lessons">
+                          {items.map((l,j)=>{
+                            const num = ++globalIdx;
+                            return (
+                              <div key={j} className="it-lesson" onClick={()=>openVideo(l)}>
+                                <div className="it-lesson-title">
+                                  <span className="it-lesson-code">{String(i+1).padStart(2,'0')}.{String(num).padStart(2,'0')}</span>
+                                  {l.t}
+                                </div>
+                                <div className="it-lesson-right">
+                                  {l.dur && <span className="it-lesson-dur">{l.dur}</span>}
+                                  <button className="it-lesson-play" aria-label="ver video">
+                                    <svg width="11" height="11" viewBox="0 0 10 10"><path d="M2 1l7 4-7 4V1z" fill="currentColor"/></svg>
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  });
+                })()
+            }
           </div>
         ))}
       </div>
@@ -694,7 +748,7 @@ function InfotoolsPage() {
             </div>
             <div className="modal-video">
               {video.yt
-                ? <iframe src={`https://www.youtube.com/embed/${video.yt}?autoplay=1&rel=0`} title={video.t} allow="autoplay; encrypted-media" allowFullScreen />
+                ? <iframe src={`https://www.youtube-nocookie.com/embed/${video.yt}?autoplay=1&rel=0`} title={video.t} allow="autoplay; encrypted-media" allowFullScreen />
                 : <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100%',background:'#111',color:'#888',fontFamily:"'JetBrains Mono',monospace",fontSize:'13px'}}>Video próximamente disponible</div>
               }
             </div>
