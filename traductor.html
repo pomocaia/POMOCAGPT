@@ -3,309 +3,654 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Traductor de CFDI · Reembolsos</title>
+<title>Vale de Reembolso · Traductor CFDI</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-  :root{
-    --fondo:#f5f5f4; --blanco:#ffffff; --tinta:#1c1917; --gris:#a8a29e;
-    --borde:#e7e5e4; --verde:#047857; --verde-osc:#065f46; --verde-claro:#ecfdf5;
-    --ambar:#b45309; --ambar-claro:#fffbeb; --rojo:#b91c1c; --rojo-claro:#fef2f2;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--fondo);color:var(--tinta);font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;line-height:1.5}
-  .contenedor{max-width:760px;margin:0 auto;padding:32px 16px}
-  .eyebrow{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--verde);font-weight:600}
-  h1{font-size:30px;letter-spacing:-.02em;margin-top:4px}
-  .sub{color:#78716c;font-size:14px;margin-top:4px}
-  .dropzone{margin-top:24px;border:2px dashed #d6d3d1;border-radius:12px;background:var(--blanco);padding:28px;text-align:center;transition:.15s}
-  .dropzone.activa{border-color:var(--verde);background:var(--verde-claro)}
-  .dropzone p{font-size:14px;color:#57534e}
-  .botones{margin-top:12px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-  .btn{cursor:pointer;border-radius:8px;padding:9px 16px;font-size:14px;font-weight:500;border:1px solid transparent}
-  .btn-primario{background:var(--verde);color:#fff}
-  .btn-primario:hover{background:var(--verde-osc)}
-  .btn-secundario{background:#fff;border-color:#d6d3d1;color:#44403c}
-  .btn-secundario:hover{background:#fafaf9}
-  .btn-borde-verde{background:#fff;border-color:var(--verde);color:var(--verde-osc);width:100%;margin-top:12px}
-  .btn-borde-verde:hover{background:var(--verde-claro)}
-  .nombre-archivo{margin-top:10px;font-size:12px;color:var(--gris);font-family:ui-monospace,monospace}
-  .alerta{margin-top:16px;border-radius:12px;padding:16px;font-size:14px;border:1px solid}
-  .alerta-error{background:var(--rojo-claro);border-color:#fecaca;color:var(--rojo)}
-  .alerta-ok{background:var(--verde-claro);border-color:#a7f3d0;color:var(--verde-osc)}
-  .alerta-ojo{background:var(--ambar-claro);border-color:#fcd34d;color:var(--ambar)}
-  .tarjeta{background:var(--blanco);border:1px solid var(--borde);border-radius:12px;padding:16px;margin-top:16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
-  .tarjeta h2{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--verde-osc);margin-bottom:10px}
-  table{width:100%;border-collapse:collapse;font-size:14px}
-  th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gris);font-weight:500;text-align:right;padding-bottom:8px}
-  th:first-child{text-align:left}
-  td{padding:7px 0;border-top:1px solid #f5f5f4;text-align:right;font-family:ui-monospace,monospace}
-  td:first-child{text-align:left;font-family:inherit}
-  tr.total td{border-top:2px solid var(--tinta);font-weight:700;font-size:15px;padding-top:10px}
-  .pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600}
-  .pill-verde{background:#d1fae5;color:var(--verde-osc)}
-  .pill-ambar{background:#fef3c7;color:#92400e}
-  .pill-rojo{background:#fee2e2;color:var(--rojo)}
-  .negativo{color:var(--rojo)}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  @media(max-width:600px){.grid2{grid-template-columns:1fr}}
-  .dato{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px dashed var(--borde);font-size:14px;align-items:baseline}
-  .dato:last-child{border-bottom:none}
-  .dato .k{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gris);flex-shrink:0}
-  .dato .v{text-align:right;word-break:break-all}
-  .mono{font-family:ui-monospace,monospace;font-size:13px}
-  .persona-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gris);margin-top:10px}
-  .persona-label:first-child{margin-top:0}
-  .persona-nombre{font-weight:500;font-size:14px}
-  .persona-rfc{font-family:ui-monospace,monospace;font-size:13px;color:var(--gris)}
-  .concepto{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid #f5f5f4;font-size:14px;align-items:baseline}
-  .concepto:first-of-type{border-top:none}
-  .concepto .detalle{font-size:12px;color:var(--gris)}
-  .concepto .importe{font-family:ui-monospace,monospace;flex-shrink:0}
-  .pie{text-align:center;font-size:12px;color:var(--gris);margin:24px 0 8px}
-  #resultados{display:none}
+:root{
+  --fondo:#f5f5f4;--blanco:#fff;--tinta:#1c1917;--gris:#a8a29e;--borde:#e7e5e4;
+  --verde:#047857;--verde-osc:#065f46;--verde-claro:#ecfdf5;
+  --ambar:#b45309;--ambar-claro:#fffbeb;--rojo:#b91c1c;--rojo-claro:#fef2f2;
+  --azul:#1d4ed8;--azul-claro:#eff6ff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--fondo);color:var(--tinta);font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;line-height:1.5}
+.wrap{max-width:820px;margin:0 auto;padding:32px 16px}
+/* Header */
+.eyebrow{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--verde);font-weight:600}
+h1{font-size:28px;letter-spacing:-.02em;margin-top:4px}
+.sub{color:#78716c;font-size:14px;margin-top:4px;margin-bottom:24px}
+/* Steps */
+.steps{display:flex;gap:0;margin-bottom:24px;background:var(--blanco);border:1px solid var(--borde);border-radius:12px;overflow:hidden}
+.step{flex:1;padding:12px 16px;text-align:center;font-size:12px;color:var(--gris);cursor:default;border-right:1px solid var(--borde);transition:.15s}
+.step:last-child{border-right:none}
+.step.activo{background:var(--verde-claro);color:var(--verde-osc);font-weight:600}
+.step.hecho{background:#f0fdf4;color:#166534}
+.step-num{display:block;font-size:18px;font-weight:700;margin-bottom:2px}
+/* Dropzone */
+.dropzone{border:2px dashed #d6d3d1;border-radius:12px;background:var(--blanco);padding:28px;text-align:center;transition:.15s;margin-bottom:16px}
+.dropzone.activa{border-color:var(--verde);background:var(--verde-claro)}
+.dropzone p{font-size:14px;color:#57534e}
+.botones{margin-top:12px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn{cursor:pointer;border-radius:8px;padding:9px 16px;font-size:14px;font-weight:500;border:1px solid transparent;transition:.12s}
+.btn-p{background:var(--verde);color:#fff}.btn-p:hover{background:var(--verde-osc)}
+.btn-s{background:#fff;border-color:#d6d3d1;color:#44403c}.btn-s:hover{background:#fafaf9}
+.btn-verde{background:#fff;border-color:var(--verde);color:var(--verde-osc);width:100%;margin-top:10px}.btn-verde:hover{background:var(--verde-claro)}
+.btn-azul{background:var(--azul);color:#fff;width:100%;margin-top:10px;padding:12px;font-size:15px}.btn-azul:hover{background:#1e3a8a}
+.btn-gray{background:#fff;border-color:#d6d3d1;color:#44403c;width:100%;margin-top:8px}.btn-gray:hover{background:#fafaf9}
+.nombre-archivo{margin-top:8px;font-size:12px;color:var(--gris);font-family:ui-monospace,monospace}
+/* Alertas */
+.alerta{border-radius:12px;padding:14px 16px;font-size:14px;border:1px solid;margin-bottom:16px}
+.alerta-error{background:var(--rojo-claro);border-color:#fecaca;color:var(--rojo)}
+.alerta-ok{background:var(--verde-claro);border-color:#a7f3d0;color:var(--verde-osc)}
+.alerta-ojo{background:var(--ambar-claro);border-color:#fcd34d;color:var(--ambar)}
+.alerta-info{background:var(--azul-claro);border-color:#bfdbfe;color:var(--azul)}
+/* Tarjetas */
+.tarjeta{background:var(--blanco);border:1px solid var(--borde);border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.tarjeta h2{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--verde-osc);font-weight:600;margin-bottom:12px}
+/* Tabla impuestos */
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gris);font-weight:500;text-align:right;padding-bottom:8px}
+th:first-child{text-align:left}
+td{padding:7px 0;border-top:1px solid #f5f5f4;text-align:right;font-family:ui-monospace,monospace}
+td:first-child{text-align:left;font-family:inherit}
+tr.total-row td{border-top:2px solid var(--tinta);font-weight:700;font-size:15px;padding-top:10px}
+.pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600}
+.pill-v{background:#d1fae5;color:var(--verde-osc)}
+.pill-a{background:#fef3c7;color:#92400e}
+.pill-r{background:#fee2e2;color:var(--rojo)}
+.negativo{color:var(--rojo)}
+/* Formulario */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:620px){.grid2{grid-template-columns:1fr}}
+.campo{display:flex;flex-direction:column;gap:4px;margin-bottom:2px}
+.campo label{font-size:12px;font-weight:600;color:#57534e;text-transform:uppercase;letter-spacing:.06em}
+.campo label .req{color:var(--rojo)}
+.campo select,.campo input[type=text],.campo input[type=date]{
+  border:1px solid #d6d3d1;border-radius:8px;padding:9px 12px;font-size:14px;
+  background:#fff;color:var(--tinta);width:100%;
+  transition:.12s;appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a8a29e' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;
+}
+.campo input[type=text],.campo input[type=date]{background-image:none}
+.campo select:focus,.campo input:focus{outline:none;border-color:var(--verde);box-shadow:0 0 0 3px rgba(4,120,87,.12)}
+.campo .hint{font-size:11px;color:var(--gris)}
+/* Resumen final */
+.resumen-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--borde);font-size:14px}
+.resumen-row:last-child{border-bottom:none;font-weight:700;font-size:15px;padding-top:10px}
+.resumen-label{color:var(--gris);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+/* Secciones */
+.seccion{display:none}.seccion.visible{display:block}
+.pie{text-align:center;font-size:12px;color:var(--gris);margin-top:8px}
+
+/* Autocomplete searchable select */
+.search-wrap{position:relative}
+.search-wrap input[type=text]{padding-right:32px}
+.search-wrap .dropdown{
+  position:absolute;top:100%;left:0;right:0;max-height:220px;overflow-y:auto;
+  background:#fff;border:1px solid var(--verde);border-top:none;border-radius:0 0 8px 8px;
+  z-index:100;display:none;box-shadow:0 4px 12px rgba(0,0,0,.1)
+}
+.search-wrap .dropdown.open{display:block}
+.search-wrap .dropdown li{padding:9px 12px;font-size:14px;cursor:pointer;list-style:none}
+.search-wrap .dropdown li:hover,.search-wrap .dropdown li.sel{background:var(--verde-claro);color:var(--verde-osc)}
+.search-wrap .dropdown li.no-match{color:var(--gris);cursor:default;font-style:italic}
 </style>
 </head>
 <body>
-<div class="contenedor">
+<div class="wrap">
   <header>
-    <p class="eyebrow">Reembolsos · Herramienta interna</p>
-    <h1>Traductor de CFDI</h1>
-    <p class="sub">Suelta el XML de tu factura y te lo regreso en idioma humano: IVA por tasa, IEPS y retenciones, listo para el vale.</p>
+    <p class="eyebrow">Herramientas Internas · Reembolsos</p>
+    <h1>Vale de Reembolso</h1>
+    <p class="sub">Sube el XML de tu factura, llena los datos del gasto y descarga el vale listo para contabilidad.</p>
   </header>
 
-  <div class="dropzone" id="dropzone">
-    <p>Arrastra aquí tu <strong>XML (CFDI)</strong> o</p>
-    <div class="botones">
-      <label class="btn btn-primario">Elegir archivo
-        <input type="file" id="inputArchivo" accept=".xml,text/xml" style="display:none">
-      </label>
-      
-    </div>
-    <p class="nombre-archivo" id="nombreArchivo"></p>
+  <!-- Indicador de pasos -->
+  <div class="steps">
+    <div class="step activo" id="step1"><span class="step-num">1</span>Sube el XML</div>
+    <div class="step" id="step2"><span class="step-num">2</span>Datos del gasto</div>
+    <div class="step" id="step3"><span class="step-num">3</span>Descarga el vale</div>
   </div>
 
-  <div id="zonaError"></div>
+  <!-- PASO 1: XML -->
+  <div class="seccion visible" id="sec1">
+    <div class="dropzone" id="dropzone">
+      <p>Arrastra aquí el <strong>XML de tu factura (CFDI)</strong> o</p>
+      <div class="botones">
+        <label class="btn btn-p">Elegir archivo XML
+          <input type="file" id="inputXML" accept=".xml,text/xml" style="display:none">
+        </label>
+      </div>
+      <p class="nombre-archivo" id="nombreArch"></p>
+    </div>
+    <div id="zonaError1"></div>
+    <div id="resumenXML" style="display:none">
+      <!-- se llena dinámicamente -->
+    </div>
+  </div>
 
-  <div id="resultados">
-    <div id="veredicto"></div>
+  <!-- PASO 2: Formulario -->
+  <div class="seccion" id="sec2">
+    <div id="veredicto2"></div>
+    <!-- Resumen XML compacto -->
+    <div class="tarjeta" id="xmlResumen2"></div>
 
-    <section class="tarjeta">
-      <h2>Desglose de impuestos</h2>
-      <table>
-        <thead><tr><th>Concepto</th><th>Base</th><th>Importe</th></tr></thead>
-        <tbody id="tablaImpuestos"></tbody>
-      </table>
-      <button class="btn btn-borde-verde" id="btnCopiar">Copiar desglose como texto</button>
-    </section>
-
-    <div class="grid2">
-      <section class="tarjeta"><h2>Factura</h2><div id="datosFactura"></div></section>
-      <section class="tarjeta"><h2>Quién factura y a quién</h2><div id="datosPartes"></div></section>
+    <div class="tarjeta">
+      <h2>Datos del responsable y empresa</h2>
+      <div class="grid2">
+        <div class="campo">
+          <label>Responsable (quien elabora) <span class="req">*</span></label>
+          <input type="text" id="f_responsable" placeholder="Tu nombre completo">
+        </div>
+        <div class="campo">
+          <label>Empresa <span class="req">*</span></label>
+          <select id="f_empresa"></select>
+        </div>
+        <div class="campo">
+          <label>Área <span class="req">*</span></label>
+          <select id="f_area"></select>
+        </div>
+        <div class="campo">
+          <label>Oficinas <span class="req">*</span></label>
+          <select id="f_oficina"></select>
+        </div>
+        <div class="campo">
+          <label>Presupuesto <span class="req">*</span></label>
+          <div class="search-wrap">
+            <input type="text" id="f_presupuesto_txt" placeholder="Buscar presupuesto…" autocomplete="off">
+            <input type="hidden" id="f_presupuesto">
+            <ul class="dropdown" id="dd_presupuesto"></ul>
+          </div>
+        </div>
+        <div class="campo">
+          <label>Partida presupuestada <span class="req">*</span></label>
+          <div class="search-wrap">
+            <input type="text" id="f_partida_txt" placeholder="Buscar partida…" autocomplete="off">
+            <input type="hidden" id="f_partida">
+            <ul class="dropdown" id="dd_partida"></ul>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <section class="tarjeta">
-      <h2 id="tituloConceptos">Conceptos</h2>
-      <div id="listaConceptos"></div>
-    </section>
+    <div class="tarjeta">
+      <h2>Datos del gasto</h2>
+      <div class="grid2">
+        <div class="campo">
+          <label>Tipo de gasto <span class="req">*</span></label>
+          <select id="f_tipo_gasto">
+            <option value="">— Selecciona —</option>
+            <option>Viáticos</option>
+            <option>Compras</option>
+            <option>Servicios</option>
+            <option>Mantenimiento</option>
+            <option>Materiales</option>
+            <option>Combustible</option>
+            <option>Hospedaje</option>
+            <option>Transporte</option>
+            <option>Publicidad</option>
+            <option>Otros</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label>¿Sin comprobante fiscal? <span class="hint">(dejar en $0 si hay XML)</span></label>
+          <input type="text" id="f_sin_comprobante" value="0" placeholder="0.00">
+        </div>
+        <div class="campo" style="grid-column:1/-1">
+          <label>Justificación <span class="req">*</span></label>
+          <input type="text" id="f_justificacion" placeholder="Ej: Consumo de alimentos en viaje a Monterrey">
+        </div>
+      </div>
+    </div>
 
-    <p class="pie">Los datos se leen directo del XML timbrado, sin interpretación manual. El archivo nunca sale de tu computadora.</p>
+    <div class="tarjeta">
+      <h2>Para el cheque</h2>
+      <div class="grid2">
+        <div class="campo">
+          <label>Elaborar cheque a nombre de <span class="req">*</span></label>
+          <div class="search-wrap">
+            <input type="text" id="f_beneficiario_txt" placeholder="Buscar beneficiario…" autocomplete="off">
+            <input type="hidden" id="f_beneficiario">
+            <ul class="dropdown" id="dd_beneficiario"></ul>
+          </div>
+        </div>
+        <div class="campo">
+          <label>Gerente que autoriza <span class="req">*</span></label>
+          <select id="f_gerente"></select>
+        </div>
+      </div>
+    </div>
+
+    <div id="zonaError2"></div>
+    <button class="btn btn-azul" id="btnGenerar">Generar vale de reembolso →</button>
+    <button class="btn btn-gray" id="btnVolver1">← Volver a cargar XML</button>
   </div>
+
+  <!-- PASO 3: Descarga -->
+  <div class="seccion" id="sec3">
+    <div class="alerta alerta-ok" style="margin-bottom:16px">
+      ✓ <strong>Vale generado.</strong> Tu archivo Excel está listo para descargar y entregar a contabilidad.
+    </div>
+    <div class="tarjeta" id="resumenFinal"></div>
+    <button class="btn btn-azul" id="btnDescargar">⬇ Descargar vale (.xlsx)</button>
+    <button class="btn btn-gray" id="btnNuevo">Crear otro vale</button>
+  </div>
+
+  <p class="pie">Los archivos se procesan en tu computadora. Nada se sube a ningún servidor.</p>
 </div>
 
 <script>
-// ── Catálogos SAT (los más comunes) ─────────────────────────────
-const IMPUESTOS = {"001":"ISR","002":"IVA","003":"IEPS"};
-const FORMA_PAGO = {"01":"Efectivo","02":"Cheque","03":"Transferencia electrónica","04":"Tarjeta de crédito","05":"Monedero electrónico","06":"Dinero electrónico","28":"Tarjeta de débito","29":"Tarjeta de servicios","30":"Aplicación de anticipos","99":"Por definir"};
-const METODO_PAGO = {PUE:"PUE · Pago en una sola exhibición",PPD:"PPD · Pago en parcialidades o diferido"};
-const TIPO_COMP = {I:"Ingreso (gasto para ti)",E:"Egreso (nota de crédito)",T:"Traslado",N:"Nómina",P:"Pago"};
-const USO_CFDI = {G01:"Adquisición de mercancías",G02:"Devoluciones o descuentos",G03:"Gastos en general",I01:"Construcciones",I02:"Mobiliario y equipo de oficina",I03:"Equipo de transporte",I04:"Equipo de cómputo",I08:"Otra maquinaria y equipo",D01:"Honorarios médicos",S01:"Sin efectos fiscales",CP01:"Pagos",P01:"Por definir"};
+// ═══════════════════════════════════════════════
+// CATÁLOGOS (tomados directamente del Excel)
+// ═══════════════════════════════════════════════
+const CAT = {
+  empresas:["VIVE POMOCA, S.A. DE C.V.","CONSTRUVIVIENDA ACELERADA, S.A. DE C.V.","VALLE REAL CONSTRUCCIONES, S.A. DE C.V.","CONSTRUCCIONES ESMERALDA, S.A. DE C.V."],
+  areas:["ADMINISTRACION","CONTRALORIA","DIRECCION DE OPERACIONES","DIRECCION GENERAL","GERENCIA CAMPECHE","OBRA","OBRA ( MAQUINARIA )","POST VENTA","PROYECTOS","RECURSOS HUMANOS","SEGURIDAD INDUSTRIAL","SUBDIRECCION","VENTAS","DESPACHO LABORAL"],
+  oficinas:["CAMPECHE","CARDENAS","CORPORATIVO","EDIFICIO CARRIZAL","NACAJUCA","PALENQUE","TAMULTE","CENTRO VHSA","BOSQUES"],
+  presupuestos:["ADMON CAMP","ADMON CAR","ADMON COBRANZA","ADMON COMPRAS","ADMON CONTAB","ADMON CORP","ADMON NAC","ADMON NOMINAS","ADMON PAL","ADMON PROVEEDORES","ADMON SEG INDUST","ADMON TESORERIA","ADMON VIGILANCIA","CONTRALORIA","DIRECCION GENERAL","EDIFICIO CARRIZAL","GERENCIA CAMPECHE","GTO CONSEJEROS","GTO IND","GTO INT DE FINANCIAMIET","GTO X EXPEDIENTE","INFRA CAMP","INFRA CAR","INFRA NAC","INFRA PAL","INFRAESTRUCTURA","ISO 9000 2008","MERC VTAS","MZA 22","N/A","OBRA BSQ","OBRA CAMP","OBRA CAR","OBRA CORP","OBRA NAC","OBRA PAL","PLAN_ESTRATEGICO","PLAZA COMERCIAL","POST VENTA","POST VTA CAMP","POST VTA CAR","POST VTA NAC","POST VTA PAL","PROYECTOS","REC HUM CAMP","REC HUM CAR","REC HUM CORP","REC HUM NAC","REC HUM PAL","SEGURIDAD INDUSTRIAL","SUBDIRECCION","TRAMITES VTAS","VARIOS DEPTOS","VTAS CAMP","VTAS CAR","VTAS CORP","VTAS NAC","VTAS PAL","VTAS VHSA"],
+  partidas:["ACARREOS DE MATERIAL PARA OBRA","ACCESORIOS CELULAR","ACONDICIONAMIENTO OFICINA","ACONDICIONANIENTO DEL AREA","ACTIVACIONES","ACTUALIZACION DE SFOTWARE","ADQUISICION DE AUTO","ADQUISICION DE EQUIPO DE COMPUTO","ADQUISICION DE EQUIPO DE OFICINA","ADQUISICION DE SOFTWARE","AGUA","AGUA CEAS","AGUINALDO","ALINEAMIENTO Y # OFICIAL","ANUALIDAD INFOTOOLS","ANUNCIOS DE VANCANTES","ARENILLA PARA RELLENO","ARTICULOS DE LIMPIEZA","ASESORIA FISCAL Y JURIDICA","ASIMILADOS A SALARIOS","ASISTENCIA MEDICA","ATENCION MEDICA","AUDITORIA DE INFOTOOLS","AVALUO","AVISO DE TERMINACION DE OBRA","CAFE","CALL CENTER NUXIBA","CAPACITACION","CELULAR","CERTIFICACION DE ASESORES","COMBUSTIBLE Y LUBRICANTES","COMIDA REUNION CONSEJO","COMISION BANCARIOS X VTA TC","COMISION POR COMBISTIBLE","COMISIONES BANCARIAS","COMPENSACION","COMPRA O RENTA DE STANDS","CONSTANACIA DE NO ADEUDO","CONSTANCIA DE TRANSLADO DE DOMINIO","CONSUMO DE ALIMENTOS","CONTRATO Y MEDIDORES DE AGUA","COPIAS","CUOTA DE INSCRIPCION DE OFERTA DE VIVIENDA","CUOTA DE VERIFICACION DE OBRA","CUOTA EXTRAORDINARIA","CUOTA UNION","CUOTA Y SUSCRIPCIONES","CUOTAS DE VERIFICACION DE VIVIENDA","CUOTAS IMSS","DISENO DE CASA MUESTRA","DISENO ESTRUCTURAL DE VIVIENDA","DIVERSOS","DONATIVOS","EDECANES Y BOTARGUERO","ELABORACION / REPARACION/ LAVANDERIA BOTARGA","ELAB DE PROYECTO ARQUITECTONICO","ENERGIA ELECTRICA","ENTREGA DE MATERIAL","EQUIPAMIENTO DE PLAZA","EQUIPO DE COMPUTO","EQUIPO DE COMUNICACION","EQUIPO DE OFICINA","EQUIPO DE SEGURIDAD","EQUIPO DE SEGURIDAD INDUSTRIAL","EQUIPO DE TRABAJO","EQUIPO PARA EVENTOS","EQUIPOS DE CONTROL DE ASISTENCIA","ESPECTACULAR","ESTUDIOS VARIOS","EVENTO DE FIN DE ANO","EVENTO MOTONAUTICA","EVENTOS Y EXPOS ADICIONALES","EVENTOS Y REUNIONES CON SOCIOS","FINIQUITO","FLETES","FUMIGACION","GASTO DE AUDITORIA","GASTOS ADMINISTRATIVOS","GASTOS DE ENTREGA DE VIVIENDA","GASTOS DE ESCRITURACION DE VIVIENDA","GASTOS DE EVENTO DE VIVIENDAS","GASTOS DE FERIA","GASTOS DE OFICINA","GASTOS DE PLANEACION EJECUTIVOS","GASTOS DE PLANEACION ESTRATEGICA","GASTOS DE REPRESENTACION","GASTOS DE VIAJES Y VIATICOS","GASTOS DE VIAJE COORDINACION","GASTOS INDIRECTOS","GASTOS PLANEACION","HONORARIOS","HORAS EXTRAS","HOSPEDAJE","IMP DE TUA","IMPRESION DE FORMATOS","IMPRESION DE LONAS","IMPRESION DE MANUALES","IMPRESIONES Y COPIAS","IMPUESTO S/HOSPEDAJE","IMPUESTOS Y DERECHOS","INDEMNIZACION X LIQUIDACION DE EMPLEADO","INDEMNIZACIONES","INFRAESTRUCTURA","INSTALACION DE RED","INTREGRACION (GASTOS VARIOS)","ISO 9001-2008","ISTALACION DE INTERNET","JARDINERIA","LIBERTAD DE GRAVAMEN","LICENCIA DE CONSTRUCCION","LINTERNAS PARA CASCOS","LIQUIDACION DE EMPLEADOS","MANIOBRAS","MAQUETAS","MATERIAL APOYO GRAFICO (BANNER, LONAS)","MATERIAL IMPRESO (TRIPTICOS, VOLANTES)","MATERIAL PARA DECORACION","MATERIALES","MOBILIAR Y EQUIPO DE OFICINA","MODIFICACION AL SISTEMA INFOTOOLS","MTTO. DE AIRES ACONDICIONADOS","MTTO. DE CIMBRA","MTTO. DE CLIMAS","MTTO. DE EQUIPO DE COMPUTO","MTTO. DE MAQUINARIA Y EQUIPO PESADO","MTTO. DE MOLDE","MTTO. DE OFICINA","MTTO. DE SOFTWARE","MTTO. EQUIPO DE OFICINA","MTTO. EQUIPO DE TRANSPORTE","MTTO. PLAZA COMERCIAL","N/A","OBSEQUIOS","OFICINAS CARRIZAL","OTROS MEDIOS","PAGO DE CATASTRO","PAPELERIA Y ART. OFICINA","PAQUETERIA Y ENVIOS","PEAJES","PERIFONEO","PERIODICO","PERMISO COLOCACION DE MODULOS IMSS","PLANEACION ESTRATEGICA (GASTOS VARIOS)","POSADA (FIN DE ANO)","POSTVENTA","PRECIOS TRANSFERENCIAS","PREDIALES","PRIMAS POR CREDITO","PRODUCCION EDICION DE VIDEOS","PROG. DE SOFTWARE","PROGRAMA DE INTEGRACION","PROMOMOCION DE CASAS","PROYECTO DE CASCO","PTU","PUBLICACION SECCION AMARILLA","PUBLICIDAD DIGITAL (FACEBOOK)","PUBLICIDAD EN PRENSA","PUBLICIDAD EN RADIO","PUBLICIDAD EN TV","RADIO","RECARGOS","REGIMEN CONDOMINIO","RENTA DE BARDAS Y ROTULACION DE BARDAS","RENTA DE CASA","RENTA DE CASA MUESTRA","RENTA DE ESPACIOS PARA MODULO","RENTA DE ESPECTACULARES","RENTA DE MAQUINARIA","RENTA DE MODULOS EN PLAZA","RENTA DE MOLDE","RENTA DE OFICINA","RENTA DE SANITARIOS","RENTA DE VEHICULO","REUNIONES CON JEFES DE AREA","REUNIONES DE CONSEJO","REUNIONES DE TRABAJO","SEGURO DE AUTOMOVILES","SEGURO DE CALIDAD Y PRIMA","SEGURO DE FLETES","SEGURO DE VEHICULO","SEGUROS POR CREDITOS","SEGUROS Y FIANZAS","SENALIZADOR VIALES","SERV. LAB. CONTROL DE CALIDAD","SERVICIO ADUANAL","SERVICIO DE DESCARGA","SERVICIO DE PAQUETERIA Y ENVIO","SERVICIOS DE CONSULTORIA","SISTEMA INFOTOOLS","SISTEMA INFOTOOLS-MIZZAR","SOFTWARE (LICENCIA)","SOUVENIRS","STAND","TELEFONO CELULARES","TELEFONO E INTERNET","TELEFONO Y BAM","TELEVISION","TENENCIA","TENENCIA DE VEHICULO","TRABAJOS EN FRACCIONAMIENTO","TRABAJOS TOPOGRAFICOS","TRAMITES VARIOS","TRAMITES Y AVALUOS","TRANSPORTACION (COMBUSTIBLE)","UNIFORMES","URBANIZACION","VALORES CATRASTALES","VOLANTES Y TRIPTICOS"],
+  beneficiarios:["ADRIANA HERNANDEZ REYES","ADRIANA REYES LOPEZ","ALDO CARRILLO CRUZ","AMAIRANI GUADALUPE DOMINGUEZ ALEJO","BEATRIZ RAMIREZ GALVEZ","BRENDA NANCY FLORES BALCHE","CARLOS ALBERTO DE LOS SANTOS LOPEZ","CARLOS BERNARDO CAMPOS CASTRO","CARLOS ENRIQUE CETINA JIMENEZ","CARLOS ERIK CAMPOS CADENA","CARMEN GUADALUPE DE TILA RUIZ DOMINGUEZ","CAROLINA BRITO MIRANDA","CAROLINA GARCIA GARCIA","CLAUDIA MARCELA SOSA GONZALEZ","DANIEL PEREZ ARENAS","DANIEL RAMOS SANTIAGO","DAVID DIAZ DE LA CRUZ","DEYSI DEL CARMEN GALLEGOS JIMENEZ","DIANA RAMIREZ SOLIS","DIANEY VALDEZ RAMOS","EDISON PATINO ANTONIO","ELISANDER SANCHEZ MENDOZA","ELSY DEL CARMEN POTENCIANO RAMOS","ERIKA CANALES CUPIDO","FABIAN ALBERTO CORROY LANDERO","FABIAN JIMENEZ PEREZ","FABIOLA COLL SILVA","FERNANDO JOSE GUTIERREZ DE ALBA","FLORITA SOBERANO HERNANDEZ","FRANCISCO HERNANDEZ HERNANDEZ","GABRIEL CAMACHO CAMARA","GADIEL HERNANDEZ PEREZ","GERARDO DE JESUS SOSA CONTRERAS","GERARDO GONZALEZ GUTIERREZ","GLORIA ALICIA FRANCO ESTANOL","GLORIA LINEY SANTOS LEDESMA","GREGORIO NARVAEZ PEREZ","GUSTAVO CARRERA FALCON","GUSTAVO RAMOS MARTINEZ","HEIDI LOPEZ GARCIA","HILDA PATRICIA ALVAREZ HERNANDEZ","HUGO ENRIQUE SANCHEZ SALAZAR","IGNACIO GARCIA CARRASCO","IRMA ESTELA TESCUM MARQUEZ","ISAI CRUZ ARIAS","ISIDRO BAUTISTA MENDOZA","JANDERIK DE LOS SANTOS CORDOVA","JAVIER BAEZ CORNELIO","JAVIER DE JESUS HERNANDEZ","JAZMANY JAMIR CAMBRANIS MARIN","JESUS HUMBERTO CAHUICH CHAN","JESUS OLAN MADRIGAL","JORGE LUIS GARCIA SALVADOR","JOSE ALFREDO HERNANDEZ CONTRERAS","JOSE BELISARIO TEJERO DIAZ","JOSE BUSTAMANTE RABELO","JOSE DEL CARMEN ACOSTA RODRIGUEZ","JOSE DEONICIO ALVAREZ PEREZ","JOSE MANUEL GARCIA GARCIA","JOSE MANUEL RAMIREZ DE LA CRUZ","JOSE MATEO MONTES JACOBO","JOSE PAUL NUNEZ HERNANDEZ","JOSE RAFAEL MURUETA NOEMI","JOSE TORRES RAMON","JUAN CARLOS VELASQUEZ SANTIAGO","JUAN MANUEL GONZALEZ GALLEGOS","LEON YE YOANI","LIDIA DEL CARMEN CHUC GARCIA","LIZBETH DEL CARMEN FRIAS OLAN","LUCIA ALVAREZ MACDONELL","LUCIA ZENTELLA AGUILAR","LUIS FERNANDO LAZO TAPIA","MAGALI HERNANDEZ HERNANDEZ","MANUEL ANTONIO PEREZ JIMENEZ","MARA KRISTELL LARA SANCHEZ","MARCELA GUADALUPE YANES JIMENEZ","MARCOS OVANDO DOMINGUEZ","MARGARITA RAMIREZ CHABLE","MARIA ANTONIA LOPEZ OPORTO","MARIA CRISTINA GONZALEZ MORALES","MARIA DE JESUS GOMEZ HERNANDEZ","MARIA DEL ROSARIO FALCON CURI","MARIA DEL ROSARIO SEVERIANO HERNANDEZ","MARIA ELIZABETH LOPEZ HIPOLITO","MARIA ISABEL REYES MORALES","MARIA JOSE DE LOS MILAGRO RAMON HERNANDEZ","MARIA LOPEZ JIMENEZ","MARIANELLA ALVAREZ LUNA","MARISOL DE LA CRUZ ACOSTA","MARTIN ALONSO HERNANDEZ TOSCA","MARTIN DE LA CRUZ LOPEZ","MAYRA ALEJANDRA ALVAREZ GOMEZ","MIGUELINA PEREZ PEREZ","MINERVA DE LOS SANTOS CALCANEO SANCHEZ","MIRNA ARACELI BELLO PARADA","MOISES TRINIDAD CRUZ","NESTOR JOSUE ALCAZAR SUAREZ","OLIVA MARTINEZ VASQUEZ","ORLANDO CORDOVA GARCIA","OVET ARIAS LEON","PENSION ALIMENTICIA","PERLA CRISTHELL DE LA O ROMAN","RENE CARRILLO HERNANDEZ","RICARDO DE LA CRUZ TOSCA","RODRIGO CRUZ CRUZ","ROGER PALACIO ZURITA","ROXANA LOPEZ RODRIGUEZ","RUBEN SUAREZ OVANDO","SANDRA MORALES GUZMAN","SARAI HERNANDEZ DE LA CRUZ","SERGIO BURGOS GOMEZ","SIMBRON CARLOS PEREZ","SYLVANA PEREZ MARTINEZ","TITO MONTEJO HERNANDEZ","TORRES ELISEO LOPEZ","URIEL ULISES REYES ROQUE","URSULA RUEDA SANCHEZ","VERONICA DEL ROSARIO HERNANDEZ CRUZ","VERONICA HERNANDEZ CRUZ","VERONICA ROMAN DE LA CRUZ","VICTOR HUGO GONZALEZ GONZALEZ","WENDY DEL ROSARIO BRITO POOT","YENI DEL CARMEN LOPEZ JIMENEZ","YOSHIRA DEL CARMEN CRUZ DE LA CRUZ","YULIANA FAJARDO TORRES"],
+  gerentes:["CARLOS ALBERTO DE LOS SANTOS LOPEZ","GUSTAVO CARRERA FALCON","IRMA ESTELA TESCUM MARQUEZ","JOSE MANUEL GARCIA GARCIA","LUIS FERNANDO LAZO TAPIA","MARIA DEL ROSARIO FALCON CURI","MARIA DEL ROSARIO SEVERIANO HERNANDEZ"]
+};
 
-const mxn = new Intl.NumberFormat("es-MX",{style:"currency",currency:"MXN"});
-const num = v => (v==null||v==="") ? 0 : parseFloat(v);
-const pct = t => { const p = num(t)*100; return p.toFixed(p%1?2:0)+"%"; };
-const esc = s => String(s??"—").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-
-// ── Parseo tolerante a namespaces (cfdi:, tfd:) ─────────────────
-function porNombre(raiz,nombre){
-  const out=[];
-  (function walk(n){ for(const c of n.children||[]){ if(c.localName===nombre) out.push(c); walk(c); } })(raiz);
-  return out;
-}
-const primero=(r,n)=>porNombre(r,n)[0]||null;
+// ═══════════════════════════════════════════════
+// PARSEO CFDI (tolerante a namespaces)
+// ═══════════════════════════════════════════════
+const num=v=>(v==null||v==="")?0:parseFloat(v);
 const attr=(el,n)=>el?el.getAttribute(n):null;
+function byLocal(r,n){const o=[];(function w(x){for(const c of x.children||[]){if(c.localName===n)o.push(c);w(c)}})(r);return o}
+const first=(r,n)=>byLocal(r,n)[0]||null;
+const pct=t=>{const p=num(t)*100;return p.toFixed(p%1?2:0)+"%"};
+const IMP={"001":"ISR","002":"IVA","003":"IEPS"};
 
-function parseCFDI(texto){
-  const doc=new DOMParser().parseFromString(texto,"text/xml");
-  if(doc.getElementsByTagName("parsererror").length) throw new Error("El archivo no es un XML válido.");
-  const comp=porNombre(doc,"Comprobante")[0]||doc.documentElement;
-  if(!comp||comp.localName!=="Comprobante") throw new Error("No encontré un CFDI (nodo Comprobante) en este XML.");
-
-  const emisor=primero(comp,"Emisor"), receptor=primero(comp,"Receptor"), timbre=primero(comp,"TimbreFiscalDigital");
-
-  const conceptos=porNombre(comp,"Concepto").map(c=>({
-    descripcion:attr(c,"Descripcion"), cantidad:num(attr(c,"Cantidad")),
-    valorUnitario:num(attr(c,"ValorUnitario")), importe:num(attr(c,"Importe")),
-    clave:attr(c,"ClaveProdServ")
+function parseCFDI(txt){
+  const doc=new DOMParser().parseFromString(txt,"text/xml");
+  if(doc.getElementsByTagName("parsererror").length)throw new Error("El archivo no es un XML válido.");
+  const comp=byLocal(doc,"Comprobante")[0]||doc.documentElement;
+  if(!comp||comp.localName!=="Comprobante")throw new Error("No encontré un CFDI en este archivo.");
+  const emisor=first(comp,"Emisor"),receptor=first(comp,"Receptor"),timbre=first(comp,"TimbreFiscalDigital");
+  const conceptos=byLocal(comp,"Concepto").map(c=>({
+    desc:attr(c,"Descripcion"),cant:num(attr(c,"Cantidad")),
+    vu:num(attr(c,"ValorUnitario")),importe:num(attr(c,"Importe")),clave:attr(c,"ClaveProdServ")
   }));
-
-  // Impuestos: nodo global (hijo directo de Comprobante) si existe; si no, suma de conceptos
-  const globalImp=[...comp.children].find(c=>c.localName==="Impuestos");
-  const scope=globalImp||comp;
-
-  const traslMap=new Map();
-  for(const t of porNombre(scope,"Traslado")){
-    const imp=attr(t,"Impuesto"), tf=attr(t,"TipoFactor"), tasa=attr(t,"TasaOCuota")||"";
-    const k=imp+"|"+tf+"|"+tasa;
-    const cur=traslMap.get(k)||{impuesto:imp,tipoFactor:tf,tasa,base:0,importe:0};
-    cur.base+=num(attr(t,"Base")); cur.importe+=num(attr(t,"Importe"));
-    traslMap.set(k,cur);
+  const gi=[...comp.children].find(c=>c.localName==="Impuestos");
+  const scope=gi||comp;
+  const tm=new Map();
+  for(const t of byLocal(scope,"Traslado")){
+    const imp=attr(t,"Impuesto"),tf=attr(t,"TipoFactor"),tasa=attr(t,"TasaOCuota")||"";
+    const k=imp+"|"+tf+"|"+tasa,cur=tm.get(k)||{impuesto:imp,tipoFactor:tf,tasa,base:0,importe:0};
+    cur.base+=num(attr(t,"Base"));cur.importe+=num(attr(t,"Importe"));tm.set(k,cur);
   }
-  const retMap=new Map();
-  for(const r of porNombre(scope,"Retencion")){
-    const imp=attr(r,"Impuesto");
-    const cur=retMap.get(imp)||{impuesto:imp,importe:0};
-    cur.importe+=num(attr(r,"Importe"));
-    retMap.set(imp,cur);
+  const rm=new Map();
+  for(const r of byLocal(scope,"Retencion")){
+    const imp=attr(r,"Impuesto"),cur=rm.get(imp)||{impuesto:imp,importe:0};
+    cur.importe+=num(attr(r,"Importe"));rm.set(imp,cur);
   }
-
   return {
-    serie:attr(comp,"Serie"), folio:attr(comp,"Folio"), fecha:attr(comp,"Fecha"),
-    subtotal:num(attr(comp,"SubTotal")), descuento:num(attr(comp,"Descuento")),
-    total:num(attr(comp,"Total")), moneda:attr(comp,"Moneda"),
-    tipo:attr(comp,"TipoDeComprobante"), formaPago:attr(comp,"FormaPago"),
-    metodoPago:attr(comp,"MetodoPago"), lugar:attr(comp,"LugarExpedicion"),
+    serie:attr(comp,"Serie"),folio:attr(comp,"Folio"),fecha:attr(comp,"Fecha"),
+    subtotal:num(attr(comp,"SubTotal")),descuento:num(attr(comp,"Descuento")),
+    total:num(attr(comp,"Total")),moneda:attr(comp,"Moneda"),
+    tipo:attr(comp,"TipoDeComprobante"),formaPago:attr(comp,"FormaPago"),
+    metodoPago:attr(comp,"MetodoPago"),lugar:attr(comp,"LugarExpedicion"),
     emisor:{rfc:attr(emisor,"Rfc"),nombre:attr(emisor,"Nombre")},
     receptor:{rfc:attr(receptor,"Rfc"),nombre:attr(receptor,"Nombre"),uso:attr(receptor,"UsoCFDI")},
     uuid:attr(timbre,"UUID"),
-    traslados:[...traslMap.values()].sort((a,b)=>a.impuesto.localeCompare(b.impuesto)||num(b.tasa)-num(a.tasa)),
-    retenciones:[...retMap.values()],
-    conceptos
+    traslados:[...tm.values()].sort((a,b)=>a.impuesto.localeCompare(b.impuesto)||num(b.tasa)-num(a.tasa)),
+    retenciones:[...rm.values()],conceptos
   };
 }
 
-const etiqueta = t => t.tipoFactor==="Exento"
-  ? (IMPUESTOS[t.impuesto]||t.impuesto)+" Exento"
-  : (IMPUESTOS[t.impuesto]||t.impuesto)+" "+pct(t.tasa);
+// ═══════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════
+const mxn=new Intl.NumberFormat("es-MX",{style:"currency",currency:"MXN"});
+const esc=s=>String(s??"—").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const etiq=t=>t.tipoFactor==="Exento"?(IMP[t.impuesto]||t.impuesto)+" Exento":(IMP[t.impuesto]||t.impuesto)+" "+pct(t.tasa);
 
-// ── Render ──────────────────────────────────────────────────────
-let cfdiActual=null;
-
-function dato(k,v,mono){ return '<div class="dato"><span class="k">'+esc(k)+'</span><span class="v'+(mono?' mono':'')+'">'+esc(v)+'</span></div>'; }
-
-function render(cfdi){
-  cfdiActual=cfdi;
-  document.getElementById("zonaError").innerHTML="";
-  document.getElementById("resultados").style.display="block";
-
-  // Veredicto
-  const solo16 = cfdi.retenciones.length===0 && cfdi.traslados.length>0 &&
-    cfdi.traslados.every(t=>t.impuesto==="002"&&t.tipoFactor==="Tasa"&&num(t.tasa)===0.16);
-  const v=document.getElementById("veredicto");
-  if(solo16){
-    v.innerHTML='<div class="alerta alerta-ok"><strong>✓ Factura sencilla:</strong> todo el subtotal causa IVA al 16%. Se puede capturar con IVA fijo sin problema.</div>';
-  } else {
-    let det=cfdi.traslados.map(etiqueta).join(", ");
-    if(cfdi.retenciones.length) det+=" y retenciones de "+cfdi.retenciones.map(r=>IMPUESTOS[r.impuesto]||r.impuesto).join(", ");
-    v.innerHTML='<div class="alerta alerta-ojo"><strong>⚠ Ojo, capturista:</strong> esta factura <u>no</u> es IVA 16% parejo. Tiene '+esc(det)+'. Captúrala con el desglose de abajo.</div>';
-  }
-
-  // Tabla de impuestos
-  let filas='<tr><td>Subtotal</td><td></td><td>'+mxn.format(cfdi.subtotal)+'</td></tr>';
-  if(cfdi.descuento>0) filas+='<tr><td>Descuento</td><td></td><td class="negativo">-'+mxn.format(cfdi.descuento)+'</td></tr>';
+function impDetalles(cfdi){
+  // Devuelve objeto con subtotales por tipo para el Excel
+  let iva16=0,iva0=0,ivaOtro=0,ieps=0,hospedaje=0,otrosImp=0,retIVA=0,retISR=0;
   for(const t of cfdi.traslados){
-    const verde=t.impuesto==="002"&&t.tipoFactor==="Tasa"&&num(t.tasa)===0.16;
-    filas+='<tr><td><span class="pill '+(verde?'pill-verde':'pill-ambar')+'">'+esc(etiqueta(t))+'</span></td>'
-      +'<td style="color:var(--gris)">'+mxn.format(t.base)+'</td>'
-      +'<td>'+(t.tipoFactor==="Exento"?"—":mxn.format(t.importe))+'</td></tr>';
+    if(t.impuesto==="002"){
+      if(num(t.tasa)===0.16)iva16+=t.importe;
+      else if(num(t.tasa)===0)iva0+=0;
+      else ivaOtro+=t.importe;
+    } else if(t.impuesto==="003") ieps+=t.importe;
+    else hospedaje+=t.importe; // otros (hospedaje SAT impuesto local)
   }
   for(const r of cfdi.retenciones){
-    filas+='<tr><td><span class="pill pill-rojo">Retención '+esc(IMPUESTOS[r.impuesto]||r.impuesto)+'</span></td><td></td><td class="negativo">-'+mxn.format(r.importe)+'</td></tr>';
+    if(r.impuesto==="002")retIVA+=r.importe;
+    else if(r.impuesto==="001")retISR+=r.importe;
   }
-  filas+='<tr class="total"><td style="font-weight:700">Total</td><td></td><td>'+mxn.format(cfdi.total)+' <span style="font-size:11px;color:var(--gris)">'+esc(cfdi.moneda)+'</span></td></tr>';
-  document.getElementById("tablaImpuestos").innerHTML=filas;
-
-  // Datos de factura
-  document.getElementById("datosFactura").innerHTML=
-    dato("Serie / Folio",[cfdi.serie,cfdi.folio].filter(Boolean).join("-")||"—")
-    +dato("Fecha",(cfdi.fecha||"").replace("T"," · "))
-    +dato("Tipo",TIPO_COMP[cfdi.tipo]||cfdi.tipo)
-    +dato("Forma de pago",FORMA_PAGO[cfdi.formaPago]||cfdi.formaPago)
-    +dato("Método de pago",METODO_PAGO[cfdi.metodoPago]||cfdi.metodoPago)
-    +dato("Lugar de expedición (CP)",cfdi.lugar)
-    +dato("UUID (folio fiscal)",cfdi.uuid,true);
-
-  // Partes
-  document.getElementById("datosPartes").innerHTML=
-    '<p class="persona-label">Emisor (proveedor)</p><p class="persona-nombre">'+esc(cfdi.emisor.nombre)+'</p><p class="persona-rfc">'+esc(cfdi.emisor.rfc)+'</p>'
-    +'<p class="persona-label">Receptor (tu empresa)</p><p class="persona-nombre">'+esc(cfdi.receptor.nombre)+'</p><p class="persona-rfc">'+esc(cfdi.receptor.rfc)+'</p>'
-    +dato("Uso CFDI",USO_CFDI[cfdi.receptor.uso]||cfdi.receptor.uso);
-
-  // Conceptos
-  document.getElementById("tituloConceptos").textContent="Conceptos ("+cfdi.conceptos.length+")";
-  document.getElementById("listaConceptos").innerHTML=cfdi.conceptos.map(c=>
-    '<div class="concepto"><div><p>'+esc(c.descripcion)+'</p><p class="detalle">'+c.cantidad+' × '+mxn.format(c.valorUnitario)+' · clave '+esc(c.clave)+'</p></div><span class="importe">'+mxn.format(c.importe)+'</span></div>'
-  ).join("");
+  return {iva16,ieps,hospedaje,otrosImp,retIVA,retISR};
 }
 
-function mostrarError(msg){
-  cfdiActual=null;
-  document.getElementById("resultados").style.display="none";
-  document.getElementById("zonaError").innerHTML='<div class="alerta alerta-error"><strong>No pude leer el archivo.</strong> '+esc(msg)+' Verifica que sea el XML del CFDI (no el PDF).</div>';
+// ═══════════════════════════════════════════════
+// ESTADO GLOBAL
+// ═══════════════════════════════════════════════
+let cfdiData=null, xmlNombre="";
+
+// ═══════════════════════════════════════════════
+// INICIALIZAR SELECTS
+// ═══════════════════════════════════════════════
+function llenaSelect(id,lista,placeholder="— Selecciona —"){
+  const sel=document.getElementById(id);
+  sel.innerHTML=`<option value="">${placeholder}</option>`+lista.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join("");
+}
+function initSelects(){
+  llenaSelect("f_empresa",CAT.empresas);
+  llenaSelect("f_area",CAT.areas);
+  llenaSelect("f_oficina",CAT.oficinas);
+  llenaSelect("f_gerente",CAT.gerentes);
+  initSearch("f_presupuesto_txt","f_presupuesto","dd_presupuesto",CAT.presupuestos);
+  initSearch("f_partida_txt","f_partida","dd_partida",CAT.partidas);
+  initSearch("f_beneficiario_txt","f_beneficiario","dd_beneficiario",CAT.beneficiarios);
 }
 
-function procesar(texto,nombre){
-  try{ render(parseCFDI(texto)); document.getElementById("nombreArchivo").textContent=nombre||""; }
-  catch(e){ mostrarError(e.message); }
+// Searchable dropdown
+function initSearch(txtId,hidId,ddId,lista){
+  const txt=document.getElementById(txtId);
+  const hid=document.getElementById(hidId);
+  const dd=document.getElementById(ddId);
+  function render(q){
+    const fl=lista.filter(v=>v.toLowerCase().includes(q.toLowerCase())).slice(0,50);
+    dd.innerHTML=fl.length?fl.map(v=>`<li data-v="${esc(v)}">${esc(v)}</li>`).join(""):"<li class='no-match'>Sin resultados</li>";
+    dd.classList.add("open");
+  }
+  txt.addEventListener("focus",()=>render(txt.value));
+  txt.addEventListener("input",()=>{hid.value="";render(txt.value)});
+  dd.addEventListener("mousedown",e=>{
+    const li=e.target.closest("li");
+    if(li&&li.dataset.v){txt.value=li.dataset.v;hid.value=li.dataset.v;dd.classList.remove("open")}
+  });
+  document.addEventListener("click",e=>{if(!txt.contains(e.target)&&!dd.contains(e.target))dd.classList.remove("open")});
 }
 
-function leerArchivo(file){
-  if(!file) return;
-  const r=new FileReader();
-  r.onload=()=>procesar(r.result,file.name);
-  r.readAsText(file);
+// ═══════════════════════════════════════════════
+// FLUJO: PASO 1
+// ═══════════════════════════════════════════════
+function mostrarError1(msg){
+  document.getElementById("zonaError1").innerHTML=`<div class="alerta alerta-error"><strong>No pude leer el archivo.</strong> ${esc(msg)}</div>`;
+  document.getElementById("resumenXML").style.display="none";
+  cfdiData=null;
 }
 
-// ── Eventos ─────────────────────────────────────────────────────
-const dz=document.getElementById("dropzone");
-dz.addEventListener("dragover",e=>{e.preventDefault();dz.classList.add("activa");});
-dz.addEventListener("dragleave",()=>dz.classList.remove("activa"));
-dz.addEventListener("drop",e=>{e.preventDefault();dz.classList.remove("activa");leerArchivo(e.dataTransfer.files[0]);});
-document.getElementById("inputArchivo").addEventListener("change",e=>leerArchivo(e.target.files[0]));
+function mostrarResumenXML(cfdi){
+  cfdiData=cfdi;
+  const det=impDetalles(cfdi);
+  const solo16=cfdi.retenciones.length===0&&cfdi.traslados.length>0&&cfdi.traslados.every(t=>t.impuesto==="002"&&t.tipoFactor==="Tasa"&&num(t.tasa)===0.16);
+  let filas=`<tr><td>Subtotal</td><td></td><td>${mxn.format(cfdi.subtotal)}</td></tr>`;
+  if(cfdi.descuento>0)filas+=`<tr><td>Descuento</td><td></td><td class="negativo">-${mxn.format(cfdi.descuento)}</td></tr>`;
+  for(const t of cfdi.traslados){
+    const v=t.impuesto==="002"&&t.tipoFactor==="Tasa"&&num(t.tasa)===0.16;
+    filas+=`<tr><td><span class="pill ${v?"pill-v":"pill-a"}">${esc(etiq(t))}</span></td><td style="color:var(--gris)">${mxn.format(t.base)}</td><td>${t.tipoFactor==="Exento"?"—":mxn.format(t.importe)}</td></tr>`;
+  }
+  for(const r of cfdi.retenciones)filas+=`<tr><td><span class="pill pill-r">Retención ${esc(IMP[r.impuesto]||r.impuesto)}</span></td><td></td><td class="negativo">-${mxn.format(r.importe)}</td></tr>`;
+  filas+=`<tr class="total-row"><td>Total a reembolsar</td><td></td><td>${mxn.format(cfdi.total)} <small style="color:var(--gris)">${esc(cfdi.moneda)}</small></td></tr>`;
 
-document.getElementById("btnCopiar").addEventListener("click",function(){
-  if(!cfdiActual) return;
-  const c=cfdiActual;
-  const lineas=[
-    "CFDI "+(c.serie||"")+(c.folio?"-"+c.folio:"")+" · "+c.emisor.nombre+" ("+c.emisor.rfc+")",
-    "UUID: "+c.uuid,
-    "Subtotal: "+mxn.format(c.subtotal),
-    ...(c.descuento?["Descuento: "+mxn.format(c.descuento)]:[]),
-    ...c.traslados.map(t=>etiqueta(t)+" — Base "+mxn.format(t.base)+" → "+mxn.format(t.importe)),
-    ...c.retenciones.map(r=>"Retención "+(IMPUESTOS[r.impuesto]||r.impuesto)+": -"+mxn.format(r.importe)),
-    "TOTAL: "+mxn.format(c.total)
+  const veredicto=solo16
+    ?`<div class="alerta alerta-ok">✓ <strong>IVA 16% simple.</strong> Se puede capturar con IVA fijo.</div>`
+    :`<div class="alerta alerta-ojo">⚠ <strong>Impuestos mixtos:</strong> ${cfdi.traslados.map(etiq).join(", ")}${cfdi.retenciones.length?" + retenciones":""} — se capturará el desglose completo.</div>`;
+
+  const r=document.getElementById("resumenXML");
+  r.style.display="block";
+  r.innerHTML=`
+    ${veredicto}
+    <div class="tarjeta">
+      <h2>✓ Factura leída — ${esc(xmlNombre)}</h2>
+      <div style="margin-bottom:12px;font-size:13px;color:#57534e">
+        <strong>${esc(cfdi.emisor.nombre)}</strong> · RFC ${esc(cfdi.emisor.rfc)}<br>
+        Folio: ${esc([cfdi.serie,cfdi.folio].filter(Boolean).join("-")||"—")} · ${esc((cfdi.fecha||"").replace("T"," "))}
+      </div>
+      <table><thead><tr><th>Concepto</th><th>Base</th><th>Importe</th></tr></thead><tbody>${filas}</tbody></table>
+      <button class="btn btn-verde" id="btnSiguiente">Continuar: llenar datos del gasto →</button>
+    </div>`;
+  document.getElementById("btnSiguiente").onclick=irPaso2;
+}
+
+function procesar(txt,nombre){
+  xmlNombre=nombre||"";
+  document.getElementById("nombreArch").textContent=nombre||"";
+  document.getElementById("zonaError1").innerHTML="";
+  try{mostrarResumenXML(parseCFDI(txt))}catch(e){mostrarError1(e.message)}
+}
+function leerArchivo(f){if(!f)return;const r=new FileReader();r.onload=()=>procesar(r.result,f.name);r.readAsText(f)}
+
+// ═══════════════════════════════════════════════
+// FLUJO: PASO 2
+// ═══════════════════════════════════════════════
+function irPaso2(){
+  if(!cfdiData)return;
+  // Rellenar resumen compacto del XML en paso 2
+  document.getElementById("xmlResumen2").innerHTML=`
+    <h2>Factura cargada</h2>
+    <div style="font-size:13px;color:#57534e">
+      <strong>${esc(cfdiData.emisor.nombre)}</strong> · RFC ${esc(cfdiData.emisor.rfc)}<br>
+      Folio ${esc([cfdiData.serie,cfdiData.folio].filter(Boolean).join("-")||"—")} · Total <strong>${mxn.format(cfdiData.total)}</strong>
+    </div>`;
+  setStep(2);
+}
+
+function irPaso1(){setStep(1)}
+
+function validarPaso2(){
+  const reqs=[
+    ["f_responsable","Responsable"],["f_empresa","Empresa"],["f_area","Área"],
+    ["f_oficina","Oficinas"],["f_presupuesto","Presupuesto"],["f_partida","Partida presupuestada"],
+    ["f_tipo_gasto","Tipo de gasto"],["f_justificacion","Justificación"],
+    ["f_beneficiario","Beneficiario del cheque"],["f_gerente","Gerente"]
   ];
-  navigator.clipboard.writeText(lineas.join("\n")).then(()=>{
-    this.textContent="✓ Copiado";
-    setTimeout(()=>this.textContent="Copiar desglose como texto",1800);
+  for(const[id,label]of reqs){
+    const el=document.getElementById(id);
+    if(!el||!el.value.trim()){
+      document.getElementById("zonaError2").innerHTML=`<div class="alerta alerta-error">Por favor llena el campo: <strong>${label}</strong></div>`;
+      el&&el.focus();return false;
+    }
+  }
+  document.getElementById("zonaError2").innerHTML="";
+  return true;
+}
+
+// ═══════════════════════════════════════════════
+// GENERACIÓN DEL EXCEL
+// ═══════════════════════════════════════════════
+function getFormData(){
+  return {
+    responsable:document.getElementById("f_responsable").value.trim(),
+    empresa:document.getElementById("f_empresa").value,
+    area:document.getElementById("f_area").value,
+    oficina:document.getElementById("f_oficina").value,
+    presupuesto:document.getElementById("f_presupuesto").value,
+    partida:document.getElementById("f_partida").value,
+    tipoGasto:document.getElementById("f_tipo_gasto").value,
+    justificacion:document.getElementById("f_justificacion").value.trim(),
+    sinComprobante:parseFloat(document.getElementById("f_sin_comprobante").value)||0,
+    beneficiario:document.getElementById("f_beneficiario").value,
+    gerente:document.getElementById("f_gerente").value,
+  };
+}
+
+let excelData=null;
+
+function generarExcel(){
+  if(!validarPaso2())return;
+  const fd=getFormData();
+  const cfdi=cfdiData;
+  const det=impDetalles(cfdi);
+
+  // Calcular totales para resumen
+  const totalImpuestos=cfdi.traslados.reduce((s,t)=>s+t.importe,0);
+  const totalRetenciones=cfdi.retenciones.reduce((s,r)=>s+r.importe,0);
+  const totalFila=cfdi.subtotal+totalImpuestos-totalRetenciones+(fd.sinComprobante||0);
+
+  // Nombre de archivo
+  const hoy=new Date();
+  const mes=String(hoy.getMonth()+1).padStart(2,"0");
+  const anio=hoy.getFullYear();
+  const nombre_resp=fd.responsable.split(" ")[0];
+  const nombreArchivo=`Vale_${nombre_resp}_${mes}${anio}.xlsx`;
+
+  // Construir workbook
+  const wb=XLSX.utils.book_new();
+
+  // ─ Hoja FORMATO ─
+  const datos=[
+    // Encabezado empresa
+    [fd.empresa,"","","","","","","","","","","","","","","",""],
+    ["COMPROBACION DE GASTOS"],
+    [],
+    [`RESPONSABLE: ${fd.responsable}`,,"","FECHA:",(new Date()).toLocaleDateString("es-MX"),,,,,,,,,"SG-FR-05"],
+    [`AREA: ${fd.area}`],
+    [`OFICINAS: ${fd.oficina}`,"","","","FOLIO:"],
+    [],
+    // Encabezados tabla
+    ["No.","FECHA","FACTURA","TIPO DE GASTOS","JUSTIFICACION","PRESUPUESTO","PARTIDA PRESUPUESTADA",
+     "SIN COMPROBANTE FISCAL","SUBTOTAL","I.V.A.","IEPS","IMP. HOSPEDAJE","OTROS IMP.","RET. IVA","RET. ISR","TOTAL"],
+    // Fila de datos
+    [1,
+     cfdi.fecha?(new Date(cfdi.fecha)).toLocaleDateString("es-MX"):"",
+     [cfdi.serie,cfdi.folio].filter(Boolean).join("-")||"",
+     fd.tipoGasto,
+     fd.justificacion,
+     fd.presupuesto,
+     fd.partida,
+     fd.sinComprobante||"",
+     cfdi.subtotal,
+     det.iva16||"",
+     det.ieps||"",
+     det.hospedaje||"",
+     det.otrosImp||"",
+     det.retIVA?-det.retIVA:"",
+     det.retISR?-det.retISR:"",
+     totalFila
+    ],
+    // Fila totales
+    ["","","","","","","SUMA:",
+     fd.sinComprobante||"",
+     cfdi.subtotal,
+     det.iva16||"",
+     det.ieps||"",
+     det.hospedaje||"",
+     det.otrosImp||"",
+     det.retIVA?-det.retIVA:"",
+     det.retISR?-det.retISR:"",
+     totalFila
+    ],
+    [],
+    [`ELABORAR CHEQUE A NOMBRE DE: ${fd.beneficiario}`],
+    [],
+    ["FIRMAS DE AUTORIZACION"],
+    [],
+    ["ELABORÓ","","","AUTORIZÓ","","VERIFICACION","","","AUTORIZÓ"],
+    [],
+    [fd.responsable,"","",fd.gerente,"","DEPARTAMENTO DE CONTABILIDAD"],
+    ["","","","GERENTE"],
+    [],
+    ["RFC EMISOR:",cfdi.emisor.rfc,"","","UUID:",cfdi.uuid],
+    ["EMISOR:",cfdi.emisor.nombre],
+    ["RFC RECEPTOR:",cfdi.receptor.rfc,"RECEPTOR:",cfdi.receptor.nombre],
+  ];
+
+  const ws=XLSX.utils.aoa_to_sheet(datos);
+
+  // Anchos de columna
+  ws['!cols']=[
+    {wch:4},{wch:12},{wch:14},{wch:16},{wch:30},{wch:14},{wch:28},
+    {wch:10},{wch:12},{wch:10},{wch:8},{wch:12},{wch:10},{wch:10},{wch:10},{wch:14}
+  ];
+
+  XLSX.utils.book_append_sheet(wb,ws,"FORMATO");
+
+  // ─ Hoja CATALOGOS (para fácil edición futura) ─
+  const catData=[
+    ["CATÁLOGO DE OPCIONES DE MENÚS DESPLEGABLES"],
+    ["EMPRESA / RAZON SOCIAL","AREA","OFICINAS","PRESUPUESTO","PARTIDA PRESUPUESTADA","CHEQUE A NOMBRE DE","GERENTES"],
+  ];
+  const maxLen=Math.max(...Object.values(CAT).map(a=>a.length));
+  for(let i=0;i<maxLen;i++){
+    catData.push([
+      CAT.empresas[i]||"",CAT.areas[i]||"",CAT.oficinas[i]||"",
+      CAT.presupuestos[i]||"",CAT.partidas[i]||"",
+      CAT.beneficiarios[i]||"",CAT.gerentes[i]||""
+    ]);
+  }
+  const wsCat=XLSX.utils.aoa_to_sheet(catData);
+  wsCat['!cols']=[{wch:35},{wch:22},{wch:18},{wch:18},{wch:40},{wch:35},{wch:35}];
+  XLSX.utils.book_append_sheet(wb,wsCat,"CATALOGOS");
+
+  excelData={wb,nombreArchivo,fd,cfdi,totalFila};
+
+  // Mostrar resumen en paso 3
+  mostrarResumenFinal(fd,cfdi,totalFila,det);
+  setStep(3);
+}
+
+function mostrarResumenFinal(fd,cfdi,total,det){
+  const filas=[
+    ["Responsable",fd.responsable],
+    ["Empresa",fd.empresa],
+    ["Área / Oficina",`${fd.area} · ${fd.oficina}`],
+    ["Presupuesto",fd.presupuesto],
+    ["Partida",fd.partida],
+    ["Tipo de gasto",fd.tipoGasto],
+    ["Justificación",fd.justificacion],
+    ["Factura",`${[cfdi.serie,cfdi.folio].filter(Boolean).join("-")||"—"} · ${cfdi.emisor.nombre}`],
+    ["Subtotal",mxn.format(cfdi.subtotal)],
+    ...(det.iva16?[["IVA 16%",mxn.format(det.iva16)]]:[]),
+    ...(det.ieps?[["IEPS",mxn.format(det.ieps)]]:[]),
+    ...(det.hospedaje?[["Imp. Hospedaje",mxn.format(det.hospedaje)]]:[]),
+    ...(det.retIVA?[["Ret. IVA",`-${mxn.format(det.retIVA)}`]]:[]),
+    ...(det.retISR?[["Ret. ISR",`-${mxn.format(det.retISR)}`]]:[]),
+    ...(fd.sinComprobante?[["Sin comprobante",mxn.format(fd.sinComprobante)]]:[]),
+    ["TOTAL A REEMBOLSAR",mxn.format(total)],
+  ];
+  document.getElementById("resumenFinal").innerHTML=
+    `<h2>Resumen del vale</h2>`+
+    filas.map((r,i)=>`<div class="resumen-row${i===filas.length-1?" total-final":""}"><span class="resumen-label">${esc(r[0])}</span><span>${esc(r[1])}</span></div>`).join("");
+}
+
+function descargarExcel(){
+  if(!excelData)return;
+  XLSX.writeFile(excelData.wb,excelData.nombreArchivo);
+}
+
+// ═══════════════════════════════════════════════
+// NAVEGACIÓN DE PASOS
+// ═══════════════════════════════════════════════
+function setStep(n){
+  document.querySelectorAll(".seccion").forEach((s,i)=>{
+    s.classList.toggle("visible",i===n-1);
+  });
+  document.querySelectorAll(".step").forEach((s,i)=>{
+    s.classList.remove("activo","hecho");
+    if(i+1<n)s.classList.add("hecho");
+    else if(i+1===n)s.classList.add("activo");
+  });
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+// ═══════════════════════════════════════════════
+// INICIALIZAR
+// ═══════════════════════════════════════════════
+document.addEventListener("DOMContentLoaded",()=>{
+  initSelects();
+
+  const dz=document.getElementById("dropzone");
+  dz.addEventListener("dragover",e=>{e.preventDefault();dz.classList.add("activa")});
+  dz.addEventListener("dragleave",()=>dz.classList.remove("activa"));
+  dz.addEventListener("drop",e=>{e.preventDefault();dz.classList.remove("activa");leerArchivo(e.dataTransfer.files[0])});
+  document.getElementById("inputXML").addEventListener("change",e=>leerArchivo(e.target.files[0]));
+  document.getElementById("btnGenerar").addEventListener("click",generarExcel);
+  document.getElementById("btnVolver1").addEventListener("click",irPaso1);
+  document.getElementById("btnDescargar").addEventListener("click",descargarExcel);
+  document.getElementById("btnNuevo").addEventListener("click",()=>{
+    cfdiData=null;excelData=null;xmlNombre="";
+    document.getElementById("nombreArch").textContent="";
+    document.getElementById("resumenXML").style.display="none";
+    document.getElementById("zonaError1").innerHTML="";
+    setStep(1);
   });
 });
-
-// ── Factura de ejemplo (mixta: IVA 16% + 0% + IEPS + retención) ──
-const DEMO=`<?xml version="1.0" encoding="UTF-8"?>
-<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" Version="4.0" Serie="A" Folio="48213" Fecha="2026-05-21T14:32:10" SubTotal="2570.00" Descuento="0.00" Total="2856.96" Moneda="MXN" TipoDeComprobante="I" MetodoPago="PUE" FormaPago="04" LugarExpedicion="86100">
-<cfdi:Emisor Rfc="HVT980512AB1" Nombre="HOTELES Y VIAJES DEL TROPICO SA DE CV" RegimenFiscal="601"/>
-<cfdi:Receptor Rfc="CTB050607XY9" Nombre="CONSTRUCTORA TABASCO SA DE CV" UsoCFDI="G03" DomicilioFiscalReceptor="86035" RegimenFiscalReceptor="601"/>
-<cfdi:Conceptos>
-<cfdi:Concepto ClaveProdServ="90111800" Cantidad="2" Descripcion="Habitacion sencilla, 2 noches" ValorUnitario="950.00" Importe="1900.00"><cfdi:Impuestos><cfdi:Traslados><cfdi:Traslado Base="1900.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="304.00"/></cfdi:Traslados></cfdi:Impuestos></cfdi:Concepto>
-<cfdi:Concepto ClaveProdServ="50202306" Cantidad="1" Descripcion="Consumo restaurante (bebidas con IEPS)" ValorUnitario="420.00" Importe="420.00"><cfdi:Impuestos><cfdi:Traslados><cfdi:Traslado Base="420.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="67.20"/><cfdi:Traslado Base="420.00" Impuesto="003" TipoFactor="Tasa" TasaOCuota="0.080000" Importe="33.60"/></cfdi:Traslados></cfdi:Impuestos></cfdi:Concepto>
-<cfdi:Concepto ClaveProdServ="50171548" Cantidad="1" Descripcion="Agua embotellada y alimentos basicos" ValorUnitario="250.00" Importe="250.00"><cfdi:Impuestos><cfdi:Traslados><cfdi:Traslado Base="250.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.000000" Importe="0.00"/></cfdi:Traslados></cfdi:Impuestos></cfdi:Concepto>
-</cfdi:Conceptos>
-<cfdi:Impuestos TotalImpuestosRetenidos="117.84" TotalImpuestosTrasladados="404.80">
-<cfdi:Retenciones><cfdi:Retencion Impuesto="002" Importe="117.84"/></cfdi:Retenciones>
-<cfdi:Traslados><cfdi:Traslado Base="2320.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="371.20"/><cfdi:Traslado Base="420.00" Impuesto="003" TipoFactor="Tasa" TasaOCuota="0.080000" Importe="33.60"/><cfdi:Traslado Base="250.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.000000" Importe="0.00"/></cfdi:Traslados>
-</cfdi:Impuestos>
-<cfdi:Complemento><tfd:TimbreFiscalDigital xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" Version="1.1" UUID="8F4A2C1E-7B3D-4E9A-A1C5-0D6F2B8E4A77" FechaTimbrado="2026-05-21T14:33:02"/></cfdi:Complemento>
-</cfdi:Comprobante>`;
-
 </script>
 </body>
 </html>
