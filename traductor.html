@@ -3,796 +3,831 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vale de Reembolso · Comprobación de Gastos</title>
+<meta name="robots" content="noindex">
+<title>PomocaGPT · Guía interna de IA</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:#f0f0f0;font-family:Arial,sans-serif;color:#161616}
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:'Geist',system-ui,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
 :root{
-  --verde:#047857;--verde-osc:#065f46;--verde-claro:#ecfdf5;
-  --borde:#e7e5e4;--gris:#a8a29e;
-  --ambar-claro:#fffbeb;--ambar:#b45309;
-  --rojo-claro:#fef2f2;--rojo:#b91c1c;
+  --bg:oklch(0.98 0.01 85);--surface:oklch(1 0 0);--surface-2:oklch(0.955 0.015 80);
+  --ink:oklch(0.16 0.02 250);--ink-soft:oklch(0.42 0.02 250);--ink-mute:oklch(0.58 0.02 250);
+  --border:oklch(0.88 0.015 80);--border-soft:oklch(0.93 0.012 80);
+  --brand:oklch(0.52 0.2 262);--brand-2:oklch(0.68 0.18 45);--brand-3:oklch(0.65 0.15 180);
+  --brand-ink:oklch(0.25 0.15 262);--brand-soft:oklch(0.94 0.04 262);
+  --warn:oklch(0.62 0.18 30);--success:oklch(0.58 0.15 150);--ink-dark:oklch(0.14 0.02 262);
 }
-.app{max-width:900px;margin:0 auto;padding:24px 16px}
-.eyebrow{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--verde);font-weight:600}
-h1{font-size:26px;letter-spacing:-.02em;margin:4px 0 4px}
-.sub{color:#78716c;font-size:13px;margin-bottom:20px}
-
+.app{min-height:100vh}
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 32px;border-bottom:1px solid var(--border);background:color-mix(in oklab,var(--bg) 92%,transparent);backdrop-filter:blur(14px);position:sticky;top:0;z-index:20}
+.brand{display:flex;align-items:center;gap:12px;cursor:pointer}
+.brand-mono{width:40px;height:40px;background:linear-gradient(135deg,var(--brand) 0%,oklch(0.35 0.2 280) 100%);color:white;display:flex;align-items:center;justify-content:center;font-family:'Instrument Serif',serif;font-size:24px;border-radius:10px;box-shadow:0 4px 12px oklch(0.52 0.2 262/0.25)}
+.brand-name{font-family:'Instrument Serif',serif;font-size:22px;line-height:1;letter-spacing:-0.01em}
+.brand-sub{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-mute);margin-top:3px;letter-spacing:0.1em;text-transform:uppercase}
+.nav{display:flex;gap:2px;background:var(--surface-2);padding:4px;border-radius:10px}
+.nav button{background:transparent;border:none;padding:8px 14px;font:inherit;font-size:13px;color:var(--ink-soft);cursor:pointer;border-radius:7px;transition:all 150ms}
+.nav button:hover{color:var(--ink);background:var(--surface)}
+.nav button.active{background:var(--ink);color:var(--bg);font-weight:500;box-shadow:0 2px 8px oklch(0 0 0/0.1)}
+.topbar-right{display:flex;align-items:center;gap:14px}
+.status-pill{display:inline-flex;align-items:center;gap:7px;padding:5px 11px;background:color-mix(in oklab,var(--success) 18%,transparent);color:oklch(0.38 0.14 150);border-radius:999px;font-size:11px;font-family:'JetBrains Mono',monospace;letter-spacing:0.04em}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--success);box-shadow:0 0 0 3px color-mix(in oklab,var(--success) 25%,transparent);animation:pulse 2s infinite}
+@keyframes pulse{50%{opacity:0.4}}
+/* HERO */
+.hero-wrap{position:relative;overflow:hidden;border-bottom:1px solid var(--border);background:radial-gradient(60% 80% at 85% 10%,oklch(0.72 0.16 45/0.15),transparent 60%),radial-gradient(50% 60% at 10% 90%,oklch(0.6 0.2 262/0.14),transparent 60%),var(--bg)}
+.hero-wrap::before{content:'';position:absolute;inset:0;background-image:linear-gradient(to right,oklch(0 0 0/0.035) 1px,transparent 1px),linear-gradient(to bottom,oklch(0 0 0/0.035) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse at center,black 40%,transparent 80%);pointer-events:none}
+.hero{max-width:1200px;margin:0 auto;padding:80px 40px 72px;position:relative}
+.hero-top{display:flex;align-items:center;gap:14px;margin-bottom:28px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;background:var(--surface);border:1px solid var(--border);border-radius:999px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--brand-ink);letter-spacing:0.06em;text-transform:uppercase}
+.hero-badge-dot{width:5px;height:5px;border-radius:50%;background:var(--brand)}
+.hero-date{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-mute);letter-spacing:0.06em}
+.hero-title{font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(52px,8vw,116px);line-height:0.95;letter-spacing:-0.035em;margin:0 0 24px;color:var(--ink);max-width:14ch}
+.hero-title em{font-style:italic;background:linear-gradient(135deg,var(--brand) 0%,var(--brand-2) 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-sub{font-size:20px;line-height:1.5;color:var(--ink-soft);max-width:54ch;margin:0 0 40px;text-wrap:pretty}
+.hero-ctas{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:60px}
+.btn-primary{display:inline-flex;align-items:center;gap:10px;padding:13px 22px;background:var(--ink);color:var(--bg);border:none;border-radius:10px;font:inherit;font-size:14px;font-weight:500;cursor:pointer;transition:transform 150ms,background 150ms;box-shadow:0 4px 14px oklch(0 0 0/0.15)}
+.btn-primary:hover{transform:translateY(-1px);background:var(--brand-ink)}
+.btn-primary .arr{transition:transform 180ms}
+.btn-primary:hover .arr{transform:translateX(3px)}
+.btn-secondary{display:inline-flex;align-items:center;gap:10px;padding:13px 22px;background:var(--surface);color:var(--ink);border:1px solid var(--border);border-radius:10px;font:inherit;font-size:14px;font-weight:500;cursor:pointer;transition:all 150ms}
+.btn-secondary:hover{border-color:var(--ink);background:var(--bg)}
+.hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 10px 40px oklch(0 0 0/0.06)}
+.hero-stat{padding:22px 24px;border-right:1px solid var(--border)}
+.hero-stat:last-child{border-right:none}
+.hero-stat-k{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px}
+.hero-stat-v{font-family:'Instrument Serif',serif;font-size:32px;line-height:1;letter-spacing:-0.01em}
+.hero-stat-v em{font-style:italic;color:var(--brand)}
+/* PAGE */
+.page{max-width:1200px;margin:0 auto;padding:0 40px 100px}
+.section{padding:80px 0;border-top:1px solid var(--border)}
+.section:first-child{border-top:none}
+.section-head{display:grid;grid-template-columns:1fr 1.4fr;gap:60px;margin-bottom:44px;align-items:end}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.14em;color:var(--brand);margin-bottom:14px;font-weight:500}
+.eyebrow-num{padding:2px 8px;background:var(--brand-soft);border-radius:4px;color:var(--brand-ink)}
+.h2{font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(32px,4vw,48px);line-height:1.05;letter-spacing:-0.02em;margin:0}
+.h2 em{font-style:italic;color:var(--brand)}
+.section-intro{color:var(--ink-soft);font-size:16px;line-height:1.55;max-width:50ch;text-wrap:pretty;margin:0}
+/* PRIVACY */
+.privacy{position:relative;padding:36px 40px;background:linear-gradient(135deg,var(--ink-dark) 0%,oklch(0.18 0.06 280) 100%);color:var(--bg);border-radius:18px;overflow:hidden;display:grid;grid-template-columns:auto 1fr auto;gap:28px;align-items:center;box-shadow:0 20px 50px oklch(0 0 0/0.18)}
+.privacy::after{content:'';position:absolute;right:-80px;top:-80px;width:280px;height:280px;background:radial-gradient(circle,var(--brand-2) 0%,transparent 70%);opacity:0.3;pointer-events:none}
+.privacy-icon{width:52px;height:52px;background:oklch(1 0 0/0.12);border:1.5px solid oklch(1 0 0/0.25);border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'Instrument Serif',serif;font-size:28px;color:var(--brand-2);flex-shrink:0}
+.privacy-content{position:relative;z-index:1}
+.privacy-title{font-family:'Instrument Serif',serif;font-size:28px;margin:0 0 8px;font-style:italic;letter-spacing:-0.01em}
+.privacy-body{font-size:15px;line-height:1.55;color:oklch(0.88 0.02 250);max-width:64ch}
+.privacy-body strong{color:var(--brand-2);font-weight:500}
+.privacy-tag{font-family:'JetBrains Mono',monospace;font-size:10.5px;padding:8px 14px;background:oklch(1 0 0/0.1);border:1px solid oklch(1 0 0/0.2);border-radius:999px;color:var(--bg);text-transform:uppercase;letter-spacing:0.14em;white-space:nowrap;position:relative;z-index:1}
+/* TOOLS */
+.tools-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.tool-card{padding:22px;background:var(--surface);border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;gap:12px;transition:all 180ms;position:relative;overflow:hidden}
+.tool-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent-color,var(--brand));transform:translateY(-3px);transition:transform 180ms}
+.tool-card:hover{transform:translateY(-2px);box-shadow:0 12px 30px oklch(0 0 0/0.08)}
+.tool-card:hover::before{transform:translateY(0)}
+.tool-glyph{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:var(--accent-soft,var(--brand-soft));color:var(--accent-ink,var(--brand-ink));font-size:20px;font-family:'Instrument Serif',serif}
+.tool-tool{font-size:16px;font-weight:600;color:var(--ink);letter-spacing:-0.005em}
+.tool-tarea{font-size:13.5px;color:var(--ink-soft);line-height:1.45;flex:1}
+.tool-uso{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.08em;padding-top:10px;border-top:1px dashed var(--border)}
+/* FREE TOOLS */
+.free-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.free-card{padding:20px;background:var(--surface);border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;gap:10px;transition:all 180ms}
+.free-card:hover{transform:translateY(-2px);box-shadow:0 12px 30px oklch(0 0 0/0.08);border-color:var(--ink)}
+.free-card-name{font-size:16px;font-weight:600;color:var(--ink)}
+.free-card-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:10px;padding:3px 8px;background:color-mix(in oklab,var(--brand) 10%,transparent);color:var(--brand-ink);border-radius:6px;letter-spacing:0.04em;align-self:flex-start}
+.free-card-desc{font-size:13px;color:var(--ink-soft);line-height:1.45;flex:1}
+.free-link{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;color:var(--brand-ink);text-decoration:none;padding:7px 12px;border:1px solid var(--border);border-radius:7px;transition:all 150ms;width:fit-content}
+.free-link:hover{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 /* STEPS */
-.steps{display:flex;background:#fff;border:1px solid var(--borde);border-radius:10px;overflow:hidden;margin-bottom:20px}
-.step{flex:1;padding:10px 14px;text-align:center;font-size:11px;color:var(--gris);border-right:1px solid var(--borde)}
-.step:last-child{border-right:none}
-.step.activo{background:var(--verde-claro);color:var(--verde-osc);font-weight:600}
-.step.hecho{background:#f0fdf4;color:#166534}
-.step-n{display:block;font-size:16px;font-weight:700;margin-bottom:1px}
-.seccion{display:none}.seccion.visible{display:block}
-
-/* DROPZONE */
-.dropzone{border:2px dashed #d6d3d1;border-radius:10px;background:#fff;padding:20px;text-align:center;transition:.15s;margin-bottom:10px}
-.dropzone.activa{border-color:var(--verde);background:var(--verde-claro)}
-.dropzone p{font-size:13px;color:#57534e}
-.botones-drop{margin-top:10px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-
-/* BOTONES */
-.btn{cursor:pointer;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;border:1px solid transparent;transition:.12s;font-family:Arial,sans-serif}
-.btn-p{background:var(--verde);color:#fff}.btn-p:hover{background:var(--verde-osc)}
-.btn-s{background:#fff;border-color:#d6d3d1;color:#44403c}.btn-s:hover{background:#fafaf9}
-.btn-verde{background:#fff;border-color:var(--verde);color:var(--verde-osc);width:100%;margin-top:10px;padding:10px}.btn-verde:hover{background:var(--verde-claro)}
-.btn-azul{background:#1d4ed8;color:#fff;width:100%;margin-top:10px;padding:11px;font-size:14px}.btn-azul:hover{background:#1e3a8a}
-.btn-gray{background:#fff;border-color:#d6d3d1;color:#44403c;width:100%;margin-top:8px}.btn-gray:hover{background:#fafaf9}
-.btn-pdf{background:#dc2626;color:#fff;width:100%;padding:12px;font-size:15px;margin-top:10px}.btn-pdf:hover{background:#b91c1c}
-.btn-add{background:#f0fdf4;border:1.5px dashed var(--verde);color:var(--verde-osc);width:100%;margin-top:8px;padding:10px;font-size:13px;font-weight:600}.btn-add:hover{background:var(--verde-claro)}
-.btn-del{background:#fef2f2;border:1px solid #fecaca;color:var(--rojo);padding:5px 10px;font-size:12px;border-radius:6px;cursor:pointer;font-family:Arial,sans-serif}
-
-/* ALERTAS */
-.alerta{border-radius:10px;padding:12px 14px;font-size:13px;border:1px solid;margin-bottom:14px}
-.alerta-error{background:var(--rojo-claro);border-color:#fecaca;color:var(--rojo)}
-.alerta-ok{background:var(--verde-claro);border-color:#a7f3d0;color:var(--verde-osc)}
-.alerta-ojo{background:var(--ambar-claro);border-color:#fcd34d;color:var(--ambar)}
-.alerta-info{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8}
-
-/* TARJETAS */
-.tarjeta{background:#fff;border:1px solid var(--borde);border-radius:10px;padding:14px;margin-bottom:14px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
-.tarjeta h2{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--verde-osc);font-weight:700;margin-bottom:10px}
-.nombre-arch{margin-top:6px;font-size:11px;color:var(--gris);font-family:monospace}
-
-/* TABLA IMPUESTOS RESUMEN */
-table.imp{width:100%;border-collapse:collapse;font-size:12px}
-table.imp th{font-size:10px;color:var(--gris);font-weight:500;text-align:right;padding-bottom:5px}
-table.imp th:first-child{text-align:left}
-table.imp td{padding:5px 0;border-top:1px solid #f5f5f4;text-align:right;font-family:monospace;font-size:11px}
-table.imp td:first-child{text-align:left;font-family:Arial,sans-serif}
-table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
-.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600}
-.pv{background:#d1fae5;color:#065f46}.pa{background:#fef3c7;color:#92400e}.pr{background:#fee2e2;color:#b91c1c}
-.neg{color:#b91c1c}
-
-/* FACTURAS AGREGADAS */
-.facturas-lista{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
-.factura-item{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
-.factura-item.pendiente{border-color:#fcd34d;background:#fffbeb}
-.factura-num{font-size:11px;font-weight:700;color:var(--verde-osc);background:var(--verde-claro);padding:2px 8px;border-radius:999px;flex-shrink:0}
-.factura-info{flex:1;min-width:0}
-.factura-nombre{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.factura-detalle{font-size:11px;color:var(--gris);margin-top:1px}
-.factura-monto{font-size:13px;font-weight:700;font-family:monospace;flex-shrink:0}
-
-/* FORMULARIO */
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media(max-width:600px){.grid2{grid-template-columns:1fr}}
-.campo{display:flex;flex-direction:column;gap:3px}
-.campo label{font-size:11px;font-weight:700;color:#57534e;text-transform:uppercase;letter-spacing:.05em}
-.campo label .req{color:var(--rojo)}
-.campo select,.campo input[type=text],.campo input[type=date]{
-  border:1px solid #d6d3d1;border-radius:7px;padding:8px 10px;font-size:13px;
-  background:#fff;color:#1c1917;width:100%;font-family:Arial,sans-serif;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a8a29e' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 8px center;appearance:none;-webkit-appearance:none;
+.steps-wide{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;position:relative}
+.step-col{padding:28px 24px 30px;background:var(--surface);border:1px solid var(--border);border-radius:16px;position:relative;transition:all 180ms}
+.step-col:hover{border-color:var(--brand);box-shadow:0 10px 30px oklch(0.52 0.2 262/0.1)}
+.step-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.step-num{width:36px;height:36px;border-radius:10px;background:var(--ink);color:var(--bg);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500}
+.step-t{font-family:'Instrument Serif',serif;font-size:30px;line-height:1;letter-spacing:-0.02em;font-style:italic;color:var(--brand)}
+.step-d{font-size:14px;color:var(--ink-soft);line-height:1.55;margin-bottom:18px}
+.step-ex-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px}
+.step-ex{font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.55;color:var(--ink);padding:14px 16px;background:var(--surface-2);border-radius:10px;border-left:3px solid var(--brand)}
+/* PROMPTS */
+.prompts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.prompt-card{padding:26px;background:var(--surface);border:1px solid var(--border);border-radius:16px;display:flex;flex-direction:column;transition:all 180ms}
+.prompt-card:hover{border-color:var(--ink);box-shadow:0 10px 30px oklch(0 0 0/0.07)}
+.prompt-card-head{display:flex;justify-content:space-between;align-items:start;gap:14px;margin-bottom:16px}
+.prompt-title{font-family:'Instrument Serif',serif;font-size:24px;line-height:1.1;letter-spacing:-0.01em;margin:0;flex:1}
+.prompt-code{font-family:'JetBrains Mono',monospace;font-size:10px;padding:4px 9px;background:var(--surface-2);color:var(--ink-mute);border-radius:6px;letter-spacing:0.06em}
+.prompt-body{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.6;padding:16px;background:var(--ink-dark);color:oklch(0.85 0.02 250);border-radius:10px;white-space:pre-wrap;flex:1;margin-bottom:16px;max-height:180px;overflow:hidden;position:relative}
+.prompt-body::after{content:'';position:absolute;left:0;right:0;bottom:0;height:50px;background:linear-gradient(transparent,var(--ink-dark));pointer-events:none}
+.prompt-actions{display:flex;gap:8px}
+.btn-copy{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--bg);border:none;padding:10px 16px;border-radius:8px;font:inherit;font-size:12.5px;font-weight:500;cursor:pointer;transition:all 150ms}
+.btn-copy:hover{background:var(--brand)}
+.btn-copy.copied{background:var(--success)}
+/* DEPARTMENTS */
+.deps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.dep-card{padding:26px;background:var(--surface);border:1px solid var(--border);border-radius:16px;transition:all 180ms;display:flex;flex-direction:column;min-height:260px;position:relative;overflow:hidden;cursor:pointer}
+.dep-card:hover{transform:translateY(-2px);box-shadow:0 14px 40px oklch(0 0 0/0.08)}
+.dep-card::after{content:'';position:absolute;width:140px;height:140px;top:-40px;right:-40px;border-radius:50%;background:var(--dep-color);opacity:0.08;transition:transform 400ms}
+.dep-card:hover::after{transform:scale(1.3)}
+.dep-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;position:relative}
+.dep-glyph{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:var(--dep-color);color:white;font-size:20px}
+.dep-count{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-mute)}
+.dep-title{font-family:'Instrument Serif',serif;font-size:24px;line-height:1.1;letter-spacing:-0.01em;margin-bottom:14px}
+.dep-list{list-style:none;margin:0;padding:0;flex:1}
+.dep-list li{padding:10px 0;border-top:1px dashed var(--border);font-size:13.5px}
+.dep-list li:first-child{border-top:none}
+.dep-l-t{color:var(--ink);font-weight:500;display:block;margin-bottom:2px}
+.dep-l-d{color:var(--ink-mute);font-size:12px}
+.dep-open{margin-top:auto;padding-top:14px;font-size:12.5px;font-weight:500;color:var(--brand-ink);display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;letter-spacing:0.04em}
+/* IT TEASER */
+.it-teaser{display:grid;grid-template-columns:1.1fr 1fr;gap:60px;padding:56px;background:linear-gradient(135deg,var(--ink-dark) 0%,oklch(0.2 0.1 262) 60%,oklch(0.3 0.15 280) 100%);color:var(--bg);border-radius:24px;align-items:center;position:relative;overflow:hidden;box-shadow:0 30px 80px oklch(0.2 0.1 262/0.25)}
+.it-teaser::before{content:'';position:absolute;top:0;right:0;bottom:0;width:50%;background:radial-gradient(circle at 70% 50%,oklch(0.7 0.2 45/0.2),transparent 50%),radial-gradient(circle at 30% 80%,oklch(0.55 0.2 300/0.3),transparent 60%);pointer-events:none}
+.it-teaser-label{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;background:oklch(1 0 0/0.08);border:1px solid oklch(1 0 0/0.15);border-radius:999px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--brand-2);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:22px}
+.it-teaser-title{font-family:'Instrument Serif',serif;font-size:clamp(40px,5vw,62px);line-height:0.98;letter-spacing:-0.025em;margin:0 0 20px}
+.it-teaser-title em{font-style:italic;background:linear-gradient(135deg,var(--brand-2),oklch(0.82 0.12 70));-webkit-background-clip:text;background-clip:text;color:transparent}
+.it-teaser-body{font-size:16px;line-height:1.55;color:oklch(0.88 0.02 250);max-width:44ch;margin-bottom:30px}
+.btn-glow{display:inline-flex;align-items:center;gap:10px;padding:14px 24px;background:var(--bg);color:var(--ink);border:none;border-radius:10px;font:inherit;font-size:14px;font-weight:500;cursor:pointer;transition:all 180ms;box-shadow:0 0 0 4px oklch(1 0 0/0.1)}
+.btn-glow:hover{transform:translateY(-1px);box-shadow:0 0 0 6px oklch(1 0 0/0.15),0 10px 30px oklch(0 0 0/0.2)}
+.it-teaser-side{display:flex;flex-direction:column;gap:8px;position:relative}
+.it-mod-chip{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:oklch(1 0 0/0.05);border:1px solid oklch(1 0 0/0.1);border-radius:10px;font-size:14px;color:var(--bg);backdrop-filter:blur(8px);transition:all 180ms}
+.it-mod-chip:hover{background:oklch(1 0 0/0.1);transform:translateX(4px)}
+.it-mod-chip-left{display:flex;align-items:center;gap:12px}
+.it-mod-chip-n{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--brand-2);background:oklch(0.65 0.15 45/0.15);padding:3px 7px;border-radius:5px}
+.it-mod-chip-c{color:oklch(0.75 0.02 250);font-size:12px;font-family:'JetBrains Mono',monospace}
+/* CFDI PAGE */
+.cfdi-hero{border-bottom:1px solid var(--border);background:radial-gradient(60% 70% at 20% 30%,oklch(0.6 0.15 150/0.1),transparent 60%),radial-gradient(50% 60% at 85% 70%,oklch(0.55 0.16 262/0.08),transparent 60%),var(--bg)}
+.cfdi-hero-inner{max-width:1200px;margin:0 auto;padding:56px 40px 48px}
+.cfdi-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.cfdi-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.06em}
+.cfdi-pill-family{background:color-mix(in oklab,var(--brand) 10%,transparent);color:var(--brand-ink);border:1px solid color-mix(in oklab,var(--brand) 20%,transparent)}
+.cfdi-pill-privacy{background:color-mix(in oklab,var(--success) 10%,transparent);color:oklch(0.38 0.14 150);border:1px solid color-mix(in oklab,var(--success) 20%,transparent)}
+.cfdi-privacy-dot{width:5px;height:5px;border-radius:50%;background:var(--success)}
+.cfdi-meta{display:grid;grid-template-columns:1fr auto;gap:40px;align-items:end;margin-top:28px}
+.cfdi-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.cfdi-badge{font-family:'JetBrains Mono',monospace;font-size:10px;padding:4px 10px;border-radius:6px;background:var(--surface-2);color:var(--ink-mute);border:1px solid var(--border)}
+.cfdi-frame-wrap{max-width:1200px;margin:0 auto;padding:32px 40px 60px}
+.cfdi-frame{width:100%;height:82vh;border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 8px 32px oklch(0 0 0/0.08)}
+.cfdi-frame iframe{width:100%;height:100%;border:0;display:block}
+@media(max-width:980px){.cfdi-hero-inner{padding:40px 20px 32px}.cfdi-frame-wrap{padding:20px 20px 40px}.cfdi-meta{grid-template-columns:1fr;gap:16px}}
+/* FOOTER */
+.footer{padding:40px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-mute);letter-spacing:0.06em;flex-wrap:wrap;gap:16px}
+.footer strong{color:var(--ink);font-weight:500}
+/* AREA PAGE */
+.area-page{max-width:1200px;margin:0 auto;padding:40px 40px 100px}
+.area-back{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:var(--surface);font-size:13px;color:var(--ink-soft);cursor:pointer;font:inherit;transition:all 150ms;margin-bottom:40px}
+.area-back:hover{border-color:var(--ink);color:var(--ink)}
+.area-header{margin-bottom:50px}
+.area-eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.14em;color:var(--brand);margin-bottom:12px;display:block}
+.area-title-big{font-family:'Instrument Serif',serif;font-size:clamp(44px,6vw,72px);line-height:0.98;letter-spacing:-0.03em;margin:0 0 14px}
+.area-desc-text{font-size:17px;color:var(--ink-soft);line-height:1.55;max-width:50ch}
+.area-prompts{display:flex;flex-direction:column;gap:16px}
+.ap-card{padding:30px;background:var(--surface);border:1px solid var(--border);border-radius:18px;transition:all 180ms}
+.ap-card:hover{box-shadow:0 12px 40px oklch(0 0 0/0.08)}
+.ap-top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:18px}
+.ap-meta{}
+.ap-num{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px}
+.ap-title{font-family:'Instrument Serif',serif;font-size:28px;line-height:1.05;letter-spacing:-0.02em;margin-bottom:6px}
+.ap-desc{font-size:14px;color:var(--ink-soft);line-height:1.5}
+.ap-box{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.7;padding:20px;background:var(--ink-dark);color:oklch(0.85 0.02 250);border-radius:12px;white-space:pre-wrap;margin-bottom:14px}
+/* INFOTOOLS PAGE */
+.it-page-hero{border-bottom:1px solid var(--border);background:radial-gradient(60% 70% at 20% 20%,oklch(0.7 0.15 180/0.1),transparent 60%),radial-gradient(50% 60% at 85% 80%,oklch(0.65 0.18 45/0.12),transparent 60%),var(--bg)}
+.it-page-hero-inner{max-width:1200px;margin:0 auto;padding:60px 40px}
+.it-modules{max-width:1200px;margin:0 auto;padding:60px 40px 80px}
+.it-mod-section{padding:48px 0;border-top:1px solid var(--border)}
+.it-mod-section:last-child{border-bottom:1px solid var(--border)}
+.it-mod-head{display:grid;grid-template-columns:auto 1fr auto;gap:28px;align-items:start;margin-bottom:28px}
+.it-mod-tag{display:flex;flex-direction:column;align-items:center;padding:14px 16px;background:var(--mod-color);color:white;border-radius:14px;min-width:88px;box-shadow:0 6px 18px var(--mod-shadow,oklch(0 0 0/0.15))}
+.it-mod-tag-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;opacity:0.8}
+.it-mod-tag-num{font-family:'Instrument Serif',serif;font-size:34px;font-style:italic;line-height:1;margin-top:2px}
+.it-mod-title{font-family:'Instrument Serif',serif;font-size:clamp(30px,3.2vw,40px);line-height:1.05;letter-spacing:-0.02em;margin:0 0 10px}
+.it-mod-desc{color:var(--ink-soft);font-size:15.5px;line-height:1.5;max-width:60ch;margin:0}
+.it-mod-meta{text-align:right;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;white-space:nowrap}
+.it-mod-meta-v{font-family:'Instrument Serif',serif;font-size:22px;line-height:1}
+.it-mod-meta-v span{color:var(--ink-mute);font-size:14px}
+.it-mod-meta-k{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.1em;margin-top:4px}
+.it-lessons{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px}
+.it-lesson{display:grid;grid-template-columns:1fr auto;gap:14px;padding:16px 18px;background:var(--surface);border:1px solid var(--border);border-radius:12px;align-items:center;cursor:pointer;transition:all 160ms}
+.it-lesson:hover{border-color:var(--mod-color);transform:translateY(-1px);box-shadow:0 8px 20px oklch(0 0 0/0.06)}
+.it-lesson-title{font-size:14px;line-height:1.35;color:var(--ink);font-weight:500}
+.it-lesson-code{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-mute);margin-right:8px}
+.it-lesson-right{display:flex;align-items:center;gap:10px}
+.it-lesson-dur{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-mute)}
+.it-lesson-play{width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;background:var(--surface-2);border:none;border-radius:50%;color:var(--ink);cursor:pointer;transition:all 150ms;flex-shrink:0}
+.it-lesson:hover .it-lesson-play{background:var(--mod-color);color:white}
+/* MODAL */
+.modal-scrim{position:fixed;inset:0;background:oklch(0.1 0.015 250/0.75);display:flex;align-items:center;justify-content:center;z-index:100;padding:40px;backdrop-filter:blur(8px);animation:fadeIn 180ms}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--bg);border-radius:18px;max-width:1000px;width:100%;overflow:hidden;animation:popIn 220ms cubic-bezier(.2,.8,.3,1);box-shadow:0 40px 80px oklch(0 0 0/0.3)}
+@keyframes popIn{from{transform:translateY(16px) scale(0.97);opacity:0}to{transform:none;opacity:1}}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid var(--border)}
+.modal-title{font-family:'Instrument Serif',serif;font-size:24px;margin:0;letter-spacing:-0.01em}
+.modal-close{background:var(--surface-2);border:none;font-size:18px;cursor:pointer;color:var(--ink-soft);width:34px;height:34px;border-radius:10px}
+.modal-close:hover{background:var(--ink);color:var(--bg)}
+.modal-video{aspect-ratio:16/9;width:100%;background:black}
+.modal-video iframe{width:100%;height:100%;border:0;display:block}
+/* TOAST */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);padding:12px 20px;background:var(--ink-dark);color:var(--bg);border-radius:999px;font-size:13px;z-index:50;animation:toastAnim 1.8s ease forwards;font-family:'Geist',sans-serif;box-shadow:0 10px 30px oklch(0 0 0/0.25);display:inline-flex;align-items:center;gap:8px}
+.toast::before{content:'✓';color:var(--success)}
+@keyframes toastAnim{0%{opacity:0;transform:translate(-50%,10px)}15%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-6px)}}
+/* RESPONSIVE */
+@media(max-width:980px){
+  .topbar{padding:12px 20px;flex-wrap:wrap;gap:10px}.topbar-right{display:none}
+  .hero{padding:50px 20px 40px}.hero-stats{grid-template-columns:repeat(2,1fr)}
+  .page{padding:0 20px 60px}.section{padding:50px 0}
+  .section-head{grid-template-columns:1fr;gap:18px;margin-bottom:28px}
+  .tools-grid{grid-template-columns:1fr 1fr}.free-grid{grid-template-columns:1fr 1fr}
+  .steps-wide{grid-template-columns:1fr 1fr}.prompts-grid{grid-template-columns:1fr}
+  .deps-grid{grid-template-columns:1fr}.it-teaser{grid-template-columns:1fr;padding:36px;gap:30px}
+  .privacy{grid-template-columns:auto 1fr;padding:24px;gap:16px}.privacy-tag{grid-column:2;justify-self:start}
+  .it-mod-head{grid-template-columns:auto 1fr;gap:16px}.it-mod-meta{grid-column:1/-1}
+  .it-lessons{grid-template-columns:1fr}.area-page{padding:20px 20px 60px}
+  .it-page-hero-inner{padding:40px 20px}.it-modules{padding:40px 20px 60px}.nav{flex-wrap:wrap}
 }
-.campo input[type=text],.campo input[type=date]{background-image:none}
-.campo select:focus,.campo input:focus{outline:none;border-color:var(--verde);box-shadow:0 0 0 3px rgba(4,120,87,.1)}
-
-/* SEARCHABLE DROPDOWN */
-.sw{position:relative}
-.sw .dd{position:absolute;top:100%;left:0;right:0;max-height:200px;overflow-y:auto;
-  background:#fff;border:1px solid var(--verde);border-top:none;border-radius:0 0 7px 7px;
-  z-index:200;display:none;box-shadow:0 4px 12px rgba(0,0,0,.1)}
-.sw .dd.open{display:block}
-.sw .dd li{padding:8px 10px;font-size:13px;cursor:pointer;list-style:none}
-.sw .dd li:hover,.sw .dd li.sel{background:var(--verde-claro);color:var(--verde-osc)}
-.sw .dd li.nm{color:var(--gris);cursor:default;font-style:italic}
-
-/* CAMPO GASTO POR FILA */
-.fila-gasto{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px;margin-bottom:8px}
-.fila-gasto-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.fila-gasto-titulo{font-size:12px;font-weight:700;color:var(--verde-osc)}
-
-/* ═══════════ VALE IMPRIMIBLE ═══════════ */
-#vale-container{display:none;margin-top:16px}
-@media print{
-  .app{display:none!important}
-  #vale-container{display:block!important;margin:0;padding:0}
-  body{background:white}
-  @page{size:letter landscape;margin:8mm}
-}
-.vale{
-  width:100%;background:white;font-family:Arial,sans-serif;font-size:7pt;
-  color:#161616;margin:0 auto;padding:5mm;
-}
-.vh{display:grid;grid-template-columns:38mm 1fr 38mm;gap:2mm;margin-bottom:2mm;align-items:center}
-.vh-logo img{width:100%;display:block}
-.vh-centro{text-align:center}
-.vh-empresa{font-size:10.5pt;font-weight:700;margin-bottom:1mm}
-.vh-tipo{font-size:9.5pt;font-weight:700}
-.vsep{border-top:2px solid #161616;margin:1.5mm 0}
-.vsep-firmas{border-top:3px solid #161616;margin:2mm 0 0}
-
-/* TABLA PRINCIPAL DEL VALE */
-.vtable{width:100%;border-collapse:collapse;font-size:6pt;table-layout:fixed}
-.vtable th,.vtable td{border:0.5px solid #888;padding:0.8mm 0.6mm;vertical-align:middle}
-.vtable th{background:#C0C0C0;font-weight:700;text-align:center;font-size:5.5pt}
-.vtable th.gc{background:#BFBFBF}
-.vtable .th-big{background:#BFBFBF;border-bottom:1px solid #888}
-.vtable td{text-align:center;font-size:6pt}
-.vtable td.der{text-align:right}
-.vtable td.izq{text-align:left}
-.vtable td.col-p{background:#D86DCD;font-weight:700;text-align:right}
-.vtable td.col-q{background:#BFBFBF;font-weight:700;text-align:right}
-.vtable td.col-r{background:#BFBFBF}
-.vtable tr.vtotal td{background:#e8e8e8;font-weight:700}
-.vtable tr.vtotal td.col-p{background:#c050b0}
-.vtable tr.vtotal td.col-q{background:#aaaaaa}
-
-/* CHEQUE */
-.vcheque{display:grid;grid-template-columns:40mm 1fr auto;gap:0;border:2px solid #161616;margin-top:1.5mm}
-.vcheque-label{padding:2mm;font-size:8.5pt;font-weight:700;text-align:center;border-right:2px solid #161616;display:flex;align-items:center;justify-content:center;line-height:1.4}
-.vcheque-nombre{padding:2mm 3mm;font-size:10pt;font-weight:700;display:flex;align-items:center;border-right:1px solid #999;flex:1}
-.vcheque-totales{padding:2mm 3mm;min-width:50mm;display:flex;flex-direction:column;justify-content:center;gap:1mm}
-.vcheque-suma-row{display:flex;justify-content:space-between;align-items:baseline;gap:2mm;font-size:7pt;font-weight:700}
-.vcheque-suma-val{font-size:10pt;font-weight:700;font-family:monospace;text-align:right}
-.vletra-box{border:1.5px solid #161616;padding:1.5mm 3mm;margin-top:1mm;text-align:center;font-size:7.5pt;font-weight:700}
-
-/* FIRMAS */
-.vfirmas-titulo{font-size:11pt;font-weight:700;text-align:center;padding:1mm 0 2mm}
-.vfirmas{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6mm;margin-top:4mm}
-.vfirma{text-align:center}
-.vfirma-label{font-size:7pt;font-weight:700;margin-bottom:1mm}
-.vfirma-linea{border-top:1px solid #161616;padding-top:1mm;margin-top:10mm}
-.vfirma-nombre{font-size:7pt;font-weight:700}
-.vfirma-cargo{font-size:6pt}
 </style>
 </head>
 <body>
-<div class="app">
-  <div class="app-header">
-    <p class="eyebrow">POMOCA-IA · Herramientas Internas · Reembolsos</p>
-    <h1>Vale de Reembolso</h1>
-    <p class="sub">Agrega una o varias facturas XML, llena los datos del gasto y descarga el vale en PDF.</p>
-  </div>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+<script type="text/babel">
+const { useState, useEffect, useCallback } = React;
 
-  <div class="steps">
-    <div class="step activo" id="step1"><span class="step-n">1</span>Facturas XML</div>
-    <div class="step" id="step2"><span class="step-n">2</span>Datos del vale</div>
-    <div class="step" id="step3"><span class="step-n">3</span>Descarga PDF</div>
-  </div>
+/* ═══════════════════════
+   DATOS
+   ═══════════════════════ */
+const HERRAMIENTAS = [
+  { tarea:'Redactar correos, reportes, analizar textos', tool:'ChatGPT', uso:'General · conversación', g:'✦', c:262, url:'https://chat.openai.com' },
+  { tarea:'Documentos largos, contratos, PDFs extensos', tool:'Claude', uso:'Documentos · análisis', g:'◎', c:180, url:'https://claude.ai' },
+  { tarea:'Notas de reuniones, resumen de grabaciones', tool:'NotebookLM', uso:'Audio → texto', g:'◐', c:150, url:'https://notebooklm.google.com' },
+  { tarea:'Presentaciones con diseño automático', tool:'Gamma', uso:'Decks automáticos', g:'▲', c:120, url:'https://gamma.app' },
+  { tarea:'Imágenes, flyers y materiales de diseño', tool:'Canva IA', uso:'Visuales desde texto', g:'◈', c:320, url:'https://canva.com' },
+];
 
-  <!-- ══ PASO 1: CARGAR XMLs ══ -->
-  <div class="seccion visible" id="sec1">
+const FREE_TOOLS = [
+  { name:'Manus', tag:'Créditos gratuitos al inicio', desc:'Agente IA que ejecuta tareas complejas paso a paso.', url:'https://manus.im/invitation/JSMP0GFTU0DJCM?utm_source=invitation&utm_medium=social&utm_campaign=copy_link' },
+  { name:'Gemini', tag:'Gratis con límite diario', desc:'Bueno para redactar, resumir y analizar. De Google.', url:'https://gemini.google.com' },
+  { name:'Copilot', tag:'Gratis en Windows/Edge', desc:'Integrado en Windows y Edge. No necesitas cuenta.', url:'https://copilot.microsoft.com' },
+  { name:'DeepSeek', tag:'Gratis con límite diario', desc:'Muy capaz para análisis y redacción. Origen chino.', url:'https://chat.deepseek.com' },
+  { name:'Grok', tag:'Gratis con límite diario', desc:'IA de X (Twitter). Acceso gratis con cuenta básica.', url:'https://grok.com' },
+  { name:'Perplexity', tag:'Gratis con límite diario', desc:'Ideal para buscar información con fuentes citadas.', url:'https://perplexity.ai' },
+  { name:'Venice', tag:'Gratis con límite diario', desc:'Privado, sin registro de conversaciones.', url:'https://venice.ai' },
+  { name:'Qwen', tag:'Gratis con límite diario', desc:'IA de Alibaba. Muy capaz para texto y análisis en español.', url:'https://chat.qwen.ai' },
+];
 
-    <div id="facturas-lista" class="facturas-lista"></div>
+const PASOS = [
+  { n:'01', t:'Rol', d:'Dile a la IA qué papel debe asumir.', ex:'«Actúa como gerente de compras con experiencia en construcción.»' },
+  { n:'02', t:'Contexto', d:'Explica la situación y quién lo lee.', ex:'«Trabajo en compras. Necesito comparar estas 3 cotizaciones para decidir cuál conviene.»' },
+  { n:'03', t:'Datos', d:'Pega la información real. Sin datos, la IA inventa.', ex:'«Aquí están las cotizaciones: [pega los datos]»' },
+  { n:'04', t:'Formato', d:'Dile cómo quieres la respuesta.', ex:'«Preséntalo en tabla con recomendación final al pie.»' },
+];
 
-    <div id="zona-agregar">
-      <div class="dropzone" id="dropzone">
-        <p id="drop-label">Arrastra el <strong>XML de la factura</strong> o</p>
-        <div class="botones-drop">
-          <label class="btn btn-p" id="lbl-xml">
-            <span id="lbl-xml-txt">Elegir archivo XML</span>
-            <input type="file" id="inputXML" accept=".xml,text/xml" style="display:none">
-          </label>
+const PROMPTS_GENERALES = [
+  { titulo:'Resumir un documento', txt:'Quiero que resumas el siguiente documento. Organiza el resumen así: (1) idea principal, (2) puntos más importantes, (3) conclusiones o acciones a tomar. Usa lenguaje simple y directo.\n\n[Pega aquí el texto del documento]' },
+  { titulo:'Redactar un correo profesional', txt:'Redacta un correo profesional con estas características:\n- Para: [nombre o puesto del destinatario]\n- Objetivo del correo: [qué quiero lograr]\n- Tono: formal y respetuoso\n- Información adicional: [cualquier dato relevante]\n\nQue sea claro, breve y termine pidiendo una respuesta o acción.' },
+  { titulo:'Acta de reunión desde notas', txt:'Eres asistente ejecutivo. Con estas notas crudas de reunión, devuélveme un acta estructurada: asistentes, temas tratados, acuerdos, próximos pasos con responsable y fecha.\n\nNotas: [pega aquí]' },
+  { titulo:'Analizar datos o Excel', txt:'Analiza los siguientes datos y dime: (1) qué tendencias o patrones ves, (2) si hay algo inusual que llame la atención, (3) qué recomendarías hacer.\n\n[Pega aquí los datos o describe la información]' },
+  { titulo:'Generar un reporte ejecutivo', txt:'Genera un reporte ejecutivo sobre el siguiente tema: [describe el tema]\n\nDebe incluir: introducción breve, puntos principales, conclusión y recomendaciones. Formato limpio, máximo una página.' },
+  { titulo:'Generar un prompt optimizado', txt:'Actúa como experto en ingeniería de prompts.\n\nQuiero crear un prompt para esta tarea: [describe lo que quieres hacer]\n\nContexto de mi trabajo: [describe tu área o puesto]\n\nDatos que voy a usar: [describe qué información vas a pegar]\n\nResultado que necesito: [describe cómo quieres que te responda]\n\nCrea un prompt optimizado que pueda usar directamente en ChatGPT.' },
+];
+
+const AREAS = [
+  { key:'compras', nombre:'Compras', emoji:'🛒', color:'oklch(0.55 0.16 45)', desc:'Cotizaciones, evaluación de proveedores y negociaciones', prompts:[
+    { t:'Comparar cotizaciones', d:'Cuando tienes varias propuestas y quieres saber cuál conviene más.', txt:'Analiza las siguientes cotizaciones y compáralas. Considera: precio total, plazo de entrega, condiciones de pago, garantías y diferencias importantes.\n\nAl final, dime cuál recomiendas y por qué. Si te falta información para decidir, indícamelo.\n\nCotizaciones:\n[Pega aquí los datos de cada cotización]' },
+    { t:'Solicitud de cotización', d:'Para pedir cotizaciones a proveedores de forma formal y completa.', txt:'Redacta una solicitud de cotización formal para enviar a un proveedor con estos datos:\n- Producto o servicio que necesito: [describe]\n- Cantidad: [cantidad]\n- Fecha límite de entrega: [fecha]\n- Condiciones de pago: [ej. 30 días]\n\nTono formal y profesional.' },
+    { t:'Evaluar a un proveedor', d:'Para revisar si un proveedor es confiable antes de una compra importante.', txt:'Ayúdame a evaluar a este proveedor. Analiza: cumplimiento de entregas, calidad, precio, servicio y riesgos. Al final dame una calificación del 1 al 10 y tu recomendación.\n\nInformación del proveedor:\n[Describe lo que sabes: historial, experiencia, referencias, datos relevantes]' },
+    { t:'Preparar negociación', d:'Para entrar a una negociación con argumentos y estrategia clara.', txt:'Ayúdame a prepararme para negociar con un proveedor. Dame:\n1. Argumentos para conseguir mejor precio o condiciones\n2. Posibles respuestas del proveedor y cómo contestarlas\n3. Alternativas que puedo mencionar para tener más poder\n4. Un rango razonable de descuento que podría pedir\n\nContexto:\n- Producto/servicio: [describe]\n- Precio ofertado: [precio]\n- Volumen de compra: [cantidad]\n- Relación con el proveedor: [nuevo / habitual]' },
+    { t:'Analizar gasto de compras', d:'Para revisar en qué se está gastando y encontrar oportunidades de ahorro.', txt:'Analiza este resumen de gasto en compras y dime:\n1. ¿Qué categorías tienen el mayor gasto?\n2. ¿Hay algún gasto inusual que llame la atención?\n3. ¿Dónde podría haber oportunidades de ahorro?\n4. ¿Qué recomendarías revisar o renegociar?\n\nDatos:\n[Pega aquí el resumen de compras o describe los montos por categoría]' },
+  ]},
+  { key:'ventas', nombre:'Ventas', emoji:'📈', color:'oklch(0.55 0.16 160)', desc:'Propuestas, seguimiento de clientes y análisis comercial', prompts:[
+    { t:'Propuesta comercial', d:'Para preparar una propuesta profesional para un cliente.', txt:'Redacta una propuesta comercial con estos datos. Que sea clara, enfocada en los beneficios para el cliente y termine con una invitación a actuar.\n\n- Cliente o empresa: [nombre]\n- Lo que ofrecemos: [describe el producto o servicio]\n- Necesidad del cliente: [qué problema quiere resolver]\n- Precio o condiciones: [si aplica]\n- Por qué somos la mejor opción: [diferenciadores]\n\nTono: profesional y orientado a resultados.' },
+    { t:'Seguimiento a cliente', d:'Para retomar contacto con alguien que no ha respondido.', txt:'Redacta un correo de seguimiento para un cliente al que ya enviamos una propuesta pero no ha respondido. Tono amable, sin presión, con una pregunta concreta para reactivar la conversación.\n\n- Nombre del cliente: [nombre]\n- Propuesta enviada: [resume en una línea]\n- Fecha en que se envió: [fecha]\n- Algo adicional que quiero mencionar: [opcional]' },
+    { t:'Responder objeción', d:'Cuando el cliente dice "está muy caro" u otra objeción.', txt:'Un cliente me dijo esto durante la negociación: "[escribe exactamente lo que dijo]"\n\nAyúdame a responder de manera profesional y empática, sin sonar defensivo. Dame 2 o 3 formas distintas de responder. El objetivo es mantener la conversación y avanzar hacia el cierre.' },
+    { t:'Analizar resultados de ventas', d:'Para revisar el desempeño del periodo y encontrar áreas de mejora.', txt:'Analiza estos resultados de ventas del periodo. Dime:\n1. ¿Cómo estuvo el desempeño respecto a la meta?\n2. ¿Qué productos o servicios tuvieron mejor y peor resultado?\n3. ¿Qué factores podrían explicar los resultados?\n4. ¿Qué recomendarías para el siguiente periodo?\n\nDatos:\n[Pega aquí: metas, ventas reales, comparativos, lo que tengas]' },
+    { t:'Preparar presentación para cliente', d:'Para estructurar bien una reunión de ventas.', txt:'Ayúdame a estructurar una presentación de ventas. Dame el esquema de puntos a cubrir, en qué orden y el mensaje clave de cada sección.\n\n- Cliente: [nombre o tipo de empresa]\n- Duración de la reunión: [ej. 30 minutos]\n- Objetivo: [ej. cerrar venta, presentar nuevo servicio]\n- Lo que vamos a presentar: [describe]\n- Lo que más le importa al cliente: [si lo sabes]' },
+  ]},
+  { key:'contabilidad', nombre:'Contabilidad', emoji:'🧾', color:'oklch(0.52 0.16 262)', desc:'Estados financieros, conciliaciones e informes ejecutivos', prompts:[
+    { t:'Interpretar estado financiero', d:'Para entender qué dice un balance o estado de resultados.', txt:'Analiza el siguiente estado financiero y explícame en lenguaje claro:\n1. ¿Cuál es la situación financiera general?\n2. ¿Qué indicadores están bien y cuáles son preocupantes?\n3. ¿Qué tendencias importantes hay?\n4. ¿Qué debería revisar con más detalle?\n\nEstado financiero:\n[Pega aquí los datos del balance o estado de resultados]' },
+    { t:'Detectar errores o inconsistencias', d:'Cuando algo no cuadra y quieres que la IA te ayude a encontrarlo.', txt:'Revisa estos registros contables y dime si encuentras errores, inconsistencias o valores que no cuadren. Señala exactamente qué está mal y cómo corregirlo. Si todo parece correcto, dímelo también.\n\nRegistros:\n[Pega aquí los datos o describe las partidas que quieres revisar]' },
+    { t:'Conciliación bancaria', d:'Para identificar diferencias entre saldo del banco y libros.', txt:'Ayúdame a preparar una conciliación bancaria. Dime:\n1. ¿Cuáles son las partidas en tránsito?\n2. ¿Hay errores que corregir?\n3. ¿Cómo queda el saldo conciliado?\n\n- Saldo según banco: [monto]\n- Saldo según libros: [monto]\n- Diferencia: [monto]\n- Transacciones pendientes: [detalla aquí]' },
+    { t:'Explicar concepto contable', d:'Cuando necesitas entender o explicarle algo contable a alguien.', txt:'Explícame este concepto contable de forma simple y con un ejemplo práctico. Quiero poder explicárselo a alguien sin formación contable.\n\nIncluye: qué es, para qué sirve y cómo aplica en una empresa constructora o inmobiliaria.\n\nConcepto: [escribe aquí el término o proceso]' },
+    { t:'Informe para directivos', d:'Para comunicar resultados financieros sin tecnicismos.', txt:'Redacta un informe ejecutivo contable con estos datos. Que sea claro para directivos que no son contadores. Incluye: resumen del periodo, indicadores clave, variaciones respecto al periodo anterior y puntos de atención.\n\nDatos del periodo:\n[Pega aquí los números o describe los resultados]\n\nPeriodo: [ej. Marzo 2025]' },
+  ]},
+  { key:'almacen', nombre:'Almacén', emoji:'📦', color:'oklch(0.55 0.14 80)', desc:'Control de inventario, entradas, salidas y reportes de materiales', prompts:[
+    { t:'Analizar niveles de inventario', d:'Para identificar materiales con exceso, escasez o movimiento irregular.', txt:'Analiza este reporte de inventario y dime:\n1. ¿Qué materiales tienen stock por debajo del mínimo?\n2. ¿Hay materiales con exceso o sin movimiento en los últimos 30 días?\n3. ¿Qué artículos deberían reabastecerse de inmediato?\n4. ¿Alguna inconsistencia o dato que llame la atención?\n\nDatos del inventario:\n[Pega aquí el listado con cantidades, mínimos y últimos movimientos]' },
+    { t:'Reporte de entradas y salidas', d:'Para documentar los movimientos del período de forma clara.', txt:'Redacta un reporte de movimientos de almacén para el período indicado. Incluye: resumen de entradas, resumen de salidas, materiales con mayor rotación y observaciones relevantes.\n\n- Período: [ej. marzo 2025]\n- Entradas del período: [describe o pega los datos]\n- Salidas del período: [describe o pega los datos]\n- Observaciones que quiero incluir: [opcional]' },
+    { t:'Detectar diferencias en conteo físico', d:'Cuando el inventario físico no cuadra con el sistema.', txt:'Compara este conteo físico contra el inventario en sistema y dime:\n1. ¿Qué artículos tienen diferencias?\n2. ¿Las diferencias son por faltante o sobrante?\n3. ¿Cuáles son las diferencias más significativas?\n4. ¿Qué posibles causas podrían explicarlo?\n\nConteo físico:\n[Pega aquí los datos del conteo]\n\nInventario en sistema:\n[Pega aquí los datos del sistema]' },
+    { t:'Solicitud de materiales', d:'Para pedir materiales a compras de forma clara y completa.', txt:'Redacta una solicitud formal de materiales para el área de compras con estos datos:\n- Solicitante: [nombre y área]\n- Obra o proyecto destino: [nombre]\n- Fecha requerida: [fecha]\n- Materiales solicitados:\n[Lista aquí cada material con cantidad y unidad de medida]\n\nTono formal. Que quede claro el motivo y la urgencia si aplica.' },
+    { t:'Organizar lista de materiales', d:'Para ordenar un listado desordenado por categoría, prioridad o uso.', txt:'Toma esta lista de materiales y organízala así:\n1. Agrúpalos por categoría (ferretería, acabados, estructura, etc.)\n2. Dentro de cada categoría, ordénalos por cantidad descendente\n3. Identifica cuáles podrían considerarse materiales críticos\n\nLista de materiales:\n[Pega aquí la lista sin orden]' },
+  ]},
+  { key:'tesoreria', nombre:'Tesorería', emoji:'💰', color:'oklch(0.55 0.16 230)', desc:'Flujo de caja, pagos, posición bancaria y proyecciones', prompts:[
+    { t:'Analizar flujo de caja', d:'Para entender entradas, salidas y posición de liquidez actual.', txt:'Analiza este flujo de caja y dime:\n1. ¿Cuál es la posición de liquidez actual?\n2. ¿Los ingresos cubren los egresos del período?\n3. ¿Hay semanas o días críticos con riesgo de déficit?\n4. ¿Qué recomendarías para mejorar la posición?\n\nDatos del flujo:\n[Pega aquí el resumen de ingresos y egresos por fecha]' },
+    { t:'Proyectar flujo a 30 días', d:'Para anticipar necesidades de liquidez en el próximo mes.', txt:'Ayúdame a proyectar el flujo de caja de los próximos 30 días. Organízalo por semana e identifica en qué momentos podría haber déficit.\n\n- Saldo inicial: [monto]\n- Ingresos esperados (con fechas aproximadas): [describe]\n- Pagos comprometidos (con fechas): [describe: nómina, proveedores, impuestos, etc.]\n- Pagos probables pero no confirmados: [describe]' },
+    { t:'Priorizar pagos pendientes', d:'Cuando hay más compromisos que liquidez disponible.', txt:'Tengo los siguientes pagos pendientes y liquidez limitada. Ayúdame a priorizarlos considerando: vencimiento, consecuencias de no pagar, impacto en operaciones y relación con el proveedor.\n\n- Liquidez disponible: [monto]\n- Pagos pendientes:\n[Lista cada uno con: destinatario, monto, fecha de vencimiento, consecuencia si no se paga]' },
+    { t:'Aviso de pago a proveedor', d:'Para notificar que un pago fue realizado o programado.', txt:'Redacta un correo formal para notificar a un proveedor sobre un pago. Tono profesional y cordial.\n\n- Proveedor: [nombre]\n- Monto pagado: [monto]\n- Fecha del pago: [fecha]\n- Número de transferencia o referencia: [referencia]\n- Banco origen: [banco]\n- Concepto del pago: [describe la factura o servicio]' },
+    { t:'Resumir posición bancaria', d:'Para consolidar saldos de múltiples cuentas en un reporte claro.', txt:'Resume esta posición bancaria de forma clara para presentarla a dirección. Incluye: saldo total consolidado, saldo por cuenta, variación respecto al período anterior y observaciones relevantes.\n\nCuentas y saldos actuales:\n[Pega aquí: banco, cuenta, saldo actual, saldo período anterior]\n\nFecha del corte: [fecha]' },
+  ]},
+  { key:'cxp', nombre:'Ctas x Pagar', emoji:'🤝', color:'oklch(0.52 0.14 300)', desc:'Gestión de facturas, vencimientos y relación con proveedores', prompts:[
+    { t:'Analizar cartera por pagar', d:'Para ver qué se debe, a quién y qué está vencido.', txt:'Analiza esta cartera de cuentas por pagar y dime:\n1. ¿Cuánto se debe en total?\n2. ¿Qué facturas están vencidas y por cuánto tiempo?\n3. ¿Cuáles son los proveedores con mayor saldo?\n4. ¿Qué pagos son urgentes para evitar consecuencias?\n\nCartera actual:\n[Pega aquí: proveedor, número de factura, monto, fecha de vencimiento]' },
+    { t:'Solicitud de prórroga de pago', d:'Para pedir más tiempo a un proveedor de forma profesional.', txt:'Redacta una carta formal para solicitar prórroga de pago a un proveedor. Tono respetuoso, sin excusas innecesarias, con fecha concreta de compromiso.\n\n- Proveedor: [nombre]\n- Monto adeudado: [monto]\n- Fecha original de vencimiento: [fecha]\n- Nueva fecha propuesta: [fecha]\n- Motivo breve (opcional): [describe si quieres mencionarlo]\n- Quién firma: [nombre y puesto]' },
+    { t:'Conciliar facturas con OC', d:'Para verificar que las facturas correspondan a lo solicitado.', txt:'Compara estas facturas recibidas contra las órdenes de compra y dime:\n1. ¿Hay facturas sin orden de compra correspondiente?\n2. ¿Hay diferencias en montos, cantidades o conceptos?\n3. ¿Alguna factura duplicada o con datos incorrectos?\n4. ¿Qué facturas están listas para procesar y cuáles tienen pendientes?\n\nFacturas recibidas:\n[Pega aquí los datos]\n\nÓrdenes de compra:\n[Pega aquí los datos]' },
+    { t:'Relación de pagos para autorización', d:'Para presentar a dirección los pagos que necesitan aprobación.', txt:'Prepara una relación de pagos lista para autorización con estos datos. Que sea clara, ordenada y con la información necesaria para que quien aprueba pueda decidir rápido.\n\nPagos a incluir:\n[Lista: proveedor, concepto, monto, fecha de vencimiento, banco a pagar]\n\nFecha de la relación: [fecha]\nElaboró: [nombre]' },
+    { t:'Responder reclamación de proveedor', d:'Cuando un proveedor reclama un pago pendiente o con retraso.', txt:'Redacta una respuesta profesional a la reclamación de un proveedor sobre un pago pendiente. Tono cordial, transparente y con compromiso concreto.\n\n- Proveedor: [nombre]\n- Qué reclama: [describe la situación]\n- Estado actual del pago: [describe: en proceso, pendiente de autorización, etc.]\n- Fecha compromiso de pago: [fecha]\n- Quién responde: [nombre y puesto]' },
+  ]},
+  { key:'rrhh', nombre:'Rec. Humanos', emoji:'👥', color:'oklch(0.55 0.14 340)', desc:'Nómina, comunicados, descripciones de puesto y gestión de personal', prompts:[
+    { t:'Descripción de puesto', d:'Para definir claramente un rol, sus responsabilidades y perfil requerido.', txt:'Redacta una descripción de puesto profesional con esta información. Que sea clara, atractiva y completa.\n\n- Nombre del puesto: [nombre]\n- Área: [área]\n- Objetivo del puesto: [describe para qué existe este rol]\n- Responsabilidades principales: [lista las actividades clave]\n- Perfil requerido (escolaridad, experiencia, habilidades): [describe]\n- Tipo de contrato y horario: [describe]\n- Empresa: Grupo Pomoca' },
+    { t:'Comunicado interno', d:'Para informar algo a los colaboradores de forma clara y profesional.', txt:'Redacta un comunicado interno para los colaboradores de Grupo Pomoca. Tono profesional, directo y cordial.\n\n- Asunto del comunicado: [describe de qué trata]\n- A quién va dirigido: [todos / área específica]\n- Mensaje principal: [qué quieres comunicar]\n- Fecha de vigencia o acción requerida: [si aplica]\n- Quién firma: [nombre y puesto]' },
+    { t:'Analizar indicadores de nómina', d:'Para revisar el gasto de nómina, variaciones y alertas del período.', txt:'Analiza estos datos de nómina del período y dime:\n1. ¿Cuál fue el gasto total y cómo se compara con el período anterior?\n2. ¿Hay variaciones inusuales en algún concepto (horas extra, bajas, altas)?\n3. ¿Qué áreas concentran mayor gasto?\n4. ¿Alguna alerta o punto de atención?\n\nDatos del período:\n[Pega aquí el resumen de nómina por área o concepto]' },
+    { t:'Carta de oferta de trabajo', d:'Para formalizar una oferta a un candidato seleccionado.', txt:'Redacta una carta de oferta de trabajo formal y profesional con estos datos:\n\n- Nombre del candidato: [nombre]\n- Puesto ofrecido: [puesto]\n- Área: [área]\n- Sueldo mensual bruto: [monto]\n- Prestaciones: [lista: IMSS, vacaciones, aguinaldo, otras]\n- Fecha de inicio propuesta: [fecha]\n- A quién reporta: [puesto del jefe directo]\n- Empresa: Grupo Pomoca / Vive Pomoca' },
+    { t:'Preguntas para entrevista', d:'Para evaluar bien a un candidato según el puesto.', txt:'Prepárame una guía de preguntas para entrevista de trabajo. Incluye preguntas técnicas, de experiencia y de competencias conductuales. Que sean preguntas abiertas que inviten al candidato a dar ejemplos concretos.\n\n- Puesto a entrevistar: [nombre del puesto]\n- Habilidades clave que quiero evaluar: [lista 3-5 habilidades]\n- Experiencia mínima requerida: [describe]\n- Algo específico que quiero explorar: [opcional]' },
+  ]},
+];
+
+const IT_MODULES = [
+  { id:'m1', nombre:'Plan Maestro', color:'#6B7280', desc:'Planificación general, control de proyectos y seguimiento maestro.', lecciones:[] },
+  { id:'m2', nombre:'Ventas CRM', color:'#1B3A6B', desc:'Gestión de clientes, prospectos, cotizaciones y pipeline comercial.', lecciones:[] },
+  { id:'m3', nombre:'Construcción', color:'#C2621A', desc:'Captura de avance, estimaciones y números generadores en campo.', lecciones:[] },
+  { id:'m4', nombre:'Abastecimientos', color:'#C0392B', desc:'Catálogos, usuarios, almacenes, compras y cuentas por pagar.', lecciones:[
+    { grupo:'Catálogos, Usuarios', t:'Administración seguridad', dur:'', yt:'fi9PqUy86dQ' },
+    { grupo:'Catálogos, Usuarios', t:'Administración catálogo', dur:'', yt:'DOGHpWBVBoU' },
+    { grupo:'Almacenes', t:'Código de barras', dur:'', yt:'nl1FEu6kWZI' },
+    { grupo:'Almacenes', t:'Inventario y almacenes', dur:'', yt:'qsHnLwEpLAM' },
+    { grupo:'Compras', t:'Ordenes de compra', dur:'', yt:'tx9ScqlP2Us' },
+    { grupo:'Compras', t:'Ordenes de compra directa a un contrato', dur:'', yt:'QFbq_l2U6_4' },
+    { grupo:'Cuentas por Pagar', t:'Cuentas por pagar', dur:'', yt:'8lqSmBlgW6E' },
+    { grupo:'Cuentas por Pagar', t:'Programación de pagos', dur:'', yt:'EeugX70NriM' },
+    { grupo:'Cuentas por Pagar', t:'Manejo repositorios CFDIs', dur:'', yt:'L-Soh6h1hw4' },
+    { grupo:'Pagos Antes de Factura', t:'Solicitud de pago antes de factura', dur:'', yt:'KINguSUvBHc' },
+  ]},
+  { id:'m5', nombre:'Contabilidad', color:'#1A6B3A', desc:'Registro de pólizas, conciliación bancaria e informes contables.', lecciones:[] },
+  { id:'m6', nombre:'Control Presupuestal', color:'#B8860B', desc:'Control presupuestal vs real por proyecto y por partida.', lecciones:[] },
+  { id:'m7', nombre:'Tableros BI', color:'#5B2181', desc:'Navegación, filtros y lectura de tableros de inteligencia de negocio.', lecciones:[] },
+  { id:'m8', nombre:'Portal del Cliente', color:'#9F1239', desc:'Acceso, consulta de avance y comunicación con el cliente final.', lecciones:[] },
+];
+
+/* ═══════════════════════
+   COMPONENTS
+   ═══════════════════════ */
+
+function App() {
+  const [page, setPage] = useState('home');
+  const [areaKey, setAreaKey] = useState(null);
+
+  useEffect(() => { window.scrollTo({top:0,behavior:'instant'}); }, [page, areaKey]);
+
+  const openArea = useCallback((key) => { setAreaKey(key); setPage('area'); }, []);
+
+  return (
+    <div className="app">
+      <Topbar page={page} setPage={setPage} areaKey={areaKey} openArea={openArea} />
+      {page === 'home' && <HomePage setPage={setPage} openArea={openArea} />}
+      {page === 'area' && <AreaPage areaKey={areaKey} setPage={setPage} />}
+      {page === 'infotools' && <InfotoolsPage />}
+      {page === 'cfdi' && <CfdiPage />}
+      <Footer />
+    </div>
+  );
+}
+
+function Topbar({ page, setPage }) {
+  const scrollTo = (id) => {
+    if (page !== 'home') { setPage('home'); setTimeout(() => document.getElementById(id)?.scrollIntoView({behavior:'smooth'}), 120); }
+    else document.getElementById(id)?.scrollIntoView({behavior:'smooth'});
+  };
+  return (
+    <header className="topbar">
+      <div className="brand" onClick={() => setPage('home')}>
+        <div className="brand-mono">P</div>
+        <div>
+          <div className="brand-name">PomocaGPT</div>
+          <div className="brand-sub">Guía interna · IA</div>
         </div>
-        <p class="nombre-arch" id="nombreArch"></p>
       </div>
-      <div id="zonaError1"></div>
-      <div id="resumenXML" style="display:none"></div>
-    </div>
-
-    <div id="zona-continuar" style="display:none">
-      <button class="btn btn-add" id="btnAgregarOtra">+ Agregar otra factura al vale</button>
-      <button class="btn btn-azul" id="btnIrPaso2">Continuar: datos del vale →</button>
-    </div>
-  </div>
-
-  <!-- ══ PASO 2: DATOS DEL VALE ══ -->
-  <div class="seccion" id="sec2">
-
-    <!-- Resumen facturas cargadas -->
-    <div class="tarjeta" id="resumenFacturas2"></div>
-
-    <div class="tarjeta">
-      <h2>Datos del responsable y empresa</h2>
-      <div class="grid2">
-        <div class="campo"><label>Responsable (quien elabora) <span class="req">*</span></label>
-          <input type="text" id="f_responsable" placeholder="Tu nombre completo"></div>
-        <div class="campo"><label>Empresa <span class="req">*</span></label>
-          <select id="f_empresa"></select></div>
-        <div class="campo"><label>Área <span class="req">*</span></label>
-          <select id="f_area"></select></div>
-        <div class="campo"><label>Oficinas <span class="req">*</span></label>
-          <select id="f_oficina"></select></div>
-        <div class="campo"><label>Presupuesto <span class="req">*</span></label>
-          <div class="sw"><input type="text" id="f_presupuesto_txt" placeholder="Buscar…" autocomplete="off">
-          <input type="hidden" id="f_presupuesto"><ul class="dd" id="dd_presupuesto"></ul></div></div>
-        <div class="campo"><label>Gerente que autoriza <span class="req">*</span></label>
-          <select id="f_gerente"></select></div>
-        <div class="campo"><label>Folio del vale</label>
-          <input type="text" id="f_folio" placeholder="001"></div>
-        <div class="campo"><label>Beneficiario del cheque <span class="req">*</span></label>
-          <div class="sw"><input type="text" id="f_beneficiario_txt" placeholder="Buscar…" autocomplete="off">
-          <input type="hidden" id="f_beneficiario"><ul class="dd" id="dd_beneficiario"></ul></div></div>
+      <nav className="nav">
+        <button className={page==='home'?'active':''} onClick={()=>setPage('home')}>Inicio</button>
+        <button onClick={()=>scrollTo('sec-herramientas')}>Herramientas</button>
+        <button onClick={()=>scrollTo('sec-prompt')}>Cómo pedir</button>
+        <button onClick={()=>scrollTo('sec-deps')}>Por área</button>
+        <button className={page==='infotools'?'active':''} onClick={()=>setPage('infotools')}>Infotools E-Learning</button>
+        <button className={page==='cfdi'?'active':''} onClick={()=>setPage('cfdi')}>Reembolsos · CFDI</button>
+      </nav>
+      <div className="topbar-right">
+        <div className="status-pill"><span className="status-dot"/>En línea</div>
       </div>
+    </header>
+  );
+}
+
+function HomePage({ setPage, openArea }) {
+  const totalPrompts = PROMPTS_GENERALES.length + AREAS.reduce((a,d)=>a+d.prompts.length,0);
+  return (
+    <>
+      <div className="hero-wrap">
+        <section className="hero">
+          <div className="hero-top">
+            <span className="hero-badge"><span className="hero-badge-dot"/>Uso interno · Pomoca</span>
+            <span className="hero-date">v 2026.04 · Abril 2026</span>
+          </div>
+          <h1 className="hero-title">La guía para usar <em>IA</em> en tu día a día.</h1>
+          <p className="hero-sub">Prompts listos, herramientas validadas y buenas prácticas. Pensada para cualquier persona del equipo — sin jerga, sin vueltas.</p>
+          <div className="hero-ctas">
+            <button className="btn-primary" onClick={()=>document.getElementById('sec-prompt')?.scrollIntoView({behavior:'smooth'})}>
+              Empezar por cómo pedir <span className="arr">→</span>
+            </button>
+            <button className="btn-secondary" onClick={()=>setPage('infotools')}>Infotools E-Learning</button>
+          </div>
+          <div className="hero-stats">
+            <div className="hero-stat"><div className="hero-stat-k">Herramientas IA</div><div className="hero-stat-v">{HERRAMIENTAS.length + FREE_TOOLS.length}</div></div>
+            <div className="hero-stat"><div className="hero-stat-k">Prompts listos</div><div className="hero-stat-v"><em>{totalPrompts}</em></div></div>
+            <div className="hero-stat"><div className="hero-stat-k">Áreas de Pomoca</div><div className="hero-stat-v">{AREAS.length}</div></div>
+            <div className="hero-stat"><div className="hero-stat-k">Módulos Infotools</div><div className="hero-stat-v">{IT_MODULES.length}</div></div>
+          </div>
+        </section>
+      </div>
+
+      <div className="page">
+        <section className="section">
+          <PrivacyCard />
+        </section>
+
+        <section className="section" id="sec-herramientas">
+          <div className="section-head">
+            <div>
+              <div className="eyebrow"><span className="eyebrow-num">01</span> Catálogo</div>
+              <h2 className="h2">Qué herramienta usar <em>para cada tarea</em>.</h2>
+            </div>
+            <p className="section-intro">No todas las IA hacen lo mismo. Aquí las que hemos validado en Pomoca. Si dudas, empieza siempre por ChatGPT o Claude.</p>
+          </div>
+          <div className="tools-grid">
+            {HERRAMIENTAS.map((h,i)=>(
+              <div key={i} className="tool-card" style={{'--accent-color':`oklch(0.55 0.15 ${h.c})`,'--accent-soft':`oklch(0.94 0.04 ${h.c})`,'--accent-ink':`oklch(0.35 0.14 ${h.c})`}}>
+                <div className="tool-glyph">{h.g}</div>
+                <div className="tool-tool">{h.tool}</div>
+                <div className="tool-tarea">{h.tarea}</div>
+                <div className="tool-uso">{h.uso}</div>
+                <a href={h.url} target="_blank" rel="noopener noreferrer" style={{marginTop:'10px',display:'inline-flex',alignItems:'center',gap:'6px',fontSize:'12.5px',fontWeight:'500',color:'var(--brand-ink)',textDecoration:'none',padding:'7px 12px',border:'1px solid var(--border)',borderRadius:'7px',transition:'all 150px',background:'var(--surface-2)'}}>Abrir →</a>
+              </div>
+            ))}
+          </div>
+
+          <div style={{marginTop:'48px'}}>
+            <div style={{marginBottom:'20px'}}>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.12em',color:'var(--ink-mute)',marginBottom:'8px'}}>¿Se acabaron tus preguntas gratis?</div>
+              <div style={{fontFamily:"'Instrument Serif',serif",fontSize:'clamp(22px,3vw,30px)',letterSpacing:'-0.02em',marginBottom:'6px'}}>Más opciones <em style={{fontStyle:'italic',color:'var(--brand)'}}>sin pagar</em>.</div>
+              <div style={{fontSize:'14px',color:'var(--ink-soft)'}}>Todas tienen plan gratuito. Los límites varían — ninguna es 100% ilimitada.</div>
+            </div>
+            <div className="free-grid">
+              {FREE_TOOLS.map((f,i)=>(
+                <div key={i} className="free-card">
+                  <div className="free-card-name">{f.name}</div>
+                  <span className="free-card-tag">{f.tag}</span>
+                  <div className="free-card-desc">{f.desc}</div>
+                  <a href={f.url} target="_blank" rel="noopener noreferrer" className="free-link">Abrir →</a>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="section" id="sec-prompt">
+          <div className="section-head">
+            <div>
+              <div className="eyebrow"><span className="eyebrow-num">02</span> Método</div>
+              <h2 className="h2">Un buen prompt en <em>cuatro pasos</em>.</h2>
+            </div>
+            <p className="section-intro">Un prompt es lo que le escribes a la IA. Cuanto más claro seas, mejor responderá. Este es el método que seguimos en Pomoca.</p>
+          </div>
+          <div className="steps-wide">
+            {PASOS.map(p=>(
+              <div key={p.n} className="step-col">
+                <div className="step-head"><div className="step-num">{p.n}</div><div className="step-t">{p.t}</div></div>
+                <div className="step-d">{p.d}</div>
+                <div className="step-ex-label">Ejemplo</div>
+                <div className="step-ex">{p.ex}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="section">
+          <div className="section-head">
+            <div>
+              <div className="eyebrow"><span className="eyebrow-num">03</span> Biblioteca</div>
+              <h2 className="h2">Prompts generales <em>listos para usar</em>.</h2>
+            </div>
+            <p className="section-intro">Copia, pega y adapta. Cambia lo que está entre corchetes por tu contexto real.</p>
+          </div>
+          <div className="prompts-grid">
+            {PROMPTS_GENERALES.map((p,i)=><PromptCard key={i} index={i+1} titulo={p.titulo} txt={p.txt} />)}
+          </div>
+        </section>
+
+        <section className="section" id="sec-deps">
+          <div className="section-head">
+            <div>
+              <div className="eyebrow"><span className="eyebrow-num">04</span> Por área</div>
+              <h2 className="h2">Prompts para <em>tu departamento</em>.</h2>
+            </div>
+            <p className="section-intro">Casos reales por área. Haz clic en la tuya para ver los prompts completos con botón de copiar.</p>
+          </div>
+          <div className="deps-grid">
+            {AREAS.map(a=>(
+              <div key={a.key} className="dep-card" style={{'--dep-color':a.color}} onClick={()=>openArea(a.key)}>
+                <div className="dep-head">
+                  <div className="dep-glyph">{a.emoji}</div>
+                  <div className="dep-count">{a.prompts.length} prompts</div>
+                </div>
+                <div className="dep-title">{a.nombre}</div>
+                <ul className="dep-list">
+                  {a.prompts.slice(0,3).map((p,i)=>(
+                    <li key={i}><span className="dep-l-t">{p.t}</span><span className="dep-l-d">{p.d}</span></li>
+                  ))}
+                </ul>
+                <div className="dep-open">Ver todos los prompts →</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="section">
+          <div className="it-teaser">
+            <div>
+              <div className="it-teaser-label">Nueva sección</div>
+              <h2 className="it-teaser-title">E-learning de <em>Infotools</em></h2>
+              <p className="it-teaser-body">Nuestro ERP, explicado paso a paso. Videos cortos organizados por módulo — desde Plan Maestro hasta Tableros BI.</p>
+              <button className="btn-glow" onClick={()=>setPage('infotools')}>Abrir Infotools E-Learning <span>→</span></button>
+            </div>
+            <div className="it-teaser-side">
+              {IT_MODULES.slice(0,5).map((m,i)=>(
+                <div key={m.id} className="it-mod-chip">
+                  <div className="it-mod-chip-left">
+                    <span className="it-mod-chip-n">M.{String(i+1).padStart(2,'0')}</span>
+                    {m.nombre}
+                  </div>
+                  <span className="it-mod-chip-c">{m.lecciones.length} videos</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </div>
+    </>
+  );
+}
+
+function PrivacyCard() {
+  return (
+    <div className="privacy">
+      <div className="privacy-icon">!</div>
+      <div className="privacy-content">
+        <h3 className="privacy-title">Privacidad primero.</h3>
+        <div className="privacy-body">
+          <strong>Nunca introduzcas datos confidenciales</strong> en herramientas de IA: datos personales de clientes, información financiera sensible, contratos, RFC de terceros o contraseñas. Si necesitas trabajar con datos reales, anonimízalos antes. La IA también comete errores — verifica siempre lo que te da.
+        </div>
+      </div>
+      <div className="privacy-tag">Regla n°1</div>
     </div>
+  );
+}
 
-    <!-- Datos por factura -->
-    <div class="tarjeta">
-      <h2>Detalles por factura</h2>
-      <div id="filas-gastos"></div>
-    </div>
-
-    <div id="zonaError2"></div>
-    <button class="btn btn-azul" id="btnGenerar">Generar vale →</button>
-    <button class="btn btn-gray" id="btnVolver1">← Volver</button>
-  </div>
-
-  <!-- ══ PASO 3: DESCARGA ══ -->
-  <div class="seccion" id="sec3">
-    <div class="alerta alerta-ok" id="alerta-paso3">✓ Vale generado correctamente.</div>
-    <button class="btn btn-pdf" onclick="window.print()">🖨 Descargar / Imprimir PDF</button>
-    <button class="btn btn-gray" id="btnNuevo" style="margin-top:10px;display:block">+ Crear otro vale</button>
-    <p style="font-size:12px;color:#78716c;margin-top:8px;text-align:center">El vale aparece abajo. Revísalo antes de imprimir.</p>
-  </div>
-
-  <p style="text-align:center;font-size:11px;color:#a8a29e;margin-top:8px">Los archivos se procesan en tu computadora. Nada se sube a ningún servidor.</p>
-</div>
-
-<!-- ══ VALE IMPRIMIBLE ══ -->
-<div id="vale-container">
-  <div class="vale" id="vale"></div>
-</div>
-
-<script>
-// ══════════════ CATÁLOGOS ══════════════
-const CAT={
-  empresas:["VIVE POMOCA, S.A. DE C.V.","CONSTRUVIVIENDA ACELERADA, S.A. DE C.V.","VALLE REAL CONSTRUCCIONES, S.A. DE C.V.","CONSTRUCCIONES ESMERALDA, S.A. DE C.V."],
-  areas:["ADMINISTRACION","CONTRALORIA","DIRECCION DE OPERACIONES","DIRECCION GENERAL","GERENCIA CAMPECHE","OBRA","OBRA ( MAQUINARIA )","POST VENTA","PROYECTOS","RECURSOS HUMANOS","SEGURIDAD INDUSTRIAL","SUBDIRECCION","VENTAS","DESPACHO LABORAL"],
-  oficinas:["CAMPECHE","CARDENAS","CORPORATIVO","EDIFICIO CARRIZAL","NACAJUCA","PALENQUE","TAMULTE","CENTRO VHSA","BOSQUES"],
-  presupuestos:["ADMON CAMP","ADMON CAR","ADMON COBRANZA","ADMON COMPRAS","ADMON CONTAB","ADMON CORP","ADMON NAC","ADMON NOMINAS","ADMON PAL","ADMON PROVEEDORES","ADMON SEG INDUST","ADMON TESORERIA","ADMON VIGILANCIA","CONTRALORIA","DIRECCION GENERAL","EDIFICIO CARRIZAL","GERENCIA CAMPECHE","GTO CONSEJEROS","GTO IND","GTO INT DE FINANCIAMIET","GTO X EXPEDIENTE","INFRA CAMP","INFRA CAR","INFRA NAC","INFRA PAL","INFRAESTRUCTURA","ISO 9000 2008","MERC VTAS","MZA 22","N/A","OBRA BSQ","OBRA CAMP","OBRA CAR","OBRA CORP","OBRA NAC","OBRA PAL","PLAN_ESTRATEGICO","PLAZA COMERCIAL","POST VENTA","POST VTA CAMP","POST VTA CAR","POST VTA NAC","POST VTA PAL","PROYECTOS","REC HUM CAMP","REC HUM CAR","REC HUM CORP","REC HUM NAC","REC HUM PAL","SEGURIDAD INDUSTRIAL","SUBDIRECCION","TRAMITES VTAS","VARIOS DEPTOS","VTAS CAMP","VTAS CAR","VTAS CORP","VTAS NAC","VTAS PAL","VTAS VHSA"],
-  partidas:["ACARREOS DE MATERIAL PARA OBRA","ACCESORIOS CELULAR","ACONDICIONAMIENTO OFICINA","ACONDICIONANIENTO DEL AREA","ACTIVACIONES","ACTUALIZACION DE SFOTWARE","ADQUISICION DE AUTO","ADQUISICION DE EQUIPO DE COMPUTO","ADQUISICION DE EQUIPO DE OFICINA","ADQUISICION DE SOFTWARE","AGUA","AGUA CEAS","AGUINALDO","ALINEAMIENTO Y # OFICIAL","ANUALIDAD INFOTOOLS","ANUNCIOS DE VANCANTES","ARENILLA PARA RELLENO","ARTICULOS DE LIMPIEZA","ASESORIA FISCAL Y JURIDICA","ASIMILADOS A SALARIOS","ASISTENCIA MEDICA","ATENCION MEDICA","AUDITORIA DE INFOTOOLS","AVALUO","AVISO DE TERMINACION DE OBRA","CAFE","CALL CENTER NUXIBA","CAPACITACION","CELULAR","CERTIFICACION DE ASESORES","COMBUSTIBLE Y LUBRICANTES","COMIDA REUNION CONSEJO","COMISION BANCARIOS X VTA TC","COMISION POR COMBISTIBLE","COMISIONES BANCARIAS","COMPENSACION","COMPRA O RENTA DE STANDS","CONSTANACIA DE NO ADEUDO","CONSTANCIA DE TRANSLADO DE DOMINIO","CONSUMO DE ALIMENTOS","CONTRATO Y MEDIDORES DE AGUA","COPIAS","CUOTA DE INSCRIPCION DE OFERTA DE VIVIENDA","CUOTA DE VERIFICACION DE OBRA","CUOTA EXTRAORDINARIA","CUOTA UNION","CUOTA Y SUSCRIPCIONES","CUOTAS DE VERIFICACION DE VIVIENDA","CUOTAS IMSS","DISENO DE CASA MUESTRA","DISENO ESTRUCTURAL DE VIVIENDA","DIVERSOS","DONATIVOS","EDECANES Y BOTARGUERO","ELABORACION / REPARACION/ LAVANDERIA BOTARGA","ELAB DE PROYECTO ARQUITECTONICO","ENERGIA ELECTRICA","ENTREGA DE MATERIAL","EQUIPAMIENTO DE PLAZA","EQUIPO DE COMPUTO","EQUIPO DE COMUNICACION","EQUIPO DE OFICINA","EQUIPO DE SEGURIDAD","EQUIPO DE SEGURIDAD INDUSTRIAL","EQUIPO DE TRABAJO","EQUIPO PARA EVENTOS","EQUIPOS DE CONTROL DE ASISTENCIA","ESPECTACULAR","ESTUDIOS VARIOS","EVENTO DE FIN DE ANO","EVENTO MOTONAUTICA","EVENTOS Y EXPOS ADICIONALES","EVENTOS Y REUNIONES CON SOCIOS","FINIQUITO","FLETES","FUMIGACION","GASTO DE AUDITORIA","GASTOS ADMINISTRATIVOS","GASTOS DE ENTREGA DE VIVIENDA","GASTOS DE ESCRITURACION DE VIVIENDA","GASTOS DE EVENTO DE VIVIENDAS","GASTOS DE FERIA","GASTOS DE OFICINA","GASTOS DE PLANEACION EJECUTIVOS","GASTOS DE PLANEACION ESTRATEGICA","GASTOS DE REPRESENTACION","GASTOS DE VIAJES Y VIATICOS","GASTOS DE VIAJE COORDINACION","GASTOS INDIRECTOS","GASTOS PLANEACION","HONORARIOS","HORAS EXTRAS","HOSPEDAJE","IMP DE TUA","IMPRESION DE FORMATOS","IMPRESION DE LONAS","IMPRESION DE MANUALES","IMPRESIONES Y COPIAS","IMPUESTO S/HOSPEDAJE","IMPUESTOS Y DERECHOS","INDEMNIZACION X LIQUIDACION DE EMPLEADO","INDEMNIZACIONES","INFRAESTRUCTURA","INSTALACION DE RED","INTREGRACION (GASTOS VARIOS)","ISO 9001-2008","ISTALACION DE INTERNET","JARDINERIA","LIBERTAD DE GRAVAMEN","LICENCIA DE CONSTRUCCION","LINTERNAS PARA CASCOS","LIQUIDACION DE EMPLEADOS","MANIOBRAS","MAQUETAS","MATERIAL APOYO GRAFICO (BANNER, LONAS)","MATERIAL IMPRESO (TRIPTICOS, VOLANTES)","MATERIAL PARA DECORACION","MATERIALES","MOBILIAR Y EQUIPO DE OFICINA","MODIFICACION AL SISTEMA INFOTOOLS","MTTO. DE AIRES ACONDICIONADOS","MTTO. DE CIMBRA","MTTO. DE CLIMAS","MTTO. DE EQUIPO DE COMPUTO","MTTO. DE MAQUINARIA Y EQUIPO PESADO","MTTO. DE MOLDE","MTTO. DE OFICINA","MTTO. DE SOFTWARE","MTTO. EQUIPO DE OFICINA","MTTO. EQUIPO DE TRANSPORTE","MTTO. PLAZA COMERCIAL","N/A","OBSEQUIOS","OFICINAS CARRIZAL","OTROS MEDIOS","PAGO DE CATASTRO","PAPELERIA Y ART. OFICINA","PAQUETERIA Y ENVIOS","PEAJES","PERIFONEO","PERIODICO","PERMISO COLOCACION DE MODULOS IMSS","PLANEACION ESTRATEGICA (GASTOS VARIOS)","POSADA (FIN DE ANO)","POSTVENTA","PRECIOS TRANSFERENCIAS","PREDIALES","PRIMAS POR CREDITO","PRODUCCION EDICION DE VIDEOS","PROG. DE SOFTWARE","PROGRAMA DE INTEGRACION","PROMOMOCION DE CASAS","PROYECTO DE CASCO","PTU","PUBLICACION SECCION AMARILLA","PUBLICIDAD DIGITAL (FACEBOOK)","PUBLICIDAD EN PRENSA","PUBLICIDAD EN RADIO","PUBLICIDAD EN TV","RADIO","RECARGOS","REGIMEN CONDOMINIO","RENTA DE BARDAS Y ROTULACION DE BARDAS","RENTA DE CASA","RENTA DE CASA MUESTRA","RENTA DE ESPACIOS PARA MODULO","RENTA DE ESPECTACULARES","RENTA DE MAQUINARIA","RENTA DE MODULOS EN PLAZA","RENTA DE MOLDE","RENTA DE OFICINA","RENTA DE SANITARIOS","RENTA DE VEHICULO","REUNIONES CON JEFES DE AREA","REUNIONES DE CONSEJO","REUNIONES DE TRABAJO","SEGURO DE AUTOMOVILES","SEGURO DE CALIDAD Y PRIMA","SEGURO DE FLETES","SEGURO DE VEHICULO","SEGUROS POR CREDITOS","SEGUROS Y FIANZAS","SENALIZADOR VIALES","SERV. LAB. CONTROL DE CALIDAD","SERVICIO ADUANAL","SERVICIO DE DESCARGA","SERVICIO DE PAQUETERIA Y ENVIO","SERVICIOS DE CONSULTORIA","SISTEMA INFOTOOLS","SISTEMA INFOTOOLS-MIZZAR","SOFTWARE (LICENCIA)","SOUVENIRS","STAND","TELEFONO CELULARES","TELEFONO E INTERNET","TELEFONO Y BAM","TELEVISION","TENENCIA","TENENCIA DE VEHICULO","TRABAJOS EN FRACCIONAMIENTO","TRABAJOS TOPOGRAFICOS","TRAMITES VARIOS","TRAMITES Y AVALUOS","TRANSPORTACION (COMBUSTIBLE)","UNIFORMES","URBANIZACION","VALORES CATRASTALES","VOLANTES Y TRIPTICOS"],
-  beneficiarios:["ADRIANA HERNANDEZ REYES","ADRIANA REYES LOPEZ","ALDO CARRILLO CRUZ","AMAIRANI GUADALUPE DOMINGUEZ ALEJO","BEATRIZ RAMIREZ GALVEZ","BRENDA NANCY FLORES BALCHE","CARLOS ALBERTO DE LOS SANTOS LOPEZ","CARLOS BERNARDO CAMPOS CASTRO","CARLOS ENRIQUE CETINA JIMENEZ","CARLOS ERIK CAMPOS CADENA","CARMEN GUADALUPE DE TILA RUIZ DOMINGUEZ","CAROLINA BRITO MIRANDA","CAROLINA GARCIA GARCIA","CLAUDIA MARCELA SOSA GONZALEZ","DANIEL PEREZ ARENAS","DANIEL RAMOS SANTIAGO","DAVID DIAZ DE LA CRUZ","DEYSI DEL CARMEN GALLEGOS JIMENEZ","DIANA RAMIREZ SOLIS","DIANEY VALDEZ RAMOS","EDISON PATINO ANTONIO","ELISANDER SANCHEZ MENDOZA","ELSY DEL CARMEN POTENCIANO RAMOS","ERIKA CANALES CUPIDO","FABIAN ALBERTO CORROY LANDERO","FABIAN JIMENEZ PEREZ","FABIOLA COLL SILVA","FERNANDO JOSE GUTIERREZ DE ALBA","FLORITA SOBERANO HERNANDEZ","FRANCISCO HERNANDEZ HERNANDEZ","GABRIEL CAMACHO CAMARA","GADIEL HERNANDEZ PEREZ","GERARDO DE JESUS SOSA CONTRERAS","GERARDO GONZALEZ GUTIERREZ","GLORIA ALICIA FRANCO ESTANOL","GLORIA LINEY SANTOS LEDESMA","GREGORIO NARVAEZ PEREZ","GUSTAVO CARRERA FALCON","GUSTAVO RAMOS MARTINEZ","HEIDI LOPEZ GARCIA","HILDA PATRICIA ALVAREZ HERNANDEZ","HUGO ENRIQUE SANCHEZ SALAZAR","IGNACIO GARCIA CARRASCO","IRMA ESTELA TESCUM MARQUEZ","ISAI CRUZ ARIAS","ISIDRO BAUTISTA MENDOZA","JANDERIK DE LOS SANTOS CORDOVA","JAVIER BAEZ CORNELIO","JAVIER DE JESUS HERNANDEZ","JAZMANY JAMIR CAMBRANIS MARIN","JESUS HUMBERTO CAHUICH CHAN","JESUS OLAN MADRIGAL","JORGE LUIS GARCIA SALVADOR","JOSE ALFREDO HERNANDEZ CONTRERAS","JOSE BELISARIO TEJERO DIAZ","JOSE BUSTAMANTE RABELO","JOSE DEL CARMEN ACOSTA RODRIGUEZ","JOSE DEONICIO ALVAREZ PEREZ","JOSE MANUEL GARCIA GARCIA","JOSE MANUEL RAMIREZ DE LA CRUZ","JOSE MATEO MONTES JACOBO","JOSE PAUL NUNEZ HERNANDEZ","JOSE RAFAEL MURUETA NOEMI","JOSE TORRES RAMON","JUAN CARLOS VELASQUEZ SANTIAGO","JUAN MANUEL GONZALEZ GALLEGOS","LEON YE YOANI","LIDIA DEL CARMEN CHUC GARCIA","LIZBETH DEL CARMEN FRIAS OLAN","LUCIA ALVAREZ MACDONELL","LUCIA ZENTELLA AGUILAR","LUIS FERNANDO LAZO TAPIA","MAGALI HERNANDEZ HERNANDEZ","MANUEL ANTONIO PEREZ JIMENEZ","MARA KRISTELL LARA SANCHEZ","MARCELA GUADALUPE YANES JIMENEZ","MARCOS OVANDO DOMINGUEZ","MARGARITA RAMIREZ CHABLE","MARIA ANTONIA LOPEZ OPORTO","MARIA CRISTINA GONZALEZ MORALES","MARIA DE JESUS GOMEZ HERNANDEZ","MARIA DEL ROSARIO FALCON CURI","MARIA DEL ROSARIO SEVERIANO HERNANDEZ","MARIA ELIZABETH LOPEZ HIPOLITO","MARIA ISABEL REYES MORALES","MARIA JOSE DE LOS MILAGRO RAMON HERNANDEZ","MARIA LOPEZ JIMENEZ","MARIANELLA ALVAREZ LUNA","MARISOL DE LA CRUZ ACOSTA","MARTIN ALONSO HERNANDEZ TOSCA","MARTIN DE LA CRUZ LOPEZ","MAYRA ALEJANDRA ALVAREZ GOMEZ","MIGUELINA PEREZ PEREZ","MINERVA DE LOS SANTOS CALCANEO SANCHEZ","MIRNA ARACELI BELLO PARADA","MOISES TRINIDAD CRUZ","NESTOR JOSUE ALCAZAR SUAREZ","OLIVA MARTINEZ VASQUEZ","ORLANDO CORDOVA GARCIA","OVET ARIAS LEON","PENSION ALIMENTICIA","PERLA CRISTHELL DE LA O ROMAN","RENE CARRILLO HERNANDEZ","RICARDO DE LA CRUZ TOSCA","RODRIGO CRUZ CRUZ","ROGER PALACIO ZURITA","ROXANA LOPEZ RODRIGUEZ","RUBEN SUAREZ OVANDO","SANDRA MORALES GUZMAN","SARAI HERNANDEZ DE LA CRUZ","SERGIO BURGOS GOMEZ","SIMBRON CARLOS PEREZ","SYLVANA PEREZ MARTINEZ","TITO MONTEJO HERNANDEZ","TORRES ELISEO LOPEZ","URIEL ULISES REYES ROQUE","URSULA RUEDA SANCHEZ","VERONICA DEL ROSARIO HERNANDEZ CRUZ","VERONICA HERNANDEZ CRUZ","VERONICA ROMAN DE LA CRUZ","VICTOR HUGO GONZALEZ GONZALEZ","WENDY DEL ROSARIO BRITO POOT","YENI DEL CARMEN LOPEZ JIMENEZ","YOSHIRA DEL CARMEN CRUZ DE LA CRUZ","YULIANA FAJARDO TORRES"],
-  gerentes:["CARLOS ALBERTO DE LOS SANTOS LOPEZ","GUSTAVO CARRERA FALCON","IRMA ESTELA TESCUM MARQUEZ","JOSE MANUEL GARCIA GARCIA","LUIS FERNANDO LAZO TAPIA","MARIA DEL ROSARIO FALCON CURI","MARIA DEL ROSARIO SEVERIANO HERNANDEZ"],
-  tiposGasto:["Viáticos","Compras","Servicios","Mantenimiento","Materiales","Combustible","Hospedaje","Transporte","Publicidad","Otros"]
-};
-const CODIGOS={"VIVE POMOCA, S.A. DE C.V.":"PM-FR-05","CONSTRUVIVIENDA ACELERADA, S.A. DE C.V.":"SG-FR-05","VALLE REAL CONSTRUCCIONES, S.A. DE C.V.":"VR-FR-05","CONSTRUCCIONES ESMERALDA, S.A. DE C.V.":"ES-FR-05"};
-const LOGO_B64="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";
-
-// ══════════════ PARSEO CFDI ══════════════
-const _n=v=>(v==null||v==="")? 0:parseFloat(v);
-const _a=(el,n)=>el?el.getAttribute(n):null;
-function _byL(r,n){const o=[];(function w(x){for(const c of x.children||[]){if(c.localName===n)o.push(c);w(c)}})(r);return o}
-const _f=(r,n)=>_byL(r,n)[0]||null;
-const _pct=t=>{const p=_n(t)*100;return p.toFixed(p%1?2:0)+"%"};
-const IMP={"001":"ISR","002":"IVA","003":"IEPS"};
-
-function parseCFDI(txt){
-  const doc=new DOMParser().parseFromString(txt,"text/xml");
-  if(doc.getElementsByTagName("parsererror").length)throw new Error("XML inválido.");
-  const comp=_byL(doc,"Comprobante")[0]||doc.documentElement;
-  if(!comp||comp.localName!=="Comprobante")throw new Error("No es un CFDI válido.");
-  const em=_f(comp,"Emisor"),re=_f(comp,"Receptor"),ti=_f(comp,"TimbreFiscalDigital");
-  const gi=[...comp.children].find(c=>c.localName==="Impuestos");
-  const scope=gi||comp;
-  const tm=new Map();
-  for(const t of _byL(scope,"Traslado")){
-    const imp=_a(t,"Impuesto"),tf=_a(t,"TipoFactor"),tasa=_a(t,"TasaOCuota")||"";
-    const k=imp+"|"+tf+"|"+tasa,cur=tm.get(k)||{impuesto:imp,tipoFactor:tf,tasa,base:0,importe:0};
-    cur.base+=_n(_a(t,"Base"));cur.importe+=_n(_a(t,"Importe"));tm.set(k,cur);
-  }
-  const rm=new Map();
-  for(const r of _byL(scope,"Retencion")){
-    const imp=_a(r,"Impuesto"),cur=rm.get(imp)||{impuesto:imp,importe:0};
-    cur.importe+=_n(_a(r,"Importe"));rm.set(imp,cur);
-  }
-  return{serie:_a(comp,"Serie"),folio:_a(comp,"Folio"),fecha:_a(comp,"Fecha"),
-    subtotal:_n(_a(comp,"SubTotal")),descuento:_n(_a(comp,"Descuento")),
-    total:_n(_a(comp,"Total")),moneda:_a(comp,"Moneda"),
-    emisor:{rfc:_a(em,"Rfc"),nombre:_a(em,"Nombre")},
-    receptor:{rfc:_a(re,"Rfc"),nombre:_a(re,"Nombre")},
-    uuid:_a(ti,"UUID"),
-    traslados:[...tm.values()].sort((a,b)=>a.impuesto.localeCompare(b.impuesto)||_n(b.tasa)-_n(a.tasa)),
-    retenciones:[...rm.values()]
+function PromptCard({ titulo, txt, index }) {
+  const [copied, setCopied] = useState(false);
+  const [toast, setToast] = useState(false);
+  const copy = () => {
+    navigator.clipboard?.writeText(txt);
+    setCopied(true); setToast(true);
+    setTimeout(()=>setCopied(false), 1800);
+    setTimeout(()=>setToast(false), 1800);
   };
+  return (
+    <>
+      <div className="prompt-card">
+        <div className="prompt-card-head">
+          <h3 className="prompt-title">{titulo}</h3>
+          <span className="prompt-code">PG-{String(index).padStart(2,'0')}</span>
+        </div>
+        <div className="prompt-body">{txt}</div>
+        <div className="prompt-actions">
+          <button className={`btn-copy${copied?' copied':''}`} onClick={copy}>
+            {copied ? '✓ Copiado' : 'Copiar prompt'}
+          </button>
+        </div>
+      </div>
+      {toast && <div className="toast">Prompt copiado</div>}
+    </>
+  );
 }
 
-function impDet(cfdi){
-  let iva=0,ieps=0,hosp=0,otros=0,retIVA=0,retISR=0;
-  for(const t of cfdi.traslados){
-    if(t.impuesto==="002") iva+=t.importe;
-    else if(t.impuesto==="003") ieps+=t.importe;
-    else hosp+=t.importe;
-  }
-  for(const r of cfdi.retenciones){
-    if(r.impuesto==="002")retIVA+=r.importe;
-    else if(r.impuesto==="001")retISR+=r.importe;
-  }
-  return{iva,ieps,hosp,otros,retIVA,retISR};
+function AreaPage({ areaKey, setPage }) {
+  const area = AREAS.find(a=>a.key===areaKey);
+  if (!area) return null;
+  return (
+    <div className="area-page">
+      <button className="area-back" onClick={()=>setPage('home')}>← Volver al inicio</button>
+      <div className="area-header">
+        <span className="area-eyebrow">{area.emoji} Departamento · Pomoca</span>
+        <div className="area-title-big">{area.nombre}</div>
+        <div className="area-desc-text">{area.desc}</div>
+      </div>
+      <div className="area-prompts">
+        {area.prompts.map((p,i)=><AreaPromptCard key={i} prompt={p} index={i+1} total={area.prompts.length} />)}
+      </div>
+    </div>
+  );
 }
 
-// ══════════════ UTILS ══════════════
-const mxn=n=>new Intl.NumberFormat("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
-const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const etiq=t=>t.tipoFactor==="Exento"?(IMP[t.impuesto]||t.impuesto)+" Exento":(IMP[t.impuesto]||t.impuesto)+" "+_pct(t.tasa);
-const dash=v=>v?mxn(v):"-";
-
-function numALetra(n){
-  const U=["","UN","DOS","TRES","CUATRO","CINCO","SEIS","SIETE","OCHO","NUEVE","DIEZ","ONCE","DOCE","TRECE","CATORCE","QUINCE","DIECISEIS","DIECISIETE","DIECIOCHO","DIECINUEVE","VEINTE"];
-  const D=["","","VEINTI","TREINTA","CUARENTA","CINCUENTA","SESENTA","SETENTA","OCHENTA","NOVENTA"];
-  const C=["","CIENTO","DOSCIENTOS","TRESCIENTOS","CUATROCIENTOS","QUINIENTOS","SEISCIENTOS","SETECIENTOS","OCHOCIENTOS","NOVECIENTOS"];
-  function c3(n){
-    if(n===100)return"CIEN";
-    const ce=Math.floor(n/100),d=Math.floor((n%100)/10),u=n%10;
-    let r=C[ce]||"";
-    const rm=n%100;
-    if(rm>0&&rm<=20)r+=(r?" ":"")+U[rm];
-    else{if(d>1)r+=(r?" ":"")+D[d]+(u>0?" Y "+U[u]:"");
-    else if(d===1)r+=(r?" ":"")+U[10+u];
-    else if(u>0)r+=(r?" ":"")+U[u];}
-    return r;
-  }
-  function miles(n){
-    if(n===0)return"";if(n===1)return"MIL";if(n<1000)return c3(n);
-    const m=Math.floor(n/1000),r=n%1000;
-    return(m===1?"MIL":(c3(m)+" MIL"))+(r>0?" "+c3(r):"");
-  }
-  const ent=Math.floor(n),cts=Math.round((n-ent)*100);
-  let txt="";
-  if(ent>=1000000){const ml=Math.floor(ent/1000000),r=ent%1000000;txt=(ml===1?"UN MILLON":(c3(ml)+" MILLONES"))+(r>0?" "+miles(r):"");}
-  else txt=miles(ent)||"CERO";
-  return"("+txt+" PESOS "+String(cts).padStart(2,"0")+"/100 M.N.)";
-}
-
-// ══════════════ ESTADO GLOBAL ══════════════
-// facturas = [{cfdi, nombre, tipoGasto, justificacion, sinComp, presupuesto_override, partida}]
-let facturas=[];
-let modoAgregar=false;  // true cuando estamos agregando la 2da, 3ra...
-
-// ══════════════ SELECTS ══════════════
-function llenaSelect(id,lista,ph="— Selecciona —"){
-  const s=document.getElementById(id);
-  s.innerHTML=`<option value="">${ph}</option>`+lista.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join("");
-}
-function initSearch(tId,hId,dId,lista){
-  const t=document.getElementById(tId),h=document.getElementById(hId),d=document.getElementById(dId);
-  if(!t||!h||!d)return;
-  const render=q=>{
-    const fl=lista.filter(v=>v.toLowerCase().includes(q.toLowerCase())).slice(0,60);
-    d.innerHTML=fl.length?fl.map(v=>`<li data-v="${esc(v)}">${esc(v)}</li>`).join(""):`<li class="nm">Sin resultados</li>`;
-    d.classList.add("open");
+function AreaPromptCard({ prompt, index, total }) {
+  const [copied, setCopied] = useState(false);
+  const [toast, setToast] = useState(false);
+  const copy = () => {
+    navigator.clipboard?.writeText(prompt.txt);
+    setCopied(true); setToast(true);
+    setTimeout(()=>setCopied(false), 1800);
+    setTimeout(()=>setToast(false), 1800);
   };
-  t.addEventListener("focus",()=>render(t.value));
-  t.addEventListener("input",()=>{h.value="";render(t.value)});
-  d.addEventListener("mousedown",e=>{const li=e.target.closest("li");if(li&&li.dataset.v){t.value=li.dataset.v;h.value=li.dataset.v;d.classList.remove("open")}});
-  document.addEventListener("click",e=>{if(!t.contains(e.target)&&!d.contains(e.target))d.classList.remove("open")});
-}
-function initSelects(){
-  llenaSelect("f_empresa",CAT.empresas);
-  llenaSelect("f_area",CAT.areas);
-  llenaSelect("f_oficina",CAT.oficinas);
-  llenaSelect("f_gerente",CAT.gerentes);
-  initSearch("f_presupuesto_txt","f_presupuesto","dd_presupuesto",CAT.presupuestos);
-  initSearch("f_beneficiario_txt","f_beneficiario","dd_beneficiario",CAT.beneficiarios);
-}
-
-// ══════════════ RENDER LISTA FACTURAS (Paso 1) ══════════════
-function renderListaFacturas(){
-  const cont=document.getElementById("facturas-lista");
-  if(!facturas.length){cont.innerHTML="";return}
-  let total=facturas.reduce((s,f)=>s+f.cfdi.total,0);
-  cont.innerHTML=facturas.map((f,i)=>{
-    const det=impDet(f.cfdi);
-    const folioCfdi=[f.cfdi.serie,f.cfdi.folio].filter(Boolean).join("-")||"—";
-    return`<div class="factura-item">
-      <span class="factura-num">#${i+1}</span>
-      <div class="factura-info">
-        <div class="factura-nombre">${esc(f.cfdi.emisor.nombre)}</div>
-        <div class="factura-detalle">Folio ${esc(folioCfdi)} · ${esc(f.nombre)}</div>
+  return (
+    <>
+      <div className="ap-card">
+        <div className="ap-top">
+          <div className="ap-meta">
+            <div className="ap-num">Prompt {index} de {total}</div>
+            <div className="ap-title">{prompt.t}</div>
+            <div className="ap-desc">{prompt.d}</div>
+          </div>
+          <button className={`btn-copy${copied?' copied':''}`} onClick={copy} style={{flexShrink:0}}>
+            {copied ? '✓ Copiado' : 'Copiar'}
+          </button>
+        </div>
+        <div className="ap-box">{prompt.txt}</div>
       </div>
-      <span class="factura-monto">${mxn(f.cfdi.total)}</span>
-      <button class="btn-del" onclick="eliminarFactura(${i})">✕</button>
-    </div>`;
-  }).join("")+`<div style="text-align:right;font-size:13px;font-weight:700;padding:6px 4px;border-top:2px solid #161616;margin-top:4px">TOTAL: ${mxn(total)}</div>`;
-
-  // Mostrar zona continuar
-  document.getElementById("zona-continuar").style.display="block";
+      {toast && <div className="toast">Prompt copiado</div>}
+    </>
+  );
 }
 
-function eliminarFactura(i){
-  facturas.splice(i,1);
-  renderListaFacturas();
-  if(facturas.length===0) document.getElementById("zona-continuar").style.display="none";
-}
+function InfotoolsPage() {
+  const [video, setVideo] = useState(null);
+  const openVideo = (l) => { if (l.yt) window.open(`https://www.youtube.com/watch?v=${l.yt}`, '_blank'); };
 
-// ══════════════ RENDER CAMPOS POR FACTURA (Paso 2) ══════════════
-function renderFilasGastos(){
-  const cont=document.getElementById("filas-gastos");
-  cont.innerHTML=facturas.map((f,i)=>{
-    const folioCfdi=[f.cfdi.serie,f.cfdi.folio].filter(Boolean).join("-")||"—";
-    const tiposOpts=CAT.tiposGasto.map(v=>`<option value="${esc(v)}" ${f.tipoGasto===v?"selected":""}>${esc(v)}</option>`).join("");
-    const partidasOpts=CAT.partidas.map(v=>`<option value="${esc(v)}" ${f.partida===v?"selected":""}>${esc(v)}</option>`).join("");
-    return`<div class="fila-gasto" id="fila-${i}">
-      <div class="fila-gasto-header">
-        <span class="fila-gasto-titulo">#${i+1} · ${esc(f.cfdi.emisor.nombre)} · Folio ${esc(folioCfdi)} · ${mxn(f.cfdi.total)}</span>
+  return (
+    <>
+      <div className="it-page-hero">
+        <div className="it-page-hero-inner">
+          <div className="hero-top" style={{marginBottom:'20px'}}>
+            <span className="hero-badge"><span className="hero-badge-dot"/>E-Learning · Infotools ERP</span>
+          </div>
+          <h1 className="hero-title" style={{fontSize:'clamp(44px,6vw,80px)',marginBottom:'16px'}}>Aprende <em>Infotools</em><br/>a tu ritmo.</h1>
+          <p className="hero-sub" style={{marginBottom:0}}>Videos cortos organizados por módulo. Empieza por donde quieras y vuelve cuando lo necesites. <strong>Estos videos son del sistema ERP — no son de IA.</strong></p>
+        </div>
       </div>
-      <div class="grid2">
-        <div class="campo"><label>Tipo de gasto <span class="req">*</span></label>
-          <select id="fg_tipo_${i}" onchange="facturas[${i}].tipoGasto=this.value">
-            <option value="">— Selecciona —</option>${tiposOpts}
-          </select></div>
-        <div class="campo"><label>Sin comprobante fiscal ($)</label>
-          <input type="text" id="fg_sincomp_${i}" value="${f.sinComp||""}" placeholder="0.00"
-            oninput="facturas[${i}].sinComp=parseFloat(this.value)||0"></div>
-        <div class="campo" style="grid-column:1/-1"><label>Justificación <span class="req">*</span></label>
-          <input type="text" id="fg_just_${i}" value="${esc(f.justificacion||"")}" placeholder="Ej: Consumo de alimentos en viaje a Monterrey"
-            oninput="facturas[${i}].justificacion=this.value"></div>
-        <div class="campo" style="grid-column:1/-1"><label>Partida presupuestada <span class="req">*</span></label>
-          <div class="sw">
-            <input type="text" id="fg_partida_txt_${i}" value="${esc(f.partida||"")}" placeholder="Buscar partida…" autocomplete="off">
-            <input type="hidden" id="fg_partida_${i}" value="${esc(f.partida||"")}">
-            <ul class="dd" id="fg_dd_partida_${i}"></ul>
-          </div></div>
+
+      <div className="it-modules">
+        {IT_MODULES.map((m,i)=>(
+          <div key={m.id} className="it-mod-section" style={{'--mod-color':m.color,'--mod-shadow':m.color+'44'}}>
+            <div className="it-mod-head">
+              <div className="it-mod-tag">
+                <div className="it-mod-tag-label">Módulo</div>
+                <div className="it-mod-tag-num">{String(i+1).padStart(2,'0')}</div>
+              </div>
+              <div>
+                <h2 className="it-mod-title">{m.nombre}</h2>
+                <p className="it-mod-desc">{m.desc}</p>
+              </div>
+              <div className="it-mod-meta">
+                <div className="it-mod-meta-v">{m.lecciones.length}<span> videos</span></div>
+                <div className="it-mod-meta-k">en este módulo</div>
+              </div>
+            </div>
+            {m.lecciones.length === 0
+              ? <div style={{padding:'20px 0',fontFamily:"'JetBrains Mono',monospace",fontSize:'12px',color:'var(--ink-mute)'}}>Videos próximamente disponibles.</div>
+              : (() => {
+                  const hasGroups = m.lecciones.some(l => l.grupo);
+                  if (!hasGroups) {
+                    return (
+                      <div className="it-lessons">
+                        {m.lecciones.map((l,j)=>(
+                          <div key={j} className="it-lesson" onClick={()=>openVideo(l)}>
+                            <div className="it-lesson-title">
+                              <span className="it-lesson-code">{String(i+1).padStart(2,'0')}.{String(j+1).padStart(2,'0')}</span>
+                              {l.t}
+                            </div>
+                            <div className="it-lesson-right">
+                              <span className="it-lesson-dur">{l.dur}</span>
+                              <button className="it-lesson-play" aria-label="ver video">
+                                <svg width="11" height="11" viewBox="0 0 10 10"><path d="M2 1l7 4-7 4V1z" fill="currentColor"/></svg>
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  }
+                  // Render with subgroups
+                  const grupos = [...new Set(m.lecciones.map(l=>l.grupo))];
+                  let globalIdx = 0;
+                  return grupos.map(g => {
+                    const items = m.lecciones.filter(l=>l.grupo===g);
+                    return (
+                      <div key={g} style={{marginBottom:'24px'}}>
+                        <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:'10px',textTransform:'uppercase',letterSpacing:'0.12em',color:'var(--mod-color)',marginBottom:'10px',fontWeight:'500',display:'flex',alignItems:'center',gap:'8px'}}>
+                          <span style={{height:'1px',width:'20px',background:'var(--mod-color)',opacity:0.4,display:'inline-block'}}/>
+                          {g}
+                        </div>
+                        <div className="it-lessons">
+                          {items.map((l,j)=>{
+                            const num = ++globalIdx;
+                            return (
+                              <div key={j} className="it-lesson" onClick={()=>openVideo(l)}>
+                                <div className="it-lesson-title">
+                                  <span className="it-lesson-code">{String(i+1).padStart(2,'0')}.{String(num).padStart(2,'0')}</span>
+                                  {l.t}
+                                </div>
+                                <div className="it-lesson-right">
+                                  {l.dur && <span className="it-lesson-dur">{l.dur}</span>}
+                                  <button className="it-lesson-play" aria-label="ver video">
+                                    <svg width="11" height="11" viewBox="0 0 10 10"><path d="M2 1l7 4-7 4V1z" fill="currentColor"/></svg>
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  });
+                })()
+            }
+          </div>
+        ))}
       </div>
-    </div>`;
-  }).join("");
 
-  // Inicializar searchable para cada partida
-  facturas.forEach((_,i)=>{
-    initSearch(`fg_partida_txt_${i}`,`fg_partida_${i}`,`fg_dd_partida_${i}`,CAT.partidas);
-    // Vincular cambio de partida al estado
-    const hid=document.getElementById(`fg_partida_${i}`);
-    if(hid){
-      const orig=hid.value;
-      const observer=new MutationObserver(()=>facturas[i].partida=hid.value);
-      observer.observe(hid,{attributes:true,attributeFilter:['value']});
-      // También monitorear por input directo
-      document.getElementById(`fg_partida_txt_${i}`).addEventListener('input',()=>{
-        if(!document.getElementById(`fg_partida_${i}`).value) facturas[i].partida="";
-      });
-    }
-  });
+      {video && (
+        <div className="modal-scrim" onClick={()=>setVideo(null)}>
+          <div className="modal" onClick={e=>e.stopPropagation()}>
+            <div className="modal-head">
+              <h3 className="modal-title">{video.t}</h3>
+              <button className="modal-close" onClick={()=>setVideo(null)}>✕</button>
+            </div>
+            <div className="modal-video">
+              {video.yt
+                ? <iframe src={`https://www.youtube-nocookie.com/embed/${video.yt}?autoplay=1&rel=0`} title={video.t} allow="autoplay; encrypted-media" allowFullScreen />
+                : <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100%',background:'#111',color:'#888',fontFamily:"'JetBrains Mono',monospace",fontSize:'13px'}}>Video próximamente disponible</div>
+              }
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
 }
 
-// ══════════════ PASO 1: LEER XML ══════════════
-function mostrarResumenXML(cfdi, nombre){
-  const solo16=cfdi.retenciones.length===0&&cfdi.traslados.length>0&&cfdi.traslados.every(t=>t.impuesto==="002"&&t.tipoFactor==="Tasa"&&_n(t.tasa)===0.16);
-  let filas=`<tr><td>Subtotal</td><td></td><td>${mxn(cfdi.subtotal)}</td></tr>`;
-  if(cfdi.descuento>0)filas+=`<tr><td class="neg">Descuento</td><td></td><td class="neg">-${mxn(cfdi.descuento)}</td></tr>`;
-  for(const t of cfdi.traslados){
-    const verde=t.impuesto==="002"&&t.tipoFactor==="Tasa"&&_n(t.tasa)===0.16;
-    filas+=`<tr><td><span class="pill ${verde?"pv":"pa"}">${esc(etiq(t))}</span></td><td style="color:#a8a29e">${mxn(t.base)}</td><td>${t.tipoFactor==="Exento"?"—":mxn(t.importe)}</td></tr>`;
-  }
-  for(const r of cfdi.retenciones)filas+=`<tr><td><span class="pill pr">Ret. ${esc(IMP[r.impuesto]||r.impuesto)}</span></td><td></td><td class="neg">-${mxn(r.importe)}</td></tr>`;
-  filas+=`<tr class="tot"><td><b>Total</b></td><td></td><td><b>${mxn(cfdi.total)}</b></td></tr>`;
-  const verd=solo16?`<div class="alerta alerta-ok" style="margin-bottom:10px">✓ <strong>IVA 16% simple.</strong></div>`:`<div class="alerta alerta-ojo" style="margin-bottom:10px">⚠ <strong>Mixto:</strong> ${cfdi.traslados.map(etiq).join(", ")}${cfdi.retenciones.length?" + ret.":""} — se capturará desglose completo.</div>`;
-  const r=document.getElementById("resumenXML");
-  r.style.display="block";
-  r.innerHTML=`${verd}<div class="tarjeta"><h2>✓ ${esc(nombre)}</h2>
-    <div style="font-size:12px;color:#57534e;margin-bottom:10px"><strong>${esc(cfdi.emisor.nombre)}</strong> · RFC ${esc(cfdi.emisor.rfc)}<br>Folio: ${esc([cfdi.serie,cfdi.folio].filter(Boolean).join("-")||"—")} · ${esc((cfdi.fecha||"").replace("T"," "))}</div>
-    <table class="imp"><thead><tr><th>Concepto</th><th>Base</th><th>Importe</th></tr></thead><tbody>${filas}</tbody></table>
-    <button class="btn btn-verde" id="btnAgregar">+ Agregar al vale</button>
-  </div>`;
-  document.getElementById("btnAgregar").onclick=()=>agregarFactura(cfdi,nombre);
-}
-
-function agregarFactura(cfdi,nombre){
-  if(facturas.length>=20){
-    document.getElementById("zonaError1").innerHTML=`<div class="alerta alerta-error">Máximo 20 facturas por vale.</div>`;
-    return;
-  }
-  facturas.push({cfdi,nombre,tipoGasto:"",justificacion:"",sinComp:0,partida:""});
-  renderListaFacturas();
-  // Limpiar para siguiente
-  document.getElementById("resumenXML").style.display="none";
-  document.getElementById("nombreArch").textContent="";
-  document.getElementById("zonaError1").innerHTML="";
-  document.getElementById("inputXML").value="";
-  // Actualizar texto del dropzone
-  document.getElementById("drop-label").innerHTML=`Arrastra el <strong>XML de otra factura</strong> o`;
-  document.getElementById("lbl-xml-txt").textContent="Elegir otro XML";
-}
-
-function procesar(txt,nombre){
-  document.getElementById("nombreArch").textContent=nombre||"";
-  document.getElementById("zonaError1").innerHTML="";
-  try{
-    const cfdi=parseCFDI(txt);
-    // Verificar duplicado por UUID
-    if(cfdi.uuid&&facturas.some(f=>f.cfdi.uuid===cfdi.uuid)){
-      document.getElementById("resumenXML").style.display="none";
-      document.getElementById("zonaError1").innerHTML=`<div class="alerta alerta-ojo">⚠ Esta factura ya fue agregada (mismo UUID).</div>`;
-      return;
-    }
-    mostrarResumenXML(cfdi,nombre);
-  }catch(e){
-    document.getElementById("resumenXML").style.display="none";
-    document.getElementById("zonaError1").innerHTML=`<div class="alerta alerta-error"><strong>No pude leer el archivo.</strong> ${esc(e.message)}</div>`;
-  }
-}
-function leerArchivo(f){if(!f)return;const r=new FileReader();r.onload=()=>procesar(r.result,f.name);r.readAsText(f)}
-
-// ══════════════ PASO 2 ══════════════
-function irPaso2(){
-  if(!facturas.length){
-    document.getElementById("zonaError1").innerHTML=`<div class="alerta alerta-error">Agrega al menos una factura.</div>`;
-    return;
-  }
-  // Resumen compacto
-  const total=facturas.reduce((s,f)=>s+f.cfdi.total,0);
-  document.getElementById("resumenFacturas2").innerHTML=
-    `<h2>${facturas.length} factura${facturas.length>1?"s":""} cargada${facturas.length>1?"s":""} · Total: ${mxn(total)}</h2>`+
-    facturas.map((f,i)=>`<div style="font-size:12px;color:#57534e;padding:3px 0">#${i+1} <strong>${esc(f.cfdi.emisor.nombre)}</strong> · ${mxn(f.cfdi.total)}</div>`).join("");
-  renderFilasGastos();
-  setStep(2);
-}
-
-function getFD(){
-  return{
-    responsable:document.getElementById("f_responsable").value.trim(),
-    empresa:document.getElementById("f_empresa").value,
-    area:document.getElementById("f_area").value,
-    oficina:document.getElementById("f_oficina").value,
-    presupuesto:document.getElementById("f_presupuesto").value,
-    beneficiario:document.getElementById("f_beneficiario").value,
-    gerente:document.getElementById("f_gerente").value,
-    folio:document.getElementById("f_folio").value.trim()||"001",
-  };
-}
-
-function validarPaso2(){
-  const fd=getFD();
-  const globales=[["responsable","Responsable"],["empresa","Empresa"],["area","Área"],
-    ["oficina","Oficinas"],["presupuesto","Presupuesto"],["beneficiario","Beneficiario"],["gerente","Gerente"]];
-  for(const[k,lbl]of globales){
-    if(!fd[k]){document.getElementById("zonaError2").innerHTML=`<div class="alerta alerta-error">Llena el campo: <strong>${lbl}</strong></div>`;return false}
-  }
-  for(let i=0;i<facturas.length;i++){
-    const f=facturas[i];
-    // Sincronizar partida desde el hidden
-    f.partida=document.getElementById(`fg_partida_${i}`)?.value||f.partida;
-    f.tipoGasto=document.getElementById(`fg_tipo_${i}`)?.value||f.tipoGasto;
-    f.justificacion=document.getElementById(`fg_just_${i}`)?.value||f.justificacion;
-    if(!f.tipoGasto){document.getElementById("zonaError2").innerHTML=`<div class="alerta alerta-error">Factura #${i+1}: selecciona el <strong>Tipo de gasto</strong>.</div>`;return false}
-    if(!f.justificacion.trim()){document.getElementById("zonaError2").innerHTML=`<div class="alerta alerta-error">Factura #${i+1}: escribe la <strong>Justificación</strong>.</div>`;return false}
-    if(!f.partida){document.getElementById("zonaError2").innerHTML=`<div class="alerta alerta-error">Factura #${i+1}: selecciona la <strong>Partida presupuestada</strong>.</div>`;return false}
-  }
-  document.getElementById("zonaError2").innerHTML="";
-  return true;
-}
-
-// ══════════════ GENERAR VALE ══════════════
-function generarVale(){
-  if(!validarPaso2())return;
-  const fd=getFD();
-  const hoy=new Date();
-  const fechaFmt=hoy.toLocaleDateString("es-MX",{day:"numeric",month:"short",year:"2-digit"}).replace(",","");
-  const codigo=CODIGOS[fd.empresa]||"SG-FR-05";
-  const logoImg=`<img src="data:image/png;base64,${LOGO_B64}" style="max-width:100%;display:block">`;
-
-  // Calcular totales por fila y totales globales
-  let sumSinComp=0,sumSubtotal=0,sumIVA=0,sumIEPS=0,sumHosp=0,sumOtros=0,sumRetIVA=0,sumRetISR=0,sumTotal=0,sumGranTotal=0;
-
-  let filasHTML="";
-  for(let i=0;i<20;i++){
-    if(i<facturas.length){
-      const f=facturas[i];
-      const det=impDet(f.cfdi);
-      const folioCfdi=[f.cfdi.serie,f.cfdi.folio].filter(Boolean).join("-")||"—";
-      const fechaFact=f.cfdi.fecha?new Date(f.cfdi.fecha).toLocaleDateString("es-MX"):"";
-      const totalRenglon=f.cfdi.subtotal+det.iva+det.ieps+det.hosp+det.otros-det.retIVA-det.retISR;
-      const granTotalRenglon=totalRenglon+(f.sinComp||0);
-
-      sumSinComp+=f.sinComp||0;
-      sumSubtotal+=f.cfdi.subtotal;
-      sumIVA+=det.iva;
-      sumIEPS+=det.ieps;
-      sumHosp+=det.hosp;
-      sumOtros+=det.otros;
-      sumRetIVA+=det.retIVA;
-      sumRetISR+=det.retISR;
-      sumTotal+=totalRenglon;
-      sumGranTotal+=granTotalRenglon;
-
-      filasHTML+=`<tr>
-        <td>${i+1}</td>
-        <td style="font-size:5pt">${esc(fechaFact)}</td>
-        <td style="font-size:5pt">${esc(folioCfdi)}</td>
-        <td class="izq" style="font-size:5pt">${esc(f.tipoGasto)}</td>
-        <td class="izq" style="font-size:4.5pt">${esc(f.justificacion)}</td>
-        <td style="font-size:5pt">${esc(fd.presupuesto)}</td>
-        <td style="font-size:4pt">${esc(f.partida)}</td>
-        <td class="der">${dash(f.sinComp)}</td>
-        <td class="der">${mxn(f.cfdi.subtotal)}</td>
-        <td class="der">${dash(det.iva)}</td>
-        <td class="der">${dash(det.ieps)}</td>
-        <td class="der">${dash(det.hosp)}</td>
-        <td class="der">${dash(det.otros)}</td>
-        <td class="der">${dash(det.retIVA)}</td>
-        <td class="der">${dash(det.retISR)}</td>
-        <td class="col-p">${mxn(totalRenglon)}</td>
-        <td class="col-q">${mxn(granTotalRenglon)}</td>
-        <td class="col-r"></td>
-      </tr>`;
-    } else {
-      filasHTML+=`<tr><td>${i+1}</td><td></td><td></td><td></td><td></td><td></td><td></td>
-        <td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>
-        <td class="col-p">-</td><td class="col-q">-</td><td class="col-r"></td></tr>`;
-    }
-  }
-
-  const letra=numALetra(sumGranTotal);
-
-  document.getElementById("vale").innerHTML=`
-    <div class="vh">
-      <div class="vh-logo">${logoImg}</div>
-      <div class="vh-centro">
-        <div class="vh-empresa">${esc(fd.empresa)}</div>
-        <div class="vh-tipo">COMPROBACION DE GASTOS</div>
+function CfdiPage() {
+  return (
+    <>
+      <div className="cfdi-hero">
+        <div className="cfdi-hero-inner">
+          <div className="cfdi-pills">
+            <span className="cfdi-pill cfdi-pill-family">✦ Pomoca-IA · Familia de herramientas internas</span>
+            <span className="cfdi-pill cfdi-pill-privacy"><span className="cfdi-privacy-dot"/>Tu XML nunca sale de tu computadora</span>
+          </div>
+          <div className="cfdi-meta">
+            <div>
+              <div className="eyebrow" style={{marginBottom:'12px'}}>Reembolsos · Herramienta fiscal</div>
+              <h1 className="hero-title" style={{fontSize:'clamp(36px,5vw,64px)',marginBottom:'14px'}}>Traductor de <em>CFDI</em></h1>
+              <p style={{fontSize:'17px',color:'var(--ink-soft)',lineHeight:'1.6',maxWidth:'52ch',marginBottom:'18px'}}>
+                ¿Vas a hacer un vale de reembolso? Sube aquí el XML de tu factura y te mostramos el desglose fiscal completo en lenguaje claro: IVA por tasa, IEPS y retenciones. Tu archivo se procesa en tu propia computadora y nunca se sube a ningún servidor.
+              </p>
+              <div className="cfdi-badges">
+                <span className="cfdi-badge">CFDI 3.3 y 4.0</span>
+                <span className="cfdi-badge">IVA · IEPS · ISR</span>
+                <span className="cfdi-badge">Sin backend</span>
+                <span className="cfdi-badge">Semáforo fiscal</span>
+                <span className="cfdi-badge">Copia como texto</span>
+              </div>
+            </div>
+            <div style={{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'14px',padding:'20px 24px',minWidth:'200px',textAlign:'center'}}>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:'10px',textTransform:'uppercase',letterSpacing:'0.1em',color:'var(--ink-mute)',marginBottom:'8px'}}>Herramienta</div>
+              <div style={{fontFamily:"'Instrument Serif',serif",fontSize:'32px',letterSpacing:'-0.02em',lineHeight:1}}>v 1.1</div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:'10px',color:'var(--ink-mute)',marginTop:'6px'}}>Área: Reembolsos</div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="vh-logo">${logoImg}</div>
-    </div>
-
-    <div style="display:grid;grid-template-columns:auto 1fr auto auto auto;gap:0 3mm;align-items:end;margin-bottom:1.5mm;font-size:8pt">
-      <span style="font-weight:700">RESPONSABLE:</span>
-      <span style="border-bottom:1px solid #161616;font-weight:700;padding-bottom:.5mm">${esc(fd.responsable)}</span>
-      <span style="font-weight:700;padding-left:4mm">FECHA:</span>
-      <span style="border-bottom:1px solid #161616;font-weight:700;padding:0 2mm .5mm;min-width:16mm;text-align:center">${fechaFmt}</span>
-      <span style="font-weight:700;color:#1F497D;padding-left:4mm">${codigo}</span>
-    </div>
-    <div style="display:grid;grid-template-columns:auto 1fr auto 1fr auto auto;gap:0 3mm;align-items:end;margin-bottom:2mm;font-size:8pt">
-      <span style="font-weight:700">AREA:</span>
-      <span style="border-bottom:1px solid #161616;border-top:1px solid #161616;font-weight:700;padding:.5mm 1mm">${esc(fd.area)}</span>
-      <span style="font-weight:700;padding-left:4mm">OFICINAS</span>
-      <span style="border-bottom:1px solid #161616;border-top:1px solid #161616;font-weight:700;padding:.5mm 1mm">${esc(fd.oficina)}</span>
-      <span style="font-weight:700;padding-left:4mm">FOLIO:</span>
-      <span style="border-bottom:1px solid #161616;font-weight:700;padding:0 2mm .5mm;min-width:10mm;text-align:center">${esc(fd.folio)}</span>
-    </div>
-
-    <div class="vsep"></div>
-
-    <table class="vtable">
-      <colgroup>
-        <col style="width:2.5%"><col style="width:5%"><col style="width:5.5%">
-        <col style="width:5.5%"><col style="width:12%"><col style="width:5.5%">
-        <col style="width:10%"><col style="width:4%"><col style="width:5.5%">
-        <col style="width:4%"><col style="width:4%"><col style="width:4%">
-        <col style="width:4%"><col style="width:4%"><col style="width:4%">
-        <col style="width:5.5%"><col style="width:5.5%"><col style="width:5%">
-      </colgroup>
-      <thead>
-        <tr>
-          <th rowspan="3">No.</th><th rowspan="3">FECHA</th><th rowspan="3">FACTURA</th>
-          <th rowspan="3">TIPO DE GASTOS</th><th rowspan="3">JUSTIFICACION</th>
-          <th rowspan="3">PRESUPUESTO</th><th rowspan="3">PARTIDA PRESUPUESTADA</th>
-          <th class="th-big gc" colspan="9">COMPROBANTES CON REQUISITOS</th>
-          <th rowspan="3" class="gc">TOTAL</th><th rowspan="3" class="gc">Orden de compra</th>
-        </tr>
-        <tr>
-          <th rowspan="2">SIN COMP.</th><th rowspan="2">SUBTOTAL</th>
-          <th colspan="4">IMPUESTOS</th><th colspan="2">Retenciones</th>
-          <th rowspan="2" class="gc">TOTAL</th>
-        </tr>
-        <tr><th>I.V.A.</th><th>IEPS</th><th>IMP.HOSP</th><th>OTROS</th><th>I.V.A</th><th>I.S.R</th></tr>
-      </thead>
-      <tbody>
-        ${filasHTML}
-        <tr class="vtotal">
-          <td colspan="7" style="text-align:right;font-size:5.5pt">SUMA:</td>
-          <td class="der">${dash(sumSinComp)}</td>
-          <td class="der">${mxn(sumSubtotal)}</td>
-          <td class="der">${dash(sumIVA)}</td>
-          <td class="der">${dash(sumIEPS)}</td>
-          <td class="der">${dash(sumHosp)}</td>
-          <td class="der">${dash(sumOtros)}</td>
-          <td class="der">${dash(sumRetIVA)}</td>
-          <td class="der">${dash(sumRetISR)}</td>
-          <td class="col-p">${mxn(sumTotal)}</td>
-          <td class="col-q">${mxn(sumGranTotal)}</td>
-          <td class="col-r"></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div class="vcheque">
-      <div class="vcheque-label">ELABORAR&nbsp; CHEQUE A<br>NOMBRE DE:</div>
-      <div class="vcheque-nombre">${esc(fd.beneficiario)}</div>
-      <div class="vcheque-totales">
-        <div class="vcheque-suma-row"><span>SUMA:</span><span class="vcheque-suma-val">${mxn(sumGranTotal)}</span></div>
-        <div class="vletra-box">${letra}</div>
+      <div className="cfdi-frame-wrap">
+        <div className="cfdi-frame">
+          <iframe src="./traductor.html" title="Traductor de CFDI" allow="clipboard-write" />
+        </div>
       </div>
-    </div>
-
-    <div class="vsep-firmas"></div>
-    <div class="vfirmas-titulo">FIRMAS DE AUTORIZACIÓN</div>
-    <div class="vfirmas">
-      <div class="vfirma">
-        <div class="vfirma-label">ELABORÓ</div>
-        <div class="vfirma-linea"><div class="vfirma-nombre">${esc(fd.responsable)}</div><div class="vfirma-cargo"></div></div>
-      </div>
-      <div class="vfirma">
-        <div class="vfirma-label">AUTORIZÓ</div>
-        <div class="vfirma-linea"><div class="vfirma-nombre">${esc(fd.gerente)}</div><div class="vfirma-cargo">GERENTE</div></div>
-      </div>
-      <div class="vfirma">
-        <div class="vfirma-label">VERIFICACION</div>
-        <div class="vfirma-linea"><div class="vfirma-nombre">DEPARTAMENTO DE CONTABILIDAD</div></div>
-      </div>
-      <div class="vfirma">
-        <div class="vfirma-label">AUTORIZÓ</div>
-        <div class="vfirma-linea"><div class="vfirma-nombre">MARIA DEL ROSARIO SEVERIANO HERNANDEZ</div><div class="vfirma-cargo">GERENTE</div></div>
-      </div>
-    </div>
-    <div style="margin-top:3mm;font-size:4.5pt;color:#888;border-top:.5px solid #ccc;padding-top:1mm">
-      ${facturas.map((f,i)=>`#${i+1} UUID: ${esc(f.cfdi.uuid||"—")} · RFC: ${esc(f.cfdi.emisor.rfc||"—")} · ${esc(f.cfdi.emisor.nombre||"")}`).join(" &nbsp;|&nbsp; ")}
-    </div>
-  `;
-
-  document.getElementById("vale-container").style.display="block";
-  const cnt=facturas.length;
-  document.getElementById("alerta-paso3").innerHTML=`✓ <strong>Vale generado.</strong> ${cnt} factura${cnt>1?"s":""} · Total: <strong>${mxn(sumGranTotal)}</strong>. Revisa el formato abajo y descárgalo.`;
-  setStep(3);
-  setTimeout(()=>document.getElementById("vale-container").scrollIntoView({behavior:"smooth"}),100);
+    </>
+  );
 }
 
-// ══════════════ NAVEGACIÓN ══════════════
-function setStep(n){
-  document.querySelectorAll(".seccion").forEach((s,i)=>s.classList.toggle("visible",i===n-1));
-  document.querySelectorAll(".step").forEach((s,i)=>{s.classList.remove("activo","hecho");if(i+1<n)s.classList.add("hecho");else if(i+1===n)s.classList.add("activo")});
-  if(n<3)document.getElementById("vale-container").style.display="none";
-  window.scrollTo({top:0,behavior:"smooth"});
+function Footer() {
+  return (
+    <footer className="footer">
+      <div><strong>POMOCAGPT</strong> · Guía interna · Uso exclusivo Grupo Pomoca</div>
+      <div>v 2026.04 · Abril 2026</div>
+    </footer>
+  );
 }
 
-// ══════════════ RESET ══════════════
-function resetTodo(){
-  facturas=[];
-  document.getElementById("facturas-lista").innerHTML="";
-  document.getElementById("zona-continuar").style.display="none";
-  document.getElementById("resumenXML").style.display="none";
-  document.getElementById("zonaError1").innerHTML="";
-  document.getElementById("nombreArch").textContent="";
-  document.getElementById("inputXML").value="";
-  document.getElementById("drop-label").innerHTML=`Arrastra el <strong>XML de la factura</strong> o`;
-  document.getElementById("lbl-xml-txt").textContent="Elegir archivo XML";
-  document.getElementById("vale-container").style.display="none";
-  setStep(1);
-}
-
-// ══════════════ INIT ══════════════
-document.addEventListener("DOMContentLoaded",()=>{
-  initSelects();
-  const dz=document.getElementById("dropzone");
-  dz.addEventListener("dragover",e=>{e.preventDefault();dz.classList.add("activa")});
-  dz.addEventListener("dragleave",()=>dz.classList.remove("activa"));
-  dz.addEventListener("drop",e=>{e.preventDefault();dz.classList.remove("activa");leerArchivo(e.dataTransfer.files[0])});
-  document.getElementById("inputXML").addEventListener("change",e=>{leerArchivo(e.target.files[0]);e.target.value=""});
-  document.getElementById("btnAgregarOtra").addEventListener("click",()=>{
-    document.getElementById("resumenXML").style.display="none";
-    document.getElementById("zonaError1").innerHTML="";
-    document.getElementById("nombreArch").textContent="";
-    document.getElementById("inputXML").value="";
-    document.getElementById("dropzone").scrollIntoView({behavior:"smooth"});
-  });
-  document.getElementById("btnIrPaso2").addEventListener("click",irPaso2);
-  document.getElementById("btnGenerar").addEventListener("click",generarVale);
-  document.getElementById("btnVolver1").addEventListener("click",()=>setStep(1));
-  document.getElementById("btnNuevo").addEventListener("click",resetTodo);
-});
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 </script>
 </body>
 </html>
