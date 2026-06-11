@@ -110,10 +110,9 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
 /* ═══════════ VALE IMPRIMIBLE ═══════════ */
 #vale-container{display:none;margin-top:16px}
 @media print{
-  .app-header,.steps,.seccion,.btn,.alerta,#vale-container>.btn-area{display:none!important}
+  .app{display:none!important}
   #vale-container{display:block!important;margin:0;padding:0}
   body{background:white}
-  .app{padding:0;max-width:none}
   @page{size:letter landscape;margin:8mm}
 }
 .vale{
@@ -246,9 +245,10 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
 
   <!-- ══ PASO 3: DESCARGA ══ -->
   <div class="seccion" id="sec3">
-    <div class="alerta alerta-ok" id="alerta-paso3"></div>
+    <div class="alerta alerta-ok" id="alerta-paso3">✓ Vale generado correctamente.</div>
     <button class="btn btn-pdf" onclick="window.print()">🖨 Descargar / Imprimir PDF</button>
-    <button class="btn btn-gray" id="btnNuevo">Crear otro vale desde cero</button>
+    <button class="btn btn-gray" id="btnNuevo" style="margin-top:10px;display:block">+ Crear otro vale</button>
+    <p style="font-size:12px;color:#78716c;margin-top:8px;text-align:center">El vale aparece abajo. Revísalo antes de imprimir.</p>
   </div>
 
   <p style="text-align:center;font-size:11px;color:#a8a29e;margin-top:8px">Los archivos se procesan en tu computadora. Nada se sube a ningún servidor.</p>
