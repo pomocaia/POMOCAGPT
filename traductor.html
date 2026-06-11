@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Traductor de CFDI · Reembolsos</title>
+<style>
+  :root{
+    --fondo:#f5f5f4; --blanco:#ffffff; --tinta:#1c1917; --gris:#a8a29e;
+    --borde:#e7e5e4; --verde:#047857; --verde-osc:#065f46; --verde-claro:#ecfdf5;
+    --ambar:#b45309; --ambar-claro:#fffbeb; --rojo:#b91c1c; --rojo-claro:#fef2f2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--fondo);color:var(--tinta);font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;line-height:1.5}
+  .contenedor{max-width:760px;margin:0 auto;padding:32px 16px}
+  .eyebrow{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--verde);font-weight:600}
+  h1{font-size:30px;letter-spacing:-.02em;margin-top:4px}
+  .sub{color:#78716c;font-size:14px;margin-top:4px}
+  .dropzone{margin-top:24px;border:2px dashed #d6d3d1;border-radius:12px;background:var(--blanco);padding:28px;text-align:center;transition:.15s}
+  .dropzone.activa{border-color:var(--verde);background:var(--verde-claro)}
+  .dropzone p{font-size:14px;color:#57534e}
+  .botones{margin-top:12px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .btn{cursor:pointer;border-radius:8px;padding:9px 16px;font-size:14px;font-weight:500;border:1px solid transparent}
+  .btn-primario{background:var(--verde);color:#fff}
+  .btn-primario:hover{background:var(--verde-osc)}
+  .btn-secundario{background:#fff;border-color:#d6d3d1;color:#44403c}
+  .btn-secundario:hover{background:#fafaf9}
+  .btn-borde-verde{background:#fff;border-color:var(--verde);color:var(--verde-osc);width:100%;margin-top:12px}
+  .btn-borde-verde:hover{background:var(--verde-claro)}
+  .nombre-archivo{margin-top:10px;font-size:12px;color:var(--gris);font-family:ui-monospace,monospace}
+  .alerta{margin-top:16px;border-radius:12px;padding:16px;font-size:14px;border:1px solid}
+  .alerta-error{background:var(--rojo-claro);border-color:#fecaca;color:var(--rojo)}
+  .alerta-ok{background:var(--verde-claro);border-color:#a7f3d0;color:var(--verde-osc)}
+  .alerta-ojo{background:var(--ambar-claro);border-color:#fcd34d;color:var(--ambar)}
+  .tarjeta{background:var(--blanco);border:1px solid var(--borde);border-radius:12px;padding:16px;margin-top:16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+  .tarjeta h2{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--verde-osc);margin-bottom:10px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gris);font-weight:500;text-align:right;padding-bottom:8px}
+  th:first-child{text-align:left}
+  td{padding:7px 0;border-top:1px solid #f5f5f4;text-align:right;font-family:ui-monospace,monospace}
+  td:first-child{text-align:left;font-family:inherit}
+  tr.total td{border-top:2px solid var(--tinta);font-weight:700;font-size:15px;padding-top:10px}
+  .pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600}
+  .pill-verde{background:#d1fae5;color:var(--verde-osc)}
+  .pill-ambar{background:#fef3c7;color:#92400e}
+  .pill-rojo{background:#fee2e2;color:var(--rojo)}
+  .negativo{color:var(--rojo)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:600px){.grid2{grid-template-columns:1fr}}
+  .dato{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px dashed var(--borde);font-size:14px;align-items:baseline}
+  .dato:last-child{border-bottom:none}
+  .dato .k{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gris);flex-shrink:0}
+  .dato .v{text-align:right;word-break:break-all}
+  .mono{font-family:ui-monospace,monospace;font-size:13px}
+  .persona-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gris);margin-top:10px}
+  .persona-label:first-child{margin-top:0}
+  .persona-nombre{font-weight:500;font-size:14px}
+  .persona-rfc{font-family:ui-monospace,monospace;font-size:13px;color:var(--gris)}
+  .concepto{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid #f5f5f4;font-size:14px;align-items:baseline}
+  .concepto:first-of-type{border-top:none}
+  .concepto .detalle{font-size:12px;color:var(--gris)}
+  .concepto .importe{font-family:ui-monospace,monospace;flex-shrink:0}
+  .pie{text-align:center;font-size:12px;color:var(--gris);margin:24px 0 8px}
+  #resultados{display:none}
+</style>
+</head>
+<body>
+<div class="contenedor">
+  <header>
+    <p class="eyebrow">Reembolsos · Herramienta interna</p>
+    <h1>Traductor de CFDI</h1>
+    <p class="sub">Suelta el XML de tu factura y te lo regreso en idioma humano: IVA por tasa, IEPS y retenciones, listo para el vale.</p>
+  </header>
+
+  <div class="dropzone" id="dropzone">
+    <p>Arrastra aquí tu <strong>XML (CFDI)</strong> o</p>
+    <div class="botones">
+      <label class="btn btn-primario">Elegir archivo
+        <input type="file" id="inputArchivo" accept=".xml,text/xml" style="display:none">
+      </label>
+      <button class="btn btn-secundario" id="btnDemo">Probar con factura de ejemplo</button>
+    </div>
+    <p class="nombre-archivo" id="nombreArchivo"></p>
+  </div>
+
+  <div id="zonaError"></div>
+
+  <div id="resultados">
+    <div id="veredicto"></div>
+
+    <section class="tarjeta">
+      <h2>Desglose de impuestos</h2>
+      <table>
+        <thead><tr><th>Concepto</th><th>Base</th><th>Importe</th></tr></thead>
+        <tbody id="tablaImpuestos"></tbody>
+      </table>
+      <button class="btn btn-borde-verde" id="btnCopiar">Copiar desglose como texto</button>
+    </section>
+
+    <div class="grid2">
+      <section class="tarjeta"><h2>Factura</h2><div id="datosFactura"></div></section>
+      <section class="tarjeta"><h2>Quién factura y a quién</h2><div id="datosPartes"></div></section>
+    </div>
+
+    <section class="tarjeta">
+      <h2 id="tituloConceptos">Conceptos</h2>
+      <div id="listaConceptos"></div>
+    </section>
+
+    <p class="pie">Los datos se leen directo del XML timbrado, sin interpretación manual. El archivo nunca sale de tu computadora.</p>
+  </div>
+</div>
+
+<script>
+// ── Catálogos SAT (los más comunes) ─────────────────────────────
+const IMPUESTOS = {"001":"ISR","002":"IVA","003":"IEPS"};
+const FORMA_PAGO = {"01":"Efectivo","02":"Cheque","03":"Transferencia electrónica","04":"Tarjeta de crédito","05":"Monedero electrónico","06":"Dinero electrónico","28":"Tarjeta de débito","29":"Tarjeta de servicios","30":"Aplicación de anticipos","99":"Por definir"};
+const METODO_PAGO = {PUE:"PUE · Pago en una sola exhibición",PPD:"PPD · Pago en parcialidades o diferido"};
+const TIPO_COMP = {I:"Ingreso (gasto para ti)",E:"Egreso (nota de crédito)",T:"Traslado",N:"Nómina",P:"Pago"};
+const USO_CFDI = {G01:"Adquisición de mercancías",G02:"Devoluciones o descuentos",G03:"Gastos en general",I01:"Construcciones",I02:"Mobiliario y equipo de oficina",I03:"Equipo de transporte",I04:"Equipo de cómputo",I08:"Otra maquinaria y equipo",D01:"Honorarios médicos",S01:"Sin efectos fiscales",CP01:"Pagos",P01:"Por definir"};
+
+const mxn = new Intl.NumberFormat("es-MX",{style:"currency",currency:"MXN"});
+const num = v => (v==null||v==="") ? 0 : parseFloat(v);
+const pct = t => { const p = num(t)*100; return p.toFixed(p%1?2:0)+"%"; };
+const esc = s => String(s??"—").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+// ── Parseo tolerante a namespaces (cfdi:, tfd:) ─────────────────
+function porNombre(raiz,nombre){
+  const out=[];
+  (function walk(n){ for(const c of n.children||[]){ if(c.localName===nombre) out.push(c); walk(c); } })(raiz);
+  return out;
+}
+const primero=(r,n)=>porNombre(r,n)[0]||null;
+const attr=(el,n)=>el?el.getAttribute(n):null;
+
+function parseCFDI(texto){
+  const doc=new DOMParser().parseFromString(texto,"text/xml");
+  if(doc.getElementsByTagName("parsererror").length) throw new Error("El archivo no es un XML válido.");
+  const comp=porNombre(doc,"Comprobante")[0]||doc.documentElement;
+  if(!comp||comp.localName!=="Comprobante") throw new Error("No encontré un CFDI (nodo Comprobante) en este XML.");
+
+  const emisor=primero(comp,"Emisor"), receptor=primero(comp,"Receptor"), timbre=primero(comp,"TimbreFiscalDigital");
+
+  const conceptos=porNombre(comp,"Concepto").map(c=>({
+    descripcion:attr(c,"Descripcion"), cantidad:num(attr(c,"Cantidad")),
+    valorUnitario:num(attr(c,"ValorUnitario")), importe:num(attr(c,"Importe")),
+    clave:attr(c,"ClaveProdServ")
+  }));
+
+  // Impuestos: nodo global (hijo directo de Comprobante) si existe; si no, suma de conceptos
+  const globalImp=[...comp.children].find(c=>c.localName==="Impuestos");
+  const scope=globalImp||comp;
+
+  const traslMap=new Map();
+  for(const t of porNombre(scope,"Traslado")){
+    const imp=attr(t,"Impuesto"), tf=attr(t,"TipoFactor"), tasa=attr(t,"TasaOCuota")||"";
+    const k=imp+"|"+tf+"|"+tasa;
+    const cur=traslMap.get(k)||{impuesto:imp,tipoFactor:tf,tasa,base:0,importe:0};
+    cur.base+=num(attr(t,"Base")); cur.importe+=num(attr(t,"Importe"));
+    traslMap.set(k,cur);
+  }
+  const retMap=new Map();
+  for(const r of porNombre(scope,"Retencion")){
+    const imp=attr(r,"Impuesto");
+    const cur=retMap.get(imp)||{impuesto:imp,importe:0};
+    cur.importe+=num(attr(r,"Importe"));
+    retMap.set(imp,cur);
+  }
+
+  return {
+    serie:attr(comp,"Serie"), folio:attr(comp,"Folio"), fecha:attr(comp,"Fecha"),
+    subtotal:num(attr(comp,"SubTotal")), descuento:num(attr(comp,"Descuento")),
+    total:num(attr(comp,"Total")), moneda:attr(comp,"Moneda"),
+    tipo:attr(comp,"TipoDeComprobante"), formaPago:attr(comp,"FormaPago"),
+    metodoPago:attr(comp,"MetodoPago"), lugar:attr(comp,"LugarExpedicion"),
+    emisor:{rfc:attr(emisor,"Rfc"),nombre:attr(emisor,"Nombre")},
+    receptor:{rfc:attr(receptor,"Rfc"),nombre:attr(receptor,"Nombre"),uso:attr(receptor,"UsoCFDI")},
+    uuid:attr(timbre,"UUID"),
+    traslados:[...traslMap.values()].sort((a,b)=>a.impuesto.localeCompare(b.impuesto)||num(b.tasa)-num(a.tasa)),
+    retenciones:[...retMap.values()],
+    conceptos
+  };
+}
+
+const etiqueta = t => t.tipoFactor==="Exento"
+  ? (IMPUESTOS[t.impuesto]||t.impuesto)+" Exento"
+  : (IMPUESTOS[t.impuesto]||t.impuesto)+" "+pct(t.tasa);
+
+// ── Render ──────────────────────────────────────────────────────
+let cfdiActual=null;
+
+function dato(k,v,mono){ return '<div class="dato"><span class="k">'+esc(k)+'</span><span class="v'+(mono?' mono':'')+'">'+esc(v)+'</span></div>'; }
+
+function render(cfdi){
+  cfdiActual=cfdi;
+  document.getElementById("zonaError").innerHTML="";
+  document.getElementById("resultados").style.display="block";
+
+  // Veredicto
+  const solo16 = cfdi.retenciones.length===0 && cfdi.traslados.length>0 &&
+    cfdi.traslados.every(t=>t.impuesto==="002"&&t.tipoFactor==="Tasa"&&num(t.tasa)===0.16);
+  const v=document.getElementById("veredicto");
+  if(solo16){
+    v.innerHTML='<div class="alerta alerta-ok"><strong>✓ Factura sencilla:</strong> todo el subtotal causa IVA al 16%. Se puede capturar con IVA fijo sin problema.</div>';
+  } else {
+    let det=cfdi.traslados.map(etiqueta).join(", ");
+    if(cfdi.retenciones.length) det+=" y retenciones de "+cfdi.retenciones.map(r=>IMPUESTOS[r.impuesto]||r.impuesto).join(", ");
+    v.innerHTML='<div class="alerta alerta-ojo"><strong>⚠ Ojo, capturista:</strong> esta factura <u>no</u> es IVA 16% parejo. Tiene '+esc(det)+'. Captúrala con el desglose de abajo.</div>';
+  }
+
+  // Tabla de impuestos
+  let filas='<tr><td>Subtotal</td><td></td><td>'+mxn.format(cfdi.subtotal)+'</td></tr>';
+  if(cfdi.descuento>0) filas+='<tr><td>Descuento</td><td></td><td class="negativo">-'+mxn.format(cfdi.descuento)+'</td></tr>';
+  for(const t of cfdi.traslados){
+    const verde=t.impuesto==="002"&&t.tipoFactor==="Tasa"&&num(t.tasa)===0.16;
+    filas+='<tr><td><span class="pill '+(verde?'pill-verde':'pill-ambar')+'">'+esc(etiqueta(t))+'</span></td>'
+      +'<td style="color:var(--gris)">'+mxn.format(t.base)+'</td>'
+      +'<td>'+(t.tipoFactor==="Exento"?"—":mxn.format(t.importe))+'</td></tr>';
+  }
+  for(const r of cfdi.retenciones){
+    filas+='<tr><td><span class="pill pill-rojo">Retención '+esc(IMPUESTOS[r.impuesto]||r.impuesto)+'</span></td><td></td><td class="negativo">-'+mxn.format(r.importe)+'</td></tr>';
+  }
+  filas+='<tr class="total"><td style="font-weight:700">Total</td><td></td><td>'+mxn.format(cfdi.total)+' <span style="font-size:11px;color:var(--gris)">'+esc(cfdi.moneda)+'</span></td></tr>';
+  document.getElementById("tablaImpuestos").innerHTML=filas;
+
+  // Datos de factura
+  document.getElementById("datosFactura").innerHTML=
+    dato("Serie / Folio",[cfdi.serie,cfdi.folio].filter(Boolean).join("-")||"—")
+    +dato("Fecha",(cfdi.fecha||"").replace("T"," · "))
+    +dato("Tipo",TIPO_COMP[cfdi.tipo]||cfdi.tipo)
+    +dato("Forma de pago",FORMA_PAGO[cfdi.formaPago]||cfdi.formaPago)
+    +dato("Método de pago",METODO_PAGO[cfdi.metodoPago]||cfdi.metodoPago)
+    +dato("Lugar de expedición (CP)",cfdi.lugar)
+    +dato("UUID (folio fiscal)",cfdi.uuid,true);
+
+  // Partes
+  document.getElementById("datosPartes").innerHTML=
+    '<p class="persona-label">Emisor (proveedor)</p><p class="persona-nombre">'+esc(cfdi.emisor.nombre)+'</p><p class="persona-rfc">'+esc(cfdi.emisor.rfc)+'</p>'
+    +'<p class="persona-label">Receptor (tu empresa)</p><p class="persona-nombre">'+esc(cfdi.receptor.nombre)+'</p><p class="persona-rfc">'+esc(cfdi.receptor.rfc)+'</p>'
+    +dato("Uso CFDI",USO_CFDI[cfdi.receptor.uso]||cfdi.receptor.uso);
+
+  // Conceptos
+  document.getElementById("tituloConceptos").textContent="Conceptos ("+cfdi.conceptos.length+")";
+  document.getElementById("listaConceptos").innerHTML=cfdi.conceptos.map(c=>
+    '<div class="concepto"><div><p>'+esc(c.descripcion)+'</p><p class="detalle">'+c.cantidad+' × '+mxn.format(c.valorUnitario)+' · clave '+esc(c.clave)+'</p></div><span class="importe">'+mxn.format(c.importe)+'</span></div>'
+  ).join("");
+}
+
+function mostrarError(msg){
+  cfdiActual=null;
+  document.getElementById("resultados").style.display="none";
+  document.getElementById("zonaError").innerHTML='<div class="alerta alerta-error"><strong>No pude leer el archivo.</strong> '+esc(msg)+' Verifica que sea el XML del CFDI (no el PDF).</div>';
+}
+
+function procesar(texto,nombre){
+  try{ render(parseCFDI(texto)); document.getElementById("nombreArchivo").textContent=nombre||""; }
+  catch(e){ mostrarError(e.message); }
+}
+
+function leerArchivo(file){
+  if(!file) return;
+  const r=new FileReader();
+  r.onload=()=>procesar(r.result,file.name);
+  r.readAsText(file);
+}
+
+// ── Eventos ─────────────────────────────────────────────────────
+const dz=document.getElementById("dropzone");
+dz.addEventListener("dragover",e=>{e.preventDefault();dz.classList.add("activa");});
+dz.addEventListener("dragleave",()=>dz.classList.remove("activa"));
+dz.addEventListener("drop",e=>{e.preventDefault();dz.classList.remove("activa");leerArchivo(e.dataTransfer.files[0]);});
+document.getElementById("inputArchivo").addEventListener("change",e=>leerArchivo(e.target.files[0]));
+
+document.getElementById("btnCopiar").addEventListener("click",function(){
+  if(!cfdiActual) return;
+  const c=cfdiActual;
+  const lineas=[
+    "CFDI "+(c.serie||"")+(c.folio?"-"+c.folio:"")+" · "+c.emisor.nombre+" ("+c.emisor.rfc+")",
+    "UUID: "+c.uuid,
+    "Subtotal: "+mxn.format(c.subtotal),
+    ...(c.descuento?["Descuento: "+mxn.format(c.descuento)]:[]),
+    ...c.traslados.map(t=>etiqueta(t)+" — Base "+mxn.format(t.base)+" → "+mxn.format(t.importe)),
+    ...c.retenciones.map(r=>"Retención "+(IMPUESTOS[r.impuesto]||r.impuesto)+": -"+mxn.format(r.importe)),
+    "TOTAL: "+mxn.format(c.total)
+  ];
+  navigator.clipboard.writeText(lineas.join("\n")).then(()=>{
+    this.textContent="✓ Copiado";
+    setTimeout(()=>this.textContent="Copiar desglose como texto",1800);
+  });
+});
+
+// ── Factura de ejemplo (mixta: IVA 16% + 0% + IEPS + retención) ──
+const DEMO=`<?xml version="1.0" encoding="UTF-8"?>
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" Version="4.0" Serie="A" Folio="48213" Fecha="2026-05-21T14:32:10" SubTotal="2570.00" Descuento="0.00" Total="2856.96" Moneda="MXN" TipoDeComprobante="I" MetodoPago="PUE" FormaPago="04" LugarExpedicion="86100">
+<cfdi:Emisor Rfc="HVT980512AB1" Nombre="HOTELES Y VIAJES DEL TROPICO SA DE CV" RegimenFiscal="601"/>
+<cfdi:Receptor Rfc="CTB050607XY9" Nombre="CONSTRUCTORA TABASCO SA DE CV" UsoCFDI="G03" DomicilioFiscalReceptor="86035" RegimenFiscalReceptor="601"/>
+<cfdi:Conceptos>
+<cfdi:Concepto ClaveProdServ="90111800" Cantidad="2" Descripcion="Habitacion sencilla, 2 noches" ValorUnitario="950.00" Importe="1900.00"><cfdi:Impuestos><cfdi:Traslados><cfdi:Traslado Base="1900.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="304.00"/></cfdi:Traslados></cfdi:Impuestos></cfdi:Concepto>
+<cfdi:Concepto ClaveProdServ="50202306" Cantidad="1" Descripcion="Consumo restaurante (bebidas con IEPS)" ValorUnitario="420.00" Importe="420.00"><cfdi:Impuestos><cfdi:Traslados><cfdi:Traslado Base="420.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="67.20"/><cfdi:Traslado Base="420.00" Impuesto="003" TipoFactor="Tasa" TasaOCuota="0.080000" Importe="33.60"/></cfdi:Traslados></cfdi:Impuestos></cfdi:Concepto>
+<cfdi:Concepto ClaveProdServ="50171548" Cantidad="1" Descripcion="Agua embotellada y alimentos basicos" ValorUnitario="250.00" Importe="250.00"><cfdi:Impuestos><cfdi:Traslados><cfdi:Traslado Base="250.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.000000" Importe="0.00"/></cfdi:Traslados></cfdi:Impuestos></cfdi:Concepto>
+</cfdi:Conceptos>
+<cfdi:Impuestos TotalImpuestosRetenidos="117.84" TotalImpuestosTrasladados="404.80">
+<cfdi:Retenciones><cfdi:Retencion Impuesto="002" Importe="117.84"/></cfdi:Retenciones>
+<cfdi:Traslados><cfdi:Traslado Base="2320.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="371.20"/><cfdi:Traslado Base="420.00" Impuesto="003" TipoFactor="Tasa" TasaOCuota="0.080000" Importe="33.60"/><cfdi:Traslado Base="250.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.000000" Importe="0.00"/></cfdi:Traslados>
+</cfdi:Impuestos>
+<cfdi:Complemento><tfd:TimbreFiscalDigital xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" Version="1.1" UUID="8F4A2C1E-7B3D-4E9A-A1C5-0D6F2B8E4A77" FechaTimbrado="2026-05-21T14:33:02"/></cfdi:Complemento>
+</cfdi:Comprobante>`;
+document.getElementById("btnDemo").addEventListener("click",()=>procesar(DEMO,"factura-ejemplo.xml"));
+</script>
+</body>
+</html>
