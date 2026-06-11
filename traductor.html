@@ -78,7 +78,7 @@
       <label class="btn btn-primario">Elegir archivo
         <input type="file" id="inputArchivo" accept=".xml,text/xml" style="display:none">
       </label>
-      <button class="btn btn-secundario" id="btnDemo">Probar con factura de ejemplo</button>
+      
     </div>
     <p class="nombre-archivo" id="nombreArchivo"></p>
   </div>
@@ -305,7 +305,7 @@ const DEMO=`<?xml version="1.0" encoding="UTF-8"?>
 </cfdi:Impuestos>
 <cfdi:Complemento><tfd:TimbreFiscalDigital xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" Version="1.1" UUID="8F4A2C1E-7B3D-4E9A-A1C5-0D6F2B8E4A77" FechaTimbrado="2026-05-21T14:33:02"/></cfdi:Complemento>
 </cfdi:Comprobante>`;
-document.getElementById("btnDemo").addEventListener("click",()=>procesar(DEMO,"factura-ejemplo.xml"));
+
 </script>
 </body>
 </html>
