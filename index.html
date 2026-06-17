@@ -150,6 +150,21 @@ body{font-family:'Geist',system-ui,sans-serif;color:var(--ink);background:var(--
 .it-mod-chip-left{display:flex;align-items:center;gap:12px}
 .it-mod-chip-n{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--brand-2);background:oklch(0.65 0.15 45/0.15);padding:3px 7px;border-radius:5px}
 .it-mod-chip-c{color:oklch(0.75 0.02 250);font-size:12px;font-family:'JetBrains Mono',monospace}
+/* CFDI PAGE */
+.cfdi-hero{border-bottom:1px solid var(--border);background:radial-gradient(60% 70% at 20% 30%,oklch(0.6 0.15 150/0.1),transparent 60%),radial-gradient(50% 60% at 85% 70%,oklch(0.55 0.16 262/0.08),transparent 60%),var(--bg)}
+.cfdi-hero-inner{max-width:1200px;margin:0 auto;padding:56px 40px 48px}
+.cfdi-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.cfdi-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.06em}
+.cfdi-pill-family{background:color-mix(in oklab,var(--brand) 10%,transparent);color:var(--brand-ink);border:1px solid color-mix(in oklab,var(--brand) 20%,transparent)}
+.cfdi-pill-privacy{background:color-mix(in oklab,var(--success) 10%,transparent);color:oklch(0.38 0.14 150);border:1px solid color-mix(in oklab,var(--success) 20%,transparent)}
+.cfdi-privacy-dot{width:5px;height:5px;border-radius:50%;background:var(--success)}
+.cfdi-meta{display:grid;grid-template-columns:1fr auto;gap:40px;align-items:end;margin-top:28px}
+.cfdi-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.cfdi-badge{font-family:'JetBrains Mono',monospace;font-size:10px;padding:4px 10px;border-radius:6px;background:var(--surface-2);color:var(--ink-mute);border:1px solid var(--border)}
+.cfdi-frame-wrap{max-width:1200px;margin:0 auto;padding:32px 40px 60px}
+.cfdi-frame{width:100%;height:82vh;border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 8px 32px oklch(0 0 0/0.08)}
+.cfdi-frame iframe{width:100%;height:100%;border:0;display:block}
+@media(max-width:980px){.cfdi-hero-inner{padding:40px 20px 32px}.cfdi-frame-wrap{padding:20px 20px 40px}.cfdi-meta{grid-template-columns:1fr;gap:16px}}
 /* FOOTER */
 .footer{padding:40px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-mute);letter-spacing:0.06em;flex-wrap:wrap;gap:16px}
 .footer strong{color:var(--ink);font-weight:500}
@@ -340,7 +355,13 @@ const IT_MODULES = [
     { grupo:'Cuentas por Pagar', t:'Manejo repositorios CFDIs', dur:'', yt:'L-Soh6h1hw4' },
     { grupo:'Pagos Antes de Factura', t:'Solicitud de pago antes de factura', dur:'', yt:'KINguSUvBHc' },
   ]},
-  { id:'m5', nombre:'Contabilidad', color:'#1A6B3A', desc:'Registro de pólizas, conciliación bancaria e informes contables.', lecciones:[] },
+  { id:'m5', nombre:'Contabilidad', color:'#1A6B3A', desc:'Registro de pólizas, conciliación bancaria e informes contables.', lecciones:[
+    { t:'Interfaz Infotools Odoo', dur:'', yt:'8CofX3xAQwg' },
+    { t:'Puntos de contabilidad | Plan Maestro', dur:'', yt:'Iqrc_6Od5gQ' },
+    { t:'Pólizas | Plan Maestro', dur:'', yt:'vaZy1mGRo8s' },
+    { t:'Facturación de ventas | Plan Maestro', dur:'', yt:'h7b-zTOzNzU' },
+    { t:'Cédula de costos', dur:'', yt:'vIS3Av3qWjw' },
+  ]},
   { id:'m6', nombre:'Control Presupuestal', color:'#B8860B', desc:'Control presupuestal vs real por proyecto y por partida.', lecciones:[] },
   { id:'m7', nombre:'Tableros BI', color:'#5B2181', desc:'Navegación, filtros y lectura de tableros de inteligencia de negocio.', lecciones:[] },
   { id:'m8', nombre:'Portal del Cliente', color:'#9F1239', desc:'Acceso, consulta de avance y comunicación con el cliente final.', lecciones:[] },
@@ -364,6 +385,7 @@ function App() {
       {page === 'home' && <HomePage setPage={setPage} openArea={openArea} />}
       {page === 'area' && <AreaPage areaKey={areaKey} setPage={setPage} />}
       {page === 'infotools' && <InfotoolsPage />}
+      {page === 'cfdi' && <CfdiPage />}
       <Footer />
     </div>
   );
@@ -389,6 +411,7 @@ function Topbar({ page, setPage }) {
         <button onClick={()=>scrollTo('sec-prompt')}>Cómo pedir</button>
         <button onClick={()=>scrollTo('sec-deps')}>Por área</button>
         <button className={page==='infotools'?'active':''} onClick={()=>setPage('infotools')}>Infotools E-Learning</button>
+        <button className={page==='cfdi'?'active':''} onClick={()=>setPage('cfdi')}>Reembolsos · CFDI</button>
       </nav>
       <div className="topbar-right">
         <div className="status-pill"><span className="status-dot"/>En línea</div>
@@ -756,6 +779,47 @@ function InfotoolsPage() {
           </div>
         </div>
       )}
+    </>
+  );
+}
+
+function CfdiPage() {
+  return (
+    <>
+      <div className="cfdi-hero">
+        <div className="cfdi-hero-inner">
+          <div className="cfdi-pills">
+            <span className="cfdi-pill cfdi-pill-family">✦ Pomoca-IA · Familia de herramientas internas</span>
+            <span className="cfdi-pill cfdi-pill-privacy"><span className="cfdi-privacy-dot"/>Tu XML nunca sale de tu computadora</span>
+          </div>
+          <div className="cfdi-meta">
+            <div>
+              <div className="eyebrow" style={{marginBottom:'12px'}}>Reembolsos · Herramienta fiscal</div>
+              <h1 className="hero-title" style={{fontSize:'clamp(36px,5vw,64px)',marginBottom:'14px'}}>Traductor de <em>CFDI</em></h1>
+              <p style={{fontSize:'17px',color:'var(--ink-soft)',lineHeight:'1.6',maxWidth:'52ch',marginBottom:'18px'}}>
+                ¿Vas a hacer un vale de reembolso? Sube aquí el XML de tu factura y te mostramos el desglose fiscal completo en lenguaje claro: IVA por tasa, IEPS y retenciones. Tu archivo se procesa en tu propia computadora y nunca se sube a ningún servidor.
+              </p>
+              <div className="cfdi-badges">
+                <span className="cfdi-badge">CFDI 3.3 y 4.0</span>
+                <span className="cfdi-badge">IVA · IEPS · ISR</span>
+                <span className="cfdi-badge">Sin backend</span>
+                <span className="cfdi-badge">Semáforo fiscal</span>
+                <span className="cfdi-badge">Copia como texto</span>
+              </div>
+            </div>
+            <div style={{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'14px',padding:'20px 24px',minWidth:'200px',textAlign:'center'}}>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:'10px',textTransform:'uppercase',letterSpacing:'0.1em',color:'var(--ink-mute)',marginBottom:'8px'}}>Herramienta</div>
+              <div style={{fontFamily:"'Instrument Serif',serif",fontSize:'32px',letterSpacing:'-0.02em',lineHeight:1}}>v 1.1</div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:'10px',color:'var(--ink-mute)',marginTop:'6px'}}>Área: Reembolsos</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="cfdi-frame-wrap">
+        <div className="cfdi-frame">
+          <iframe src="./traductor.html" title="Traductor de CFDI" allow="clipboard-write" />
+        </div>
+      </div>
     </>
   );
 }
