@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alta de Proveedores · CO-CEP-03</title>
+<style>
+:root{
+  --v-osc:#1e3d2b;--v-med:#2d5a3d;--v-sua:#4a7c5e;--v-pal:#d6e8dc;--v-fon:#eef4f0;
+  --g900:#1a1a1a;--g700:#444;--g500:#777;--g300:#bbb;--g100:#f4f4f2;
+  --am-fon:#fff8e6;--am-bor:#e0b84a;--am-txt:#7a4f00;
+  --ro-fon:#fef2f2;--ro-bor:#e57373;--ro-txt:#8b1a1a;
+  --rad:6px;--som:0 2px 12px rgba(0,0,0,.07);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;font-size:13px;color:var(--g900);background:#e8ede9;min-height:100vh;padding:0 0 48px;}
+.app-header{background:var(--v-osc);color:#fff;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.25);}
+.app-header h1{font-size:15px;font-weight:700;}
+.app-header .reg{font-size:10px;color:rgba(255,255,255,.45);letter-spacing:.5px;}
+.steps-bar{background:var(--v-med);padding:0 28px;display:flex;border-bottom:2px solid var(--v-osc);}
+.step-tab{padding:10px 18px;font-size:11.5px;font-weight:600;color:rgba(255,255,255,.45);cursor:pointer;border-bottom:3px solid transparent;display:flex;align-items:center;gap:7px;white-space:nowrap;user-select:none;transition:all .15s;}
+.step-tab .num{width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+.step-tab.activo{color:#fff;border-bottom-color:#7ecfa0;}
+.step-tab.activo .num{background:#7ecfa0;color:var(--v-osc);}
+.step-tab.ok .num::after{content:'✓';}
+.step-tab.ok{color:rgba(255,255,255,.7);}
+.main{max-width:860px;margin:24px auto 0;padding:0 16px;}
+.paso{display:none;}
+.paso.activo{display:block;}
+.card{background:#fff;border-radius:var(--rad);box-shadow:var(--som);margin-bottom:16px;overflow:hidden;}
+.card-head{background:var(--v-fon);border-bottom:1px solid var(--v-pal);padding:11px 20px;display:flex;align-items:center;gap:10px;}
+.card-head h2{font-size:13px;font-weight:700;color:var(--v-osc);}
+.ico{width:28px;height:28px;background:var(--v-med);border-radius:5px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;flex-shrink:0;}
+.card-body{padding:18px 20px;}
+.grid{display:grid;gap:14px;}
+.g2{grid-template-columns:1fr 1fr;}
+.g3{grid-template-columns:1fr 1fr 1fr;}
+.s2{grid-column:span 2;}
+.s3{grid-column:span 3;}
+.campo{display:flex;flex-direction:column;gap:4px;}
+.campo label{font-size:11px;font-weight:600;color:var(--g700);text-transform:uppercase;letter-spacing:.4px;}
+.campo label .req{color:#c0392b;margin-left:2px;}
+.campo label .opc{font-weight:400;color:var(--g500);text-transform:none;letter-spacing:0;font-size:10.5px;}
+input,select,textarea{font-family:'Segoe UI',Arial,sans-serif;font-size:13px;color:var(--g900);background:var(--g100);border:1px solid #ddd;border-radius:var(--rad);padding:8px 10px;width:100%;outline:none;transition:border-color .15s,box-shadow .15s;}
+input:focus,select:focus,textarea:focus{border-color:var(--v-sua);box-shadow:0 0 0 3px rgba(74,124,94,.12);background:#fff;}
+input.autorel{background:#f0f9f4;border-color:var(--v-pal);}
+input.err{border-color:var(--ro-bor);}
+textarea{resize:vertical;min-height:56px;}
+select{cursor:pointer;}
+.hint{font-size:10.5px;color:var(--g500);margin-top:2px;}
+.ferr{font-size:10.5px;color:var(--ro-txt);margin-top:2px;display:none;}
+.ferr.vis{display:block;}
+.csf-zona{border:2px dashed var(--v-pal);border-radius:var(--rad);padding:28px 20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--v-fon);position:relative;}
+.csf-zona:hover,.csf-zona.drag{border-color:var(--v-sua);background:#e4f0e9;}
+.csf-zona input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.csf-icon{font-size:32px;margin-bottom:8px;}
+.csf-titulo{font-size:13.5px;font-weight:700;color:var(--v-osc);margin-bottom:4px;}
+.csf-sub{font-size:11px;color:var(--g500);}
+.csf-progress{display:none;margin-top:14px;}
+.csf-progress.vis{display:block;}
+.prog-bar-wrap{height:6px;background:#ddd;border-radius:3px;overflow:hidden;margin-bottom:6px;}
+.prog-bar{height:100%;background:var(--v-med);border-radius:3px;transition:width .3s;width:0%;}
+.prog-txt{font-size:11px;color:var(--g500);text-align:center;}
+.csf-resultado{display:none;margin-top:14px;}
+.csf-resultado.vis{display:block;}
+.csf-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:4px;font-size:11px;font-weight:600;margin-bottom:6px;}
+.badge-ok{background:#e6f4ec;color:var(--v-osc);}
+.badge-warn{background:var(--am-fon);color:var(--am-txt);}
+.badge-err{background:var(--ro-fon);color:var(--ro-txt);}
+.doble{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;margin-top:16px;}
+.pdf-panel{background:var(--g100);border-radius:var(--rad);overflow:hidden;border:1px solid #ddd;}
+.pdf-panel canvas{display:block;width:100%;height:auto;}
+.pdf-nav{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:#fff;border-top:1px solid #ddd;font-size:11px;color:var(--g700);}
+.pdf-nav button{padding:3px 10px;border:1px solid #ddd;border-radius:4px;background:#fff;cursor:pointer;font-size:11px;}
+.tipo-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;}
+.tipo-btn{border:2px solid #ddd;border-radius:var(--rad);padding:14px;cursor:pointer;text-align:center;transition:all .18s;background:var(--g100);}
+.tipo-btn:hover{border-color:var(--v-sua);background:var(--v-fon);}
+.tipo-btn.sel{border-color:var(--v-med);background:var(--v-fon);box-shadow:0 0 0 3px rgba(45,90,61,.08);}
+.tipo-btn .ti{font-size:22px;margin-bottom:5px;}
+.tipo-btn .tl{font-size:12px;font-weight:700;color:var(--v-osc);}
+.tipo-btn .td{font-size:10.5px;color:var(--g500);margin-top:2px;}
+.sec-pf,.sec-pm{display:none;}
+.sec-pf.vis,.sec-pm.vis{display:block;}
+.ret-box{border-radius:var(--rad);border:2px solid var(--v-pal);background:var(--v-fon);padding:14px 16px;margin-top:14px;}
+.ret-box.alerta{border-color:var(--am-bor);background:var(--am-fon);}
+.ret-box.vacio{border-color:#ddd;background:var(--g100);color:var(--g500);font-style:italic;font-size:12px;text-align:center;padding:18px;}
+.ret-tit{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--v-osc);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.ret-tit.am{color:var(--am-txt);}
+.ret-filas{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.ret-f{display:flex;flex-direction:column;gap:2px;}
+.ret-lbl{font-size:10px;color:var(--g500);text-transform:uppercase;letter-spacing:.4px;}
+.ret-val{font-size:18px;font-weight:700;color:var(--v-osc);line-height:1.1;}
+.ret-val.nd{font-size:13px;color:var(--g500);font-weight:400;}
+.ret-base{font-size:10.5px;color:var(--g500);margin-top:1px;}
+.ret-fun{font-size:10px;color:var(--v-sua);margin-top:10px;padding-top:8px;border-top:1px solid var(--v-pal);}
+.ret-fun.am{color:var(--am-txt);border-top-color:var(--am-bor);}
+.ret-nota{font-size:11px;color:var(--am-txt);background:rgba(224,184,74,.1);border-radius:4px;padding:7px 10px;margin-top:8px;line-height:1.5;}
+.chk-item{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid #f0f0ee;}
+.chk-item:last-child{border-bottom:none;}
+.chk-num{width:22px;height:22px;border-radius:50%;background:var(--v-pal);color:var(--v-osc);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.chk-txt{flex:1;font-size:12.5px;line-height:1.4;}
+.chk-ops{display:flex;gap:8px;flex-shrink:0;}
+.chk-btn{padding:4px 14px;border-radius:4px;border:1.5px solid #ddd;background:#fff;font-size:11px;font-weight:600;cursor:pointer;color:var(--g700);transition:all .15s;}
+.chk-btn.si-s{background:#e6f4ec;border-color:var(--v-sua);color:var(--v-osc);}
+.chk-btn.no-s{background:var(--ro-fon);border-color:var(--ro-bor);color:var(--ro-txt);}
+.pago-grid{display:flex;gap:10px;margin-bottom:12px;}
+.pago-btn{flex:1;padding:9px;border:1.5px solid #ddd;border-radius:var(--rad);background:var(--g100);font-size:12px;font-weight:600;cursor:pointer;color:var(--g700);text-align:center;transition:all .15s;}
+.pago-btn.sel{background:var(--v-fon);border-color:var(--v-med);color:var(--v-osc);}
+.cred-det{display:none;}
+.cred-det.vis{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.firmas{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:4px;}
+.firma{display:flex;flex-direction:column;gap:3px;}
+.firma-lin{height:36px;border-bottom:1.5px solid var(--g300);}
+.firma-n{font-size:10.5px;font-weight:700;color:var(--g700);margin-top:4px;text-align:center;}
+.firma-c{font-size:10px;color:var(--g500);text-align:center;}
+.nav-btns{display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:14px;border-top:1px solid #e8e8e6;}
+.btn{padding:10px 22px;border-radius:var(--rad);border:none;font-family:'Segoe UI',Arial,sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:7px;}
+.btn-p{background:var(--v-med);color:#fff;}
+.btn-p:hover{background:var(--v-osc);}
+.btn-s{background:var(--g100);color:var(--g700);border:1px solid #ddd;}
+.btn-s:hover{background:#eee;}
+.btn-i{background:var(--v-osc);color:#fff;padding:10px 28px;}
+.btn-i:hover{background:#111;}
+.btn-n{background:#fff;color:var(--v-osc);border:1.5px solid var(--v-med);}
+.btn-n:hover{background:var(--v-fon);}
+.fich-head{background:var(--v-osc);color:#fff;border-radius:var(--rad) var(--rad) 0 0;padding:16px 22px;display:flex;justify-content:space-between;align-items:flex-start;}
+.fich-head h2{font-size:14px;font-weight:700;}
+.fich-head .freg{font-size:10px;color:rgba(255,255,255,.45);margin-top:2px;}
+.fich-head .ffec{font-size:11px;color:rgba(255,255,255,.6);text-align:right;}
+.fich-body{background:#fff;border:1px solid var(--v-pal);border-top:none;border-radius:0 0 var(--rad) var(--rad);padding:18px 22px;box-shadow:var(--som);margin-bottom:16px;}
+.res-sec{margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #f0f0ee;}
+.res-sec:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.res-sec-tit{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--v-sua);margin-bottom:8px;}
+.res-campos{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 16px;}
+.res-c{display:flex;flex-direction:column;gap:2px;}
+.res-lbl{font-size:10px;color:var(--g500);}
+.res-val{font-size:12.5px;color:var(--g900);font-weight:500;word-break:break-word;}
+.ret-duo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;}
+.ret-d{background:var(--v-fon);border:1.5px solid var(--v-pal);border-radius:5px;padding:10px 14px;}
+.ret-d.am{background:var(--am-fon);border-color:var(--am-bor);}
+.ret-d-lbl{font-size:10px;color:var(--g500);text-transform:uppercase;letter-spacing:.4px;}
+.ret-d-val{font-size:20px;font-weight:700;color:var(--v-osc);line-height:1.1;margin-top:2px;}
+.ret-d-val.nd{font-size:13px;color:var(--g500);font-weight:400;}
+.ret-d-val.am{color:var(--am-txt);}
+.ret-d-base{font-size:10px;color:var(--g500);margin-top:1px;}
+.ret-d-fun{font-size:10px;color:var(--v-sua);margin-top:6px;}
+.alerta-c{background:var(--am-fon);border:1.5px solid var(--am-bor);border-radius:5px;padding:10px 14px;margin-top:8px;font-size:11.5px;color:var(--am-txt);line-height:1.5;}
+@media print{
+  body{background:#fff;padding:0;font-size:11px;}
+  .app-header,.steps-bar,.nav-btns,.no-print,.csf-zona,.csf-progress,.doble{display:none!important;}
+  .paso{display:block!important;}
+  .main{max-width:100%;margin:0;padding:10mm 14mm;}
+  .card{box-shadow:none;border:1px solid #ccc;margin-bottom:8px;}
+  .fich-head,.ret-d,.ret-box{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  @page{size:A4 portrait;margin:0;}
+}
+@media(max-width:640px){
+  .g2,.g3{grid-template-columns:1fr;}
+  .s2,.s3{grid-column:span 1;}
+  .tipo-grid,.doble,.firmas,.ret-duo{grid-template-columns:1fr;}
+  .res-campos{grid-template-columns:1fr 1fr;}
+  .steps-bar{overflow-x:auto;}
+  .step-tab{font-size:10px;padding:10px 10px;}
+}
+</style>
+</head>
+<body>
+<div class="app-header">
+  <div><h1>Alta de Proveedores</h1><div class="reg">REGISTRO DE SGC: CO-CEP-03</div></div>
+  <div style="font-size:11px;color:rgba(255,255,255,.45);">POMOCA-IA &middot; Herramientas Internas &middot; Contabilidad</div>
+</div>
+<div class="steps-bar">
+  <div class="step-tab activo" onclick="irA(0)"><span class="num">1</span> CSF y retenci&oacute;n</div>
+  <div class="step-tab" onclick="irA(1)"><span class="num">2</span> Datos fiscales</div>
+  <div class="step-tab" onclick="irA(2)"><span class="num">3</span> Documentaci&oacute;n</div>
+  <div class="step-tab" onclick="irA(3)"><span class="num">4</span> Ficha final</div>
+</div>
+<div class="main">
+
+<div class="paso activo" id="paso-0">
+  <div class="card">
+    <div class="card-head"><div class="ico">&#128196;</div><h2>Constancia de Situaci&oacute;n Fiscal (CSF)</h2></div>
+    <div class="card-body">
+      <div class="csf-zona" id="csf-zona"
+        ondragover="event.preventDefault();this.classList.add('drag')"
+        ondragleave="this.classList.remove('drag')"
+        ondrop="onDrop(event)">
+        <input type="file" accept="application/pdf" onchange="procesarCSF(this.files[0])">
+        <div class="csf-icon">&#128194;</div>
+        <div class="csf-titulo">Arrastra la CSF aqu&iacute; o haz clic para seleccionarla</div>
+        <div class="csf-sub">Solo archivos PDF &middot; El archivo nunca sale de tu navegador</div>
+      </div>
+      <div class="csf-progress" id="csf-prog">
+        <div class="prog-bar-wrap"><div class="prog-bar" id="prog-bar"></div></div>
+        <div class="prog-txt" id="prog-txt">Leyendo PDF&hellip;</div>
+      </div>
+      <div class="csf-resultado" id="csf-res"></div>
+      <div id="panel-doble" style="display:none">
+        <div class="doble">
+          <div class="pdf-panel">
+            <canvas id="pdf-canvas"></canvas>
+            <div class="pdf-nav">
+              <button onclick="cambiarPag(-1)">&#9664;</button>
+              <span id="pdf-info">P&aacute;g 1 / 1</span>
+              <button onclick="cambiarPag(1)">&#9654;</button>
+            </div>
+          </div>
+          <div style="font-size:12px;color:var(--g700);line-height:1.6;padding-top:8px;">
+            <strong>PDF escaneado.</strong><br>
+            Captura los datos manualmente en los campos de abajo.<br>
+            Usa el visor de la izquierda como referencia.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head"><div class="ico">&#128100;</div><h2>Tipo de persona y retenci&oacute;n</h2></div>
+    <div class="card-body">
+      <div class="tipo-grid">
+        <div class="tipo-btn sel" id="btn-pf" onclick="selTipo('PF')">
+          <div class="ti">&#129489;</div><div class="tl">Persona F&iacute;sica</div><div class="td">RFC 13 d&iacute;gitos &middot; CURP</div>
+        </div>
+        <div class="tipo-btn" id="btn-pm" onclick="selTipo('PM')">
+          <div class="ti">&#127970;</div><div class="tl">Persona Moral</div><div class="td">RFC 12 d&iacute;gitos &middot; Raz&oacute;n social</div>
+        </div>
+      </div>
+      <div class="grid g2">
+        <div class="campo">
+          <label>R&eacute;gimen fiscal <span class="req">*</span></label>
+          <select id="regimen" onchange="calcRet()">
+            <option value="">&#8212; Seleccionar r&eacute;gimen (de la CSF) &#8212;</option>
+            <optgroup label="Persona F&iacute;sica">
+              <option value="PF_RESICO">612 &middot; RESICO Persona F&iacute;sica</option>
+              <option value="PF_ACT">612 &middot; Actividades Empresariales y Profesionales</option>
+              <option value="PF_ARR">606 &middot; Arrendamiento</option>
+              <option value="PF_SIN">616 &middot; Sin obligaciones fiscales</option>
+              <option value="PF_OTR">Otro r&eacute;gimen PF</option>
+            </optgroup>
+            <optgroup label="Persona Moral">
+              <option value="PM_GEN">601 &middot; General de Ley PM</option>
+              <option value="PM_RESICO">626 &middot; RESICO PM</option>
+              <option value="PM_SFL">603 &middot; Fines no lucrativos</option>
+              <option value="PM_OTR">Otro r&eacute;gimen PM</option>
+            </optgroup>
+          </select>
+          <span class="hint">Si la CSF trae varios reg&iacute;menes, verifica y selecciona el principal</span>
+        </div>
+        <div class="campo">
+          <label>Actividad que nos factura <span class="req">*</span></label>
+          <select id="actividad" onchange="calcRet()">
+            <option value="">&#8212; Seleccionar actividad &#8212;</option>
+            <option value="HONOR">Honorarios / Servicios profesionales</option>
+            <option value="ARR_INM">Arrendamiento de inmueble</option>
+            <option value="ARR_MUE">Arrendamiento de maquinaria / equipo</option>
+            <option value="FLETE">Autotransporte terrestre de carga (fletes)</option>
+            <option value="COMIS">Comisiones mercantiles</option>
+            <option value="VENTA">Venta de bienes / materiales / insumos</option>
+            <option value="OTRO">Otro / No clasificado</option>
+          </select>
+          <span class="hint">Si la CSF trae varias actividades, confirmar cu&aacute;l aplica al servicio contratado</span>
+        </div>
+      </div>
+      <div id="ret-resultado" class="ret-box vacio">Selecciona r&eacute;gimen y actividad para calcular la retenci&oacute;n</div>
+    </div>
+  </div>
+  <div class="nav-btns no-print"><div></div><button class="btn btn-p" onclick="irA(1)">Siguiente &rarr; Datos fiscales</button></div>
+</div>
+
+<div class="paso" id="paso-1">
+  <div class="sec-pf vis" id="sec-pf">
+    <div class="card">
+      <div class="card-head"><div class="ico">&#129489;</div><h2>Datos de la persona f&iacute;sica</h2></div>
+      <div class="card-body">
+        <div class="grid g3">
+          <div class="campo"><label>Nombre(s) <span class="req">*</span></label><input type="text" id="pf-nom" placeholder="Nombre(s)"></div>
+          <div class="campo"><label>Apellido paterno <span class="req">*</span></label><input type="text" id="pf-ap" placeholder="Apellido paterno"></div>
+          <div class="campo"><label>Apellido materno <span class="opc">(opc.)</span></label><input type="text" id="pf-am" placeholder="Apellido materno"></div>
+          <div class="campo">
+            <label>RFC <span class="req">*</span> <span class="opc">13 d&iacute;gitos</span></label>
+            <input type="text" id="pf-rfc" placeholder="XXXX000000XXX" maxlength="13" oninput="this.value=this.value.toUpperCase()" onblur="valRFC('pf')">
+            <span class="ferr" id="err-pf">RFC inv&aacute;lido &mdash; deben ser 13 caracteres</span>
+          </div>
+          <div class="campo"><label>CURP <span class="req">*</span> <span class="opc">18 d&iacute;gitos</span></label><input type="text" id="pf-curp" placeholder="XXXX000000XXXXXX00" maxlength="18" oninput="this.value=this.value.toUpperCase()"></div>
+          <div class="campo"><label>C.P. fiscal <span class="req">*</span></label><input type="text" id="pf-cp" placeholder="00000" maxlength="5"></div>
+          <div class="campo s3"><label>Domicilio fiscal <span class="opc">(opc.)</span></label><input type="text" id="pf-dom" placeholder="Calle, n&uacute;mero, colonia, municipio, estado"></div>
+          <div class="campo">
+            <label>Uso de CFDI</label>
+            <select id="pf-cfdi">
+              <option value="">&#8212; Seleccionar &#8212;</option>
+              <option value="G01">G01 &middot; Adquisici&oacute;n de mercancias</option>
+              <option value="G03">G03 &middot; Gastos en general</option>
+              <option value="I01">I01 &middot; Construcciones</option>
+              <option value="I04">I04 &middot; Equipo de c&oacute;mputo</option>
+              <option value="S01">S01 &middot; Sin efectos fiscales</option>
+              <option value="CP01">CP01 &middot; Pagos</option>
+            </select>
+          </div>
+          <div class="campo"><label>Moneda</label><select id="pf-mon"><option value="MXN">MXN &middot; Peso Mexicano</option><option value="USD">USD &middot; D&oacute;lar americano</option></select></div>
+          <div class="campo"><label>CLABE interbancaria <span class="opc">(opc.)</span></label><input type="text" id="pf-clabe" placeholder="18 d&iacute;gitos" maxlength="18"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="sec-pm" id="sec-pm">
+    <div class="card">
+      <div class="card-head"><div class="ico">&#127970;</div><h2>Datos de la persona moral</h2></div>
+      <div class="card-body">
+        <div class="grid g2">
+          <div class="campo s2"><label>Raz&oacute;n social <span class="req">*</span></label><input type="text" id="pm-razon" placeholder="Raz&oacute;n social completa"></div>
+          <div class="campo">
+            <label>RFC <span class="req">*</span> <span class="opc">12 d&iacute;gitos</span></label>
+            <input type="text" id="pm-rfc" placeholder="XXX000000XXX" maxlength="12" oninput="this.value=this.value.toUpperCase()" onblur="valRFC('pm')">
+            <span class="ferr" id="err-pm">RFC inv&aacute;lido &mdash; 12 caracteres para PM</span>
+          </div>
+          <div class="campo"><label>C.P. fiscal <span class="req">*</span></label><input type="text" id="pm-cp" placeholder="00000" maxlength="5"></div>
+          <div class="campo s2"><label>Domicilio fiscal <span class="opc">(opc.)</span></label><input type="text" id="pm-dom" placeholder="Calle, n&uacute;mero, colonia, municipio, estado"></div>
+          <div class="campo">
+            <label>Uso de CFDI</label>
+            <select id="pm-cfdi">
+              <option value="">&#8212; Seleccionar &#8212;</option>
+              <option value="G01">G01 &middot; Adquisici&oacute;n de mercancias</option>
+              <option value="G03">G03 &middot; Gastos en general</option>
+              <option value="I01">I01 &middot; Construcciones</option>
+              <option value="I04">I04 &middot; Equipo de c&oacute;mputo</option>
+              <option value="S01">S01 &middot; Sin efectos fiscales</option>
+              <option value="CP01">CP01 &middot; Pagos</option>
+            </select>
+          </div>
+          <div class="campo"><label>Moneda</label><select id="pm-mon"><option value="MXN">MXN &middot; Peso Mexicano</option><option value="USD">USD &middot; D&oacute;lar americano</option></select></div>
+          <div class="campo s2"><label>CLABE interbancaria <span class="opc">(opc.)</span></label><input type="text" id="pm-clabe" placeholder="18 d&iacute;gitos" maxlength="18"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head"><div class="ico">&#128203;</div><h2>Contactos y condici&oacute;n de pago</h2></div>
+    <div class="card-body">
+      <div class="grid g2">
+        <div class="campo"><label>Rep. legal &mdash; Nombre</label><input type="text" id="rep-n" placeholder="Nombre completo"></div>
+        <div class="campo"><label>Rep. legal &mdash; Tel&eacute;fono</label><input type="tel" id="rep-t" placeholder="(999) 000-0000"></div>
+        <div class="campo"><label>Asesor comercial &mdash; Nombre</label><input type="text" id="as-n" placeholder="Nombre completo"></div>
+        <div class="campo"><label>Asesor comercial &mdash; Tel&eacute;fono</label><input type="tel" id="as-t" placeholder="(999) 000-0000"></div>
+        <div class="campo s2"><label>Asesor comercial &mdash; Correo</label><input type="email" id="as-c" placeholder="correo@empresa.com"></div>
+        <div class="campo"><label>Resp. contabilidad &mdash; Nombre</label><input type="text" id="co-n" placeholder="Nombre completo"></div>
+        <div class="campo"><label>Resp. contabilidad &mdash; Tel&eacute;fono</label><input type="tel" id="co-t" placeholder="(999) 000-0000"></div>
+        <div class="campo s2"><label>Materiales o servicios que suministra <span class="req">*</span></label><textarea id="materiales" placeholder="Describir brevemente..."></textarea></div>
+      </div>
+      <div style="margin-top:18px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--v-sua);margin-bottom:8px;">Condici&oacute;n de pago</div>
+        <div class="pago-grid">
+          <button class="pago-btn sel" id="btn-con" onclick="selPago('contado')">Contado</button>
+          <button class="pago-btn" id="btn-cre" onclick="selPago('credito')">Cr&eacute;dito</button>
+        </div>
+        <div class="cred-det" id="cred-det">
+          <div class="campo"><label>D&iacute;as de cr&eacute;dito</label><input type="number" id="dias-c" placeholder="30" min="1"></div>
+          <div class="campo"><label>Monto m&aacute;ximo</label><input type="text" id="monto-c" placeholder="$0.00"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-btns no-print">
+    <button class="btn btn-s" onclick="irA(0)">&larr; Regresar</button>
+    <button class="btn btn-p" onclick="irA(2)">Siguiente &rarr; Documentaci&oacute;n</button>
+  </div>
+</div>
+
+<div class="paso" id="paso-2">
+  <div class="card">
+    <div class="card-head"><div class="ico">&#128193;</div><h2>Lista de documentos requeridos</h2></div>
+    <div class="card-body" id="chk-cont"></div>
+  </div>
+  <div class="nav-btns no-print">
+    <button class="btn btn-s" onclick="irA(1)">&larr; Regresar</button>
+    <button class="btn btn-p" onclick="generarFicha()">Generar ficha final &rarr;</button>
+  </div>
+</div>
+
+<div class="paso" id="paso-3">
+  <div id="ficha"></div>
+  <div class="nav-btns no-print">
+    <button class="btn btn-n" onclick="nuevoRegistro()">+ Nuevo proveedor</button>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-s" onclick="irA(2)">&larr; Regresar</button>
+      <button class="btn btn-i" onclick="window.print()">&#128438; Imprimir / PDF</button>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+if(window.pdfjsLib){
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+let tipo='PF',pagoTipo='contado',pdfDoc=null,pdfPag=1;
+
+const RET={
+  PF:{
+    HONOR:{iva:'10.6667%',ivab:'2/3 del IVA trasladado',isr_r:'1.25%',isr_rb:'s/ contraprestacion',isr_n:'10%',isr_nb:'s/ contraprestacion',fun:'Art. 1-A fr.II a) LIVA - Art. 106/113-J LISR'},
+    ARR_INM:{iva:'10.6667%',ivab:'2/3 del IVA trasladado',isr_r:'1.25%',isr_rb:'s/ contraprestacion',isr_n:'10%',isr_nb:'s/ contraprestacion',fun:'Art. 1-A fr.II a) LIVA - Art. 116/113-J LISR'},
+    ARR_MUE:{iva:'10.6667%',ivab:'2/3 del IVA trasladado',isr_r:'1.25%',isr_rb:'s/ contraprestacion',isr_n:null,isr_nb:'Art. 116 LISR aplica solo a inmuebles',fun:'Art. 1-A fr.II a) LIVA - Art. 113-J LISR (RESICO)'},
+    FLETE:{iva:'4%',ivab:'s/ contraprestacion (no s/ IVA)',isr_r:'1.25%',isr_rb:'s/ contraprestacion',isr_n:null,isr_nb:null,fun:'Art. 1-A fr.II c) LIVA - Art. 3 fr.II RLIVA - Art. 113-J LISR',alerta:true,nota:'ISR para transportistas no RESICO: verificar si aplican Facilidades Administrativas 2026 del sector autotransporte (punto A pendiente con el contador).'},
+    COMIS:{iva:'10.6667%',ivab:'2/3 del IVA trasladado',isr_r:'1.25%',isr_rb:'s/ contraprestacion',isr_n:null,isr_nb:null,fun:'Art. 1-A fr.II d) LIVA - Art. 113-J LISR',alerta:true,nota:'ISR en comisiones mercantiles no RESICO: no hay retencion automatica del 10%. Confirmar con el contador (punto B pendiente).'},
+    VENTA:{iva:null,ivab:'Sin retencion de IVA en venta de bienes',isr_r:'1.25%',isr_rb:'s/ contraprestacion',isr_n:null,isr_nb:'Sin retencion ISR en venta de bienes',fun:'Art. 113-J LISR (RESICO)'},
+    OTRO:null
+  },
+  PM:{
+    FLETE:{iva:'4%',ivab:'s/ contraprestacion (no s/ IVA)',isr_r:null,isr_rb:null,isr_n:null,isr_nb:'PM-PM: sin retencion ISR',fun:'Art. 1-A fr.II c) LIVA - Art. 3 fr.II RLIVA'},
+    HONOR:{iva:null,ivab:'PM-PM: sin retencion IVA',isr_r:null,isr_rb:null,isr_n:null,isr_nb:'PM-PM: sin retencion ISR',fun:'Sin supuesto de retencion PM-PM'},
+    ARR_INM:{iva:null,ivab:'PM-PM: sin retencion IVA',isr_r:null,isr_rb:null,isr_n:null,isr_nb:'PM-PM: sin retencion ISR',fun:'Sin supuesto de retencion PM-PM'},
+    ARR_MUE:{iva:null,ivab:'PM-PM: sin retencion IVA',isr_r:null,isr_rb:null,isr_n:null,isr_nb:'PM-PM: sin retencion ISR',fun:'Sin supuesto de retencion PM-PM'},
+    COMIS:{iva:null,ivab:'PM-PM: sin retencion IVA',isr_r:null,isr_rb:null,isr_n:null,isr_nb:'PM-PM: sin retencion ISR',fun:'Sin supuesto de retencion PM-PM'},
+    VENTA:{iva:null,ivab:'Sin retencion en venta PM-PM',isr_r:null,isr_rb:null,isr_n:null,isr_nb:'PM-PM: sin retencion ISR',fun:'Sin supuesto de retencion PM-PM'},
+    OTRO:null
+  }
+};
+
+const DOCS=[
+  {id:1,txt:'RFC, Cedula de identificacion fiscal y/o Constancia de Situacion Fiscal'},
+  {id:2,txt:'Opinion de cumplimiento de obligaciones fiscales'},
+  {id:3,pf:'Acta de nacimiento (persona fisica)',pm:'Acta constitutiva (persona moral)'},
+  {id:4,txt:'Comprobante de domicilio fiscal no mayor a 3 meses'},
+  {id:5,txt:'Identificacion oficial del representante legal'},
+  {id:6,txt:'CLABE interbancaria'},
+  {id:7,txt:'Curriculum de la empresa / proveedor'},
+  {id:8,txt:'Propuesta economica'},
+  {id:9,txt:'Tipo de materiales o servicios que suministra'},
+];
+
+function onDrop(ev){
+  ev.preventDefault();
+  document.getElementById('csf-zona').classList.remove('drag');
+  var f=ev.dataTransfer.files[0];
+  if(f&&f.type==='application/pdf') procesarCSF(f);
+}
+
+function procesarCSF(file){
+  if(!file) return;
+  if(!window.pdfjsLib){
+    muestraRes('err','PDF.js no disponible','Verifica tu conexion a internet e intenta de nuevo.');
+    return;
+  }
+  setP(true,'Cargando PDF...',15);
+  var reader=new FileReader();
+  reader.onload=function(e){
+    setP(true,'Extrayendo texto...',45);
+    pdfjsLib.getDocument({data:e.target.result}).promise.then(function(doc){
+      pdfDoc=doc;
+      var texto='';
+      var max=Math.min(doc.numPages,4);
+      var pags=[];
+      for(var i=1;i<=max;i++) pags.push(i);
+      var chain=Promise.resolve();
+      pags.forEach(function(n){
+        chain=chain.then(function(){
+          return doc.getPage(n).then(function(pag){
+            return pag.getTextContent().then(function(tc){
+              texto+=tc.items.map(function(it){return it.str;}).join(' ')+'\n';
+            });
+          });
+        });
+      });
+      chain.then(function(){
+        setP(true,'Analizando...',85);
+        if(texto.trim().length<50){
+          setP(false,'',100);
+          muestraRes('warn','PDF escaneado (sin capa de texto)','Se muestra el PDF para captura manual.');
+          document.getElementById('panel-doble').style.display='block';
+          renderPag(1);
+        } else {
+          var d=parsear(texto);
+          setP(false,'',100);
+          aplicar(d);
+        }
+      });
+    }).catch(function(err){
+      setP(false,'',0);
+      muestraRes('err','Error al leer el PDF',err.message||'Archivo invalido o protegido.');
+    });
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function setP(vis,txt,pct){
+  var el=document.getElementById('csf-prog');
+  el.className='csf-progress'+(vis?' vis':'');
+  if(vis){
+    document.getElementById('prog-bar').style.width=pct+'%';
+    document.getElementById('prog-txt').textContent=txt;
+  }
+}
+
+function parsear(txt){
+  var d={};
+  var rfcM=txt.match(/\b([A-Z\u00d1&]{3,4}\d{6}[A-Z0-9]{3})\b/);
+  if(rfcM) d.rfc=rfcM[1];
+  if(d.rfc) d.tipo=d.rfc.length===13?'PF':'PM';
+  var curpM=txt.match(/\b([A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]\d)\b/);
+  if(curpM) d.curp=curpM[1];
+  var nomM=txt.match(/(?:Nombre\s*:|Nombre del contribuyente\s*:?|Raz[o\u00f3]n [Ss]ocial\s*:?)\s*([A-Z\u00c1\u00c9\u00cd\u00d3\u00da\u00d1][^\n\r,]{3,80})/i);
+  if(nomM) d.nombre=nomM[1].replace(/\s+/g,' ').trim().substring(0,80);
+  var cpM=txt.match(/\b(\d{5})\b/);
+  if(cpM) d.cp=cpM[1];
+  d.regimenes=[];
+  if(/612|RESICO.*[Ff]isica|Simplificado.*[Cc]onfianza.*[Ff]isica/i.test(txt)) d.regimenes.push('PF_RESICO');
+  if(/606|[Aa]rrendamiento/i.test(txt)&&(d.tipo==='PF'||!d.tipo)) d.regimenes.push('PF_ARR');
+  if(/601|General de [Ll]ey [Pp]ersonas [Mm]orales/i.test(txt)) d.regimenes.push('PM_GEN');
+  if(/626|RESICO.*[Mm]oral|Simplificado.*[Cc]onfianza.*[Mm]oral/i.test(txt)) d.regimenes.push('PM_RESICO');
+  d.actividades=[];
+  if(/autotransporte|transporte.*carga|flete/i.test(txt)) d.actividades.push('FLETE');
+  if(/honorarios?|servicios\s+profesionales/i.test(txt)) d.actividades.push('HONOR');
+  if(/arrendamiento|arrendar/i.test(txt)){
+    if(/maquinaria|equipo|mueble/i.test(txt)) d.actividades.push('ARR_MUE');
+    else d.actividades.push('ARR_INM');
+  }
+  if(/comisi[o\u00f3]n|comisionista/i.test(txt)) d.actividades.push('COMIS');
+  if(/comercio|venta\s+de|materiales|insumos/i.test(txt)) d.actividades.push('VENTA');
+  return d;
+}
+
+function aplicar(d){
+  var campos=[];
+  if(d.tipo) selTipo(d.tipo);
+  if(d.rfc){
+    if(d.tipo==='PF'){sv('pf-rfc',d.rfc);ma('pf-rfc');}
+    else{sv('pm-rfc',d.rfc);ma('pm-rfc');}
+    campos.push('RFC: '+d.rfc);
+  }
+  if(d.curp){sv('pf-curp',d.curp);ma('pf-curp');campos.push('CURP');}
+  if(d.cp){
+    if(d.tipo==='PF'){sv('pf-cp',d.cp);ma('pf-cp');}
+    else{sv('pm-cp',d.cp);ma('pm-cp');}
+    campos.push('C.P.: '+d.cp);
+  }
+  if(d.nombre){
+    if(d.tipo==='PF'){
+      var pts=d.nombre.split(/\s+/);
+      if(pts.length>=3){
+        sv('pf-nom',pts.slice(0,-2).join(' '));ma('pf-nom');
+        sv('pf-ap',pts[pts.length-2]);ma('pf-ap');
+        sv('pf-am',pts[pts.length-1]);ma('pf-am');
+      } else {sv('pf-nom',d.nombre);ma('pf-nom');}
+    } else {sv('pm-razon',d.nombre);ma('pm-razon');}
+    campos.push('Nombre detectado');
+  }
+  if(d.regimenes.length>0){
+    sv2('regimen',d.regimenes[0]);
+    var rtxt=document.getElementById('regimen');
+    campos.push('Regimen: '+(rtxt.options[rtxt.selectedIndex]?.text||d.regimenes[0]).split('·')[0]);
+  }
+  if(d.actividades.length>0){
+    sv2('actividad',d.actividades[0]);
+    campos.push('Actividad detectada');
+  }
+  calcRet();
+  var multR=d.regimenes.length>1,multA=d.actividades.length>1;
+  var adv='';
+  if(multR) adv+='<br>&#9888; Se detectaron <strong>'+d.regimenes.length+' regimenes</strong>. Verifica y selecciona el correcto.';
+  if(multA) adv+='<br>&#9888; Se detectaron <strong>'+d.actividades.length+' actividades</strong>. Confirma cual aplica al servicio contratado.';
+  if(campos.length>0){
+    muestraRes(multR||multA?'warn':'ok',
+      (multR||multA?'&#9888;':'&#10003;')+' Datos extraidos de la CSF - verifica antes de continuar',
+      'Se completaron automaticamente: <strong>'+campos.join(', ')+'</strong>. Los campos en verde vienen de la CSF; editables si hay error.'+adv
+    );
+  } else {
+    muestraRes('warn','No se pudieron extraer datos','Formato no estandar. Completa los campos manualmente.');
+  }
+}
+
+function sv(id,val){var e=document.getElementById(id);if(e)e.value=val;}
+function ma(id){var e=document.getElementById(id);if(e)e.classList.add('autorel');}
+function sv2(id,val){var e=document.getElementById(id);if(e)e.value=val;}
+
+function muestraRes(tp,tit,msg){
+  var el=document.getElementById('csf-res');
+  el.className='csf-resultado vis';
+  var cls=tp==='ok'?'badge-ok':tp==='warn'?'badge-warn':'badge-err';
+  el.innerHTML='<div class="csf-badge '+cls+'">'+tit+'</div><p style="font-size:11.5px;color:var(--g700);line-height:1.55;margin-top:4px;">'+msg+'</p>';
+}
+
+function renderPag(n){
+  if(!pdfDoc) return;
+  pdfPag=Math.max(1,Math.min(n,pdfDoc.numPages));
+  pdfDoc.getPage(pdfPag).then(function(pag){
+    var vp=pag.getViewport({scale:1.4});
+    var canvas=document.getElementById('pdf-canvas');
+    var ctx=canvas.getContext('2d');
+    canvas.height=vp.height;canvas.width=vp.width;
+    pag.render({canvasContext:ctx,viewport:vp}).promise.then(function(){
+      document.getElementById('pdf-info').textContent='Pag '+pdfPag+' / '+pdfDoc.numPages;
+    });
+  });
+}
+function cambiarPag(d){renderPag(pdfPag+d);}
+
+function irA(n){
+  document.querySelectorAll('.paso').forEach(function(p,i){p.classList.toggle('activo',i===n);});
+  document.querySelectorAll('.step-tab').forEach(function(t,i){
+    t.classList.remove('activo','ok');
+    if(i===n) t.classList.add('activo');
+    else if(i<n) t.classList.add('ok');
+  });
+  if(n===2) renderChk();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function selTipo(t){
+  tipo=t;
+  document.getElementById('btn-pf').classList.toggle('sel',t==='PF');
+  document.getElementById('btn-pm').classList.toggle('sel',t==='PM');
+  document.getElementById('sec-pf').classList.toggle('vis',t==='PF');
+  document.getElementById('sec-pm').classList.toggle('vis',t==='PM');
+  var sel=document.getElementById('regimen');
+  for(var i=0;i<sel.options.length;i++){
+    var opt=sel.options[i];
+    if(!opt.value) continue;
+    var og=opt.parentElement.tagName==='OPTGROUP'?opt.parentElement.label:'';
+    opt.hidden=(t==='PF'?og==='Persona Moral':og==='Persona Fisica'||og==='Persona F\u00edsica');
+  }
+}
+
+function esResico(){var r=document.getElementById('regimen').value;return r==='PF_RESICO'||r==='PM_RESICO';}
+
+function calcRet(){
+  var reg=document.getElementById('regimen').value;
+  var act=document.getElementById('actividad').value;
+  var caja=document.getElementById('ret-resultado');
+  if(!reg||!act){caja.className='ret-box vacio';caja.innerHTML='Selecciona regimen y actividad para calcular la retencion';return;}
+  var r=RET[tipo]&&RET[tipo][act];
+  if(!r){
+    caja.className='ret-box alerta';
+    caja.innerHTML='<div class="ret-tit am">&#9888; Retencion no determinada automaticamente</div><p style="font-size:12px;color:var(--am-txt);line-height:1.5;">Esta combinacion requiere revision manual del contador.</p>';
+    return;
+  }
+  var resico=esResico();
+  var isrVal=resico?r.isr_r:r.isr_n;
+  var isrBase=resico?r.isr_rb:r.isr_nb;
+  var alerta=!!r.alerta&&!resico;
+  caja.className='ret-box'+(alerta?' alerta':'');
+  var resHtml='<div class="ret-tit'+(alerta?' am':'')+'">'+
+    (alerta?'&#9888;':'&#10003;')+' Retencion aplicable'+
+    (resico?' <span style="font-size:10px;background:rgba(45,90,61,.12);border-radius:3px;padding:1px 7px;color:var(--v-osc);font-weight:600;margin-left:4px;">RESICO</span>':'')+
+    '</div>'+
+    '<div class="ret-filas">'+
+      '<div class="ret-f">'+
+        '<span class="ret-lbl">Retencion IVA</span>'+
+        '<span class="ret-val'+(r.iva?'':' nd')+'">'+( r.iva||'Sin retencion')+'</span>'+
+        '<span class="ret-base">'+(r.ivab||'')+'</span>'+
+      '</div>'+
+      '<div class="ret-f">'+
+        '<span class="ret-lbl">Retencion ISR'+(resico?' (RESICO)':'')+'</span>'+
+        '<span class="ret-val'+(isrVal?'':' nd')+'">'+( isrVal||'Sin retencion')+'</span>'+
+        '<span class="ret-base">'+(isrBase||'')+'</span>'+
+      '</div>'+
+    '</div>'+
+    '<div class="ret-fun'+(alerta?' am':'')+'">'+r.fun+'</div>'+
+    (r.nota&&!resico?'<div class="ret-nota">&#9888; '+r.nota+'</div>':'');
+  caja.innerHTML=resHtml;
+}
+
+function selPago(p){
+  pagoTipo=p;
+  document.getElementById('btn-con').classList.toggle('sel',p==='contado');
+  document.getElementById('btn-cre').classList.toggle('sel',p==='credito');
+  document.getElementById('cred-det').classList.toggle('vis',p==='credito');
+}
+
+function valRFC(t){
+  var id=t==='pf'?'pf-rfc':'pm-rfc';
+  var eid='err-'+t;
+  var len=t==='pf'?13:12;
+  var v=document.getElementById(id).value.trim();
+  var ok=!v||v.length===len;
+  document.getElementById(id).classList.toggle('err',!ok);
+  document.getElementById(eid).classList.toggle('vis',!ok);
+}
+
+function renderChk(){
+  document.getElementById('chk-cont').innerHTML=DOCS.map(function(d){
+    var txt=d.txt||(tipo==='PF'?d.pf:d.pm);
+    return '<div class="chk-item"><div class="chk-num">'+d.id+'</div><div class="chk-txt">'+txt+'</div>'+
+      '<div class="chk-ops">'+
+      '<button class="chk-btn" id="si-'+d.id+'" onclick="selDoc('+d.id+',\'SI\')">SI</button>'+
+      '<button class="chk-btn" id="no-'+d.id+'" onclick="selDoc('+d.id+',\'NO\')">NO</button>'+
+      '</div></div>';
+  }).join('');
+}
+function selDoc(id,v){
+  document.getElementById('si-'+id).className='chk-btn'+(v==='SI'?' si-s':'');
+  document.getElementById('no-'+id).className='chk-btn'+(v==='NO'?' no-s':'');
+}
+function getDoc(id){
+  if(document.getElementById('si-'+id)&&document.getElementById('si-'+id).classList.contains('si-s')) return 'SI';
+  if(document.getElementById('no-'+id)&&document.getElementById('no-'+id).classList.contains('no-s')) return 'NO';
+  return '---';
+}
+
+function gv(id){var e=document.getElementById(id);return e?e.value||'---':'---';}
+function gs(id){var e=document.getElementById(id);return e?(e.options[e.selectedIndex]?e.options[e.selectedIndex].text:'---'):'---';}
+
+function generarFicha(){
+  var reg=document.getElementById('regimen');
+  var act=document.getElementById('actividad');
+  var regimenTxt=reg.options[reg.selectedIndex]?reg.options[reg.selectedIndex].text:'---';
+  var actTxt=act.options[act.selectedIndex]?act.options[act.selectedIndex].text:'---';
+  var resico=esResico();
+  var r=RET[tipo]&&RET[tipo][act.value];
+  var isrVal=r?(resico?r.isr_r:r.isr_n):null;
+  var isrBase=r?(resico?r.isr_rb:r.isr_nb):null;
+  var alerta=r&&r.alerta&&!resico;
+  var nombre,rfc,cp,dom,cfdi,mon,clabe,curpHtml='';
+  if(tipo==='PF'){
+    nombre=[gv('pf-nom'),gv('pf-ap'),gv('pf-am')].filter(function(x){return x&&x!=='---';}).join(' ')||'---';
+    rfc=gv('pf-rfc');cp=gv('pf-cp');dom=gv('pf-dom');cfdi=gs('pf-cfdi');mon=gs('pf-mon');clabe=gv('pf-clabe');
+    curpHtml='<div class="res-c"><span class="res-lbl">CURP</span><span class="res-val">'+gv('pf-curp')+'</span></div>';
+  } else {
+    nombre=gv('pm-razon');rfc=gv('pm-rfc');cp=gv('pm-cp');dom=gv('pm-dom');cfdi=gs('pm-cfdi');mon=gs('pm-mon');clabe=gv('pm-clabe');
+  }
+  var pagoCond=pagoTipo==='contado'?'Contado':'Credito - '+gv('dias-c')+' dias - '+gv('monto-c');
+  var hoy=new Date().toLocaleDateString('es-MX',{year:'numeric',month:'long',day:'numeric'});
+  var docsHTML=DOCS.map(function(d){
+    var txt=d.txt||(tipo==='PF'?d.pf:d.pm);
+    var est=getDoc(d.id);
+    var col=est==='SI'?'var(--v-sua)':est==='NO'?'var(--ro-txt)':'var(--g300)';
+    return '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f0ee;font-size:11.5px;"><span>'+d.id+'. '+txt+'</span><span style="font-weight:700;color:'+col+'">'+est+'</span></div>';
+  }).join('');
+
+  document.getElementById('ficha').innerHTML=
+    '<div>'+
+    '<div class="fich-head">'+
+      '<div><h2>Ficha de alta de proveedor</h2><div class="freg">REGISTRO SGC: CO-CEP-03</div></div>'+
+      '<div class="ffec">'+hoy+'<br><span style="font-size:10px;opacity:.45;">Pomoca-IA · Herramientas Internas</span></div>'+
+    '</div>'+
+    '<div class="fich-body">'+
+      '<div class="res-sec">'+
+        '<div class="res-sec-tit">Identificacion fiscal</div>'+
+        '<div class="res-campos">'+
+          '<div class="res-c"><span class="res-lbl">Tipo</span><span class="res-val">'+(tipo==='PF'?'Persona fisica':'Persona moral')+'</span></div>'+
+          '<div class="res-c" style="grid-column:span 2"><span class="res-lbl">Nombre / Razon social</span><span class="res-val">'+nombre+'</span></div>'+
+          '<div class="res-c"><span class="res-lbl">RFC</span><span class="res-val">'+rfc+'</span></div>'+
+          curpHtml+
+          '<div class="res-c"><span class="res-lbl">C.P. fiscal</span><span class="res-val">'+cp+'</span></div>'+
+          '<div class="res-c" style="grid-column:span 3"><span class="res-lbl">Domicilio fiscal</span><span class="res-val">'+dom+'</span></div>'+
+          '<div class="res-c"><span class="res-lbl">Regimen fiscal</span><span class="res-val">'+regimenTxt+'</span></div>'+
+          '<div class="res-c"><span class="res-lbl">Actividad facturada</span><span class="res-val">'+actTxt+'</span></div>'+
+          '<div class="res-c"><span class="res-lbl">Uso de CFDI</span><span class="res-val">'+cfdi+'</span></div>'+
+          '<div class="res-c"><span class="res-lbl">Moneda</span><span class="res-val">'+mon+'</span></div>'+
+          '<div class="res-c"><span class="res-lbl">CLABE</span><span class="res-val">'+clabe+'</span></div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="res-sec">'+
+        '<div class="res-sec-tit">Tasas de retencion</div>'+
+        '<div class="ret-duo">'+
+          '<div class="ret-d">'+
+            '<div class="ret-d-lbl">Retencion IVA</div>'+
+            '<div class="ret-d-val'+(r&&r.iva?'':' nd')+'">'+(r&&r.iva?r.iva:'Sin retencion')+'</div>'+
+            '<div class="ret-d-base">'+(r?r.ivab:'')+'</div>'+
+          '</div>'+
+          '<div class="ret-d'+(alerta?' am':'')+'">'+
+            '<div class="ret-d-lbl">Retencion ISR'+(resico?' (RESICO)':'')+'</div>'+
+            '<div class="ret-d-val'+(isrVal?'':' nd')+(alerta?' am':'')+'">'+( isrVal||(alerta?'Revisar':'Sin retencion'))+'</div>'+
+            '<div class="ret-d-base">'+(isrBase||'')+'</div>'+
+          '</div>'+
+        '</div>'+
+        (alerta&&r&&r.nota?'<div class="alerta-c">&#9888; <strong>Revision del contador requerida.</strong><br>'+r.nota+'</div>':'')+
+      '</div>'+
+      '<div class="res-sec">'+
+        '<div class="res-sec-tit">Contactos y servicio</div>'+
+        '<div class="res-campos">'+
+          '<div class="res-c"><span class="res-lbl">Rep. legal - Nombre</span><span class="res-val">'+gv('rep-n')+'</span></div>'+
+          '<div class="res-c"><span class="res-lbl">Rep. legal - Telefono</span><span class="res-val">'+gv('rep-t')+'</span></div>'+
+          '<div class="res-c"><span class="res-lbl">Condicion de pago</span><span class="res-val">'+pagoCond+'</span></div>'+
+          '<div class="res-c"><span class="res-lbl">Asesor - Nombre</span><span class="res-val">'+gv('as-n')+'</span></div>'+
+          '<div class="res-c"><span class="res-lbl">Asesor - Telefono</span><span class="res-val">'+gv('as-t')+'</span></div>'+
+          '<div class="res-c"><span class="res-lbl">Asesor - Correo</span><span class="res-val">'+gv('as-c')+'</span></div>'+
+          '<div class="res-c"><span class="res-lbl">Contabilidad - Nombre</span><span class="res-val">'+gv('co-n')+'</span></div>'+
+          '<div class="res-c"><span class="res-lbl">Contabilidad - Tel</span><span class="res-val">'+gv('co-t')+'</span></div>'+
+          '<div class="res-c" style="grid-column:span 3"><span class="res-lbl">Materiales o servicios</span><span class="res-val">'+gv('materiales')+'</span></div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="res-sec">'+
+        '<div class="res-sec-tit">Documentacion</div>'+
+        docsHTML+
+      '</div>'+
+      '<div class="res-sec">'+
+        '<div class="res-sec-tit">Firmas de autorizacion</div>'+
+        '<div class="firmas">'+
+          '<div class="firma"><div class="firma-lin"></div><div class="firma-n">LIC. JOSE ALVARO ALVAREZ CERINO</div><div class="firma-c">Coordinacion de adquisiciones - Integro</div></div>'+
+          '<div class="firma"><div class="firma-lin"></div><div class="firma-n">C.P. MARIA DEL ROSARIO SEVERIANO H.</div><div class="firma-c">Gerente de Administracion y finanzas - Reviso</div></div>'+
+          '<div class="firma"><div class="firma-lin"></div><div class="firma-n">ING. GUSTAVO CARRERA FALCON</div><div class="firma-c">Director general - Autorizo</div></div>'+
+        '</div>'+
+      '</div>'+
+    '</div></div>';
+  irA(3);
+}
+
+function nuevoRegistro(){
+  document.querySelectorAll('input,textarea').forEach(function(e){e.value='';e.classList.remove('autorel','err');});
+  document.querySelectorAll('select').forEach(function(e){e.selectedIndex=0;});
+  document.getElementById('csf-res').className='csf-resultado';
+  document.getElementById('csf-prog').className='csf-progress';
+  document.getElementById('panel-doble').style.display='none';
+  pdfDoc=null;
+  selTipo('PF');selPago('contado');calcRet();irA(0);
+}
+
+selTipo('PF');renderChk();
+</script>
+</body>
+</html>
