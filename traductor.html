@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -136,13 +136,13 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
 .vsep{border-top:2px solid #161616;margin:1.5mm 0}
 .vsep-firmas{border-top:3px solid #161616;margin:2mm 0 0}
 
-.vtable{width:100%;border-collapse:collapse;font-size:5.5pt;table-layout:fixed}
-.vtable th,.vtable td{border:0.5px solid #888;padding:0.6mm 0.4mm;vertical-align:middle}
-.vtable th{background:#C0C0C0;font-weight:700;text-align:center;font-size:5pt;line-height:1.1}
+.vtable{width:100%;border-collapse:collapse;font-size:5pt;table-layout:fixed}
+.vtable th,.vtable td{border:0.4px solid #888;padding:0.4mm 0.2mm;vertical-align:middle}
+.vtable th{background:#C0C0C0;font-weight:700;text-align:center;font-size:4.3pt;line-height:1.05}
 .vtable th.gc{background:#BFBFBF}
 .vtable th.gcl{background:#D9D9D9}
 .vtable .th-big{background:#BFBFBF;border-bottom:1px solid #888}
-.vtable td{text-align:center;font-size:5.5pt}
+.vtable td{text-align:center;font-size:4.5pt}
 .vtable td.der{text-align:right}
 .vtable td.izq{text-align:left}
 .vtable td.col-s{background:#BFBFBF;font-weight:700;text-align:right}
@@ -333,7 +333,11 @@ function parseCFDI(txt){
 // base0 = base gravada 0% ; base16 = base gravada 16% ; baseOtra = base con tasas distintas (ej 8%)
 // ivaAcred = IVA real timbrado (suma de traslados de IVA, OPCIÓN 1) — NO recalculado
 function impDet(cfdi){
-  let base0=0,base16=0,baseOtra=0,ivaAcred=0,ieps=0,hosp=0,otros=0,retIVA=0,retISR=0;
+  // Columnas de impuesto del nuevo formato:
+  // ieps(M) hosp(N) tua(O) aero(P) locales(Q) otrosVarios(R)
+  let base0=0,base16=0,baseOtra=0,ivaAcred=0;
+  let ieps=0,hosp=0,tua=0,aero=0,locales=0,otrosVarios=0;
+  let retIVA=0,retISR=0;
   let tasasRaras=[];
   for(const t of cfdi.traslados){
     if(t.impuesto==="002"){ // IVA
@@ -343,8 +347,8 @@ function impDet(cfdi){
       else if(tasa===0){ base0+=t.base; }
       else if(tasa===0.16){ base16+=t.base; }
       else { baseOtra+=t.base; tasasRaras.push(_pct(t.tasa)); }
-    } else if(t.impuesto==="003"){ ieps+=t.importe; }
-    else { otros+=t.importe; }
+    } else if(t.impuesto==="003"){ ieps+=t.importe; } // IEPS
+    else { otrosVarios+=t.importe; } // impuestos no estándar del XML -> "otros varios"
   }
   for(const r of cfdi.retenciones){
     if(r.impuesto==="002")retIVA+=r.importe;
@@ -353,7 +357,7 @@ function impDet(cfdi){
   const subtotal=cfdi.subtotal;
   // Si el XML no trajo desglose de IVA (ej. todo exento o sin nodo), cuadrar base
   if(base0+base16+baseOtra===0){ base0=subtotal; }
-  return{subtotal,base0,base16,baseOtra,ivaAcred,ieps,hosp,otros,retIVA,retISR,tasasRaras};
+  return{subtotal,base0,base16,baseOtra,ivaAcred,ieps,hosp,tua,aero,locales,otrosVarios,retIVA,retISR,tasasRaras};
 }
 
 // ══ UTILS ══
@@ -583,7 +587,7 @@ function generarVale(){
   const codigo=CODIGOS[fd.empresa]||"SG-FR-05";
   const logoImg='<img src="data:image/png;base64,'+LOGO_B64+'" style="max-width:100%;display:block">';
 
-  let sSin=0,sSub=0,sB0=0,sB16=0,sIVA=0,sIEPS=0,sHosp=0,sOtros=0,sRetIVA=0,sRetISR=0,sTotal=0;
+  let sSin=0,sSub=0,sB0=0,sB16=0,sIVA=0,sIEPS=0,sHosp=0,sTUA=0,sAero=0,sLoc=0,sOtrV=0,sRetIVA=0,sRetISR=0,sTotal=0;
   let filasHTML="";
   for(let i=0;i<20;i++){
     if(i<conceptos.length){
@@ -592,10 +596,11 @@ function generarVale(){
         const d=impDet(c.cfdi);
         const folio=[c.cfdi.serie,c.cfdi.folio].filter(Boolean).join("-")||"—";
         const fechaF=c.cfdi.fecha?new Date(c.cfdi.fecha).toLocaleDateString("es-MX"):"";
-        // S = I + J + M + N + O + P - Q - R   (I=0 para facturas)
-        const totalRen=d.subtotal+d.ivaAcred+d.ieps+d.hosp+d.otros-d.retIVA-d.retISR;
+        // U = H + I + L + M + N + O + P + Q + R - S - T   (H=0 para facturas)
+        const totalRen=d.subtotal+d.ivaAcred+d.ieps+d.hosp+d.tua+d.aero+d.locales+d.otrosVarios-d.retIVA-d.retISR;
         sSub+=d.subtotal;sB0+=d.base0+d.baseOtra;sB16+=d.base16;sIVA+=d.ivaAcred;
-        sIEPS+=d.ieps;sHosp+=d.hosp;sOtros+=d.otros;sRetIVA+=d.retIVA;sRetISR+=d.retISR;sTotal+=totalRen;
+        sIEPS+=d.ieps;sHosp+=d.hosp;sTUA+=d.tua;sAero+=d.aero;sLoc+=d.locales;sOtrV+=d.otrosVarios;
+        sRetIVA+=d.retIVA;sRetISR+=d.retISR;sTotal+=totalRen;
         filasHTML+='<tr>'+
           '<td>'+(i+1)+'</td>'+
           '<td style="font-size:5pt">'+esc(fechaF)+'</td>'+
@@ -604,21 +609,23 @@ function generarVale(){
           '<td class="izq" style="font-size:4pt">'+esc(c.justificacion)+'</td>'+
           '<td style="font-size:4.5pt">'+esc(fd.presupuesto)+'</td>'+
           '<td style="font-size:3.5pt">'+esc(c.partida)+'</td>'+
-          '<td></td>'+/* H insumo */
-          '<td class="der">-</td>'+/* I sin comprobante */
-          '<td class="der">'+mxn(d.subtotal)+'</td>'+/* J subtotal */
-          '<td class="der">'+dash(d.base0+d.baseOtra)+'</td>'+/* K base 0% */
-          '<td class="der">'+dash(d.base16)+'</td>'+/* L base 16% */
-          '<td class="der">'+dash(d.ivaAcred)+'</td>'+/* M IVA acred */
-          '<td class="der">'+dash(d.ieps)+'</td>'+
-          '<td class="der">'+dash(d.hosp)+'</td>'+
-          '<td class="der">'+dash(d.otros)+'</td>'+
-          '<td class="der">'+dash(d.retIVA)+'</td>'+
-          '<td class="der">'+dash(d.retISR)+'</td>'+
-          '<td class="col-s">'+mxn(totalRen)+'</td>'+
-          '<td class="col-t"></td></tr>';
+          '<td class="der">-</td>'+/* H sin comprobante */
+          '<td class="der">'+mxn(d.subtotal)+'</td>'+/* I subtotal */
+          '<td class="der">'+dash(d.base0+d.baseOtra)+'</td>'+/* J base 0% */
+          '<td class="der">'+dash(d.base16)+'</td>'+/* K base 16% */
+          '<td class="der">'+dash(d.ivaAcred)+'</td>'+/* L IVA acred */
+          '<td class="der">'+dash(d.ieps)+'</td>'+/* M IEPS */
+          '<td class="der">'+dash(d.hosp)+'</td>'+/* N Hospedaje */
+          '<td class="der">'+dash(d.tua)+'</td>'+/* O TUA */
+          '<td class="der">'+dash(d.aero)+'</td>'+/* P Aeroportuarios */
+          '<td class="der">'+dash(d.locales)+'</td>'+/* Q Locales */
+          '<td class="der">'+dash(d.otrosVarios)+'</td>'+/* R Otros varios */
+          '<td class="der">'+dash(d.retIVA)+'</td>'+/* S Ret IVA */
+          '<td class="der">'+dash(d.retISR)+'</td>'+/* T Ret ISR */
+          '<td class="col-s">'+mxn(totalRen)+'</td>'+/* U Total */
+          '<td class="col-t"></td></tr>';/* V OC */
       } else {
-        // Manual: solo I y S llevan el monto, todo impuesto vacío, J vacío
+        // Manual: solo H y U llevan el monto; I y todo impuesto vacío
         sSin+=c.monto;sTotal+=c.monto;
         filasHTML+='<tr>'+
           '<td>'+(i+1)+'</td>'+
@@ -628,18 +635,18 @@ function generarVale(){
           '<td class="izq" style="font-size:4pt">'+esc(c.justificacion)+'</td>'+
           '<td style="font-size:4.5pt">'+esc(fd.presupuesto)+'</td>'+
           '<td style="font-size:3.5pt">'+esc(c.partida)+'</td>'+
-          '<td></td>'+/* H */
-          '<td class="der">'+mxn(c.monto)+'</td>'+/* I sin comprobante */
-          '<td class="der"></td>'+/* J vacío */
-          '<td class="der"></td><td class="der"></td><td class="der"></td>'+/* K L M */
-          '<td class="der"></td><td class="der"></td><td class="der"></td>'+/* N O P */
-          '<td class="der"></td><td class="der"></td>'+/* Q R */
-          '<td class="col-s">'+mxn(c.monto)+'</td>'+
-          '<td class="col-t"></td></tr>';
+          '<td class="der">'+mxn(c.monto)+'</td>'+/* H sin comprobante */
+          '<td class="der"></td>'+/* I vacío */
+          '<td class="der"></td><td class="der"></td><td class="der"></td>'+/* J K L */
+          '<td class="der"></td><td class="der"></td><td class="der"></td>'+/* M N O */
+          '<td class="der"></td><td class="der"></td><td class="der"></td>'+/* P Q R */
+          '<td class="der"></td><td class="der"></td>'+/* S T */
+          '<td class="col-s">'+mxn(c.monto)+'</td>'+/* U */
+          '<td class="col-t"></td></tr>';/* V */
       }
     } else {
       filasHTML+='<tr><td>'+(i+1)+'</td><td></td><td></td><td></td><td></td><td></td><td></td>'+
-        '<td></td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>'+
+        '<td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>'+
         '<td class="col-s">-</td><td class="col-t"></td></tr>';
     }
   }
@@ -654,47 +661,50 @@ function generarVale(){
     '<span style="font-weight:700;padding-left:4mm">FECHA:</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:0 2mm .5mm;min-width:16mm;text-align:center">'+fechaFmt+'</span>'+
     '<span style="font-weight:700;color:#1F497D;padding-left:4mm">'+codigo+'</span></div>'+
     '<div style="display:grid;grid-template-columns:auto 1fr auto 1fr auto auto;gap:0 3mm;align-items:end;margin-bottom:2mm;font-size:8pt">'+
-    '<span style="font-weight:700">AREA:</span><span style="border-bottom:1px solid #161616;border-top:1px solid #161616;font-weight:700;padding:.5mm 1mm">'+esc(fd.area)+'</span>'+
-    '<span style="font-weight:700;padding-left:4mm">OFICINAS</span><span style="border-bottom:1px solid #161616;border-top:1px solid #161616;font-weight:700;padding:.5mm 1mm">'+esc(fd.oficina)+'</span>'+
+    '<span style="font-weight:700">AREA:</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:.5mm 1mm">'+esc(fd.area)+'</span>'+
+    '<span style="font-weight:700;padding-left:4mm">OFICINAS</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:.5mm 1mm">'+esc(fd.oficina)+'</span>'+
     '<span style="font-weight:700;padding-left:4mm">FOLIO:</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:0 2mm .5mm;min-width:10mm;text-align:center">'+esc(fd.folio)+'</span></div>'+
     '<div class="vsep"></div>'+
     '<table class="vtable"><colgroup>'+
-    '<col style="width:2.2%"><col style="width:4.5%"><col style="width:4.8%"><col style="width:5%"><col style="width:9%"><col style="width:5%"><col style="width:7.5%">'+
-    '<col style="width:4.5%"><col style="width:4.5%">'+/* H I */
-    '<col style="width:4.5%"><col style="width:4%"><col style="width:4%">'+/* J K L */
-    '<col style="width:4.5%"><col style="width:3.5%"><col style="width:4%"><col style="width:4%">'+/* M N O P */
-    '<col style="width:3.5%"><col style="width:3.5%">'+/* Q R */
-    '<col style="width:5%"><col style="width:4.5%"></colgroup>'+/* S T */
+    '<col style="width:2%"><col style="width:4%"><col style="width:4.3%"><col style="width:4.5%"><col style="width:8%"><col style="width:4.5%"><col style="width:6.5%">'+/* A-G */
+    '<col style="width:4%">'+/* H sin comp */
+    '<col style="width:4.3%"><col style="width:3.6%"><col style="width:3.6%"><col style="width:4%">'+/* I J K L */
+    '<col style="width:3.4%"><col style="width:3.4%"><col style="width:3.2%"><col style="width:3.4%"><col style="width:3.4%"><col style="width:3.4%">'+/* M-R impuestos */
+    '<col style="width:3.4%"><col style="width:3.4%">'+/* S T ret */
+    '<col style="width:4.6%"><col style="width:4.2%"></colgroup>'+/* U V */
     '<thead>'+
     '<tr>'+
     '<th rowspan="3">No.</th><th rowspan="3">FECHA</th><th rowspan="3">FACTURA</th><th rowspan="3">TIPO DE GASTOS</th>'+
     '<th rowspan="3">JUSTIFICACION</th><th rowspan="3">PRESUPUESTO</th><th rowspan="3">PARTIDA PRESUPUESTADA</th>'+
-    '<th rowspan="3">INSUMO DEL PRODUCTO</th><th rowspan="3">SIN COMP. FISCAL</th>'+
+    '<th rowspan="3">SIN COMP. FISCAL</th>'+
     '<th class="th-big gc" colspan="3">SUBTOTAL</th>'+
-    '<th class="th-big gc" colspan="4">IMPUESTOS</th>'+
+    '<th class="th-big gc" colspan="7">IMPUESTOS</th>'+
     '<th class="th-big gc" colspan="2">Retenciones</th>'+
     '<th rowspan="3" class="gc">TOTAL</th><th rowspan="3" class="gcl">Orden de compra</th>'+
     '</tr>'+
     '<tr>'+
     '<th rowspan="2">SUBTOTAL (Base)</th><th colspan="2">DESGLOSE DE LA BASE</th>'+
-    '<th rowspan="2">I.V.A. ACREDITABLE</th><th rowspan="2">IEPS</th><th rowspan="2">IMP. HOSPEDAJE</th><th rowspan="2">OTROS IMP.</th>'+
+    '<th rowspan="2">I.V.A. ACREDITABLE</th><th rowspan="2">IEPS</th><th rowspan="2">IMP. HOSPEDAJE</th><th rowspan="2">TUA</th><th rowspan="2">OTROS IMP. AEROPORT.</th><th rowspan="2">IMPUESTOS LOCALES</th><th rowspan="2">OTROS IMP. VARIOS</th>'+
     '<th rowspan="2">I.V.A</th><th rowspan="2">I.S.R</th>'+
     '</tr>'+
     '<tr><th>IVA AL 0%</th><th>IVA AL 16%</th></tr>'+
     '</thead><tbody>'+filasHTML+
     '<tr class="vtotal">'+
-    '<td colspan="8" style="text-align:right;font-size:5pt">SUMA:</td>'+
-    '<td class="der">'+dash(sSin)+'</td>'+
-    '<td class="der">'+mxn(sSub)+'</td>'+
-    '<td class="der">'+dash(sB0)+'</td>'+
-    '<td class="der">'+dash(sB16)+'</td>'+
-    '<td class="der">'+dash(sIVA)+'</td>'+
-    '<td class="der">'+dash(sIEPS)+'</td>'+
-    '<td class="der">'+dash(sHosp)+'</td>'+
-    '<td class="der">'+dash(sOtros)+'</td>'+
-    '<td class="der">'+dash(sRetIVA)+'</td>'+
-    '<td class="der">'+dash(sRetISR)+'</td>'+
-    '<td class="col-s">'+mxn(sTotal)+'</td>'+
+    '<td colspan="7" style="text-align:right;font-size:5pt">SUMA:</td>'+
+    '<td class="der">'+dash(sSin)+'</td>'+/* H */
+    '<td class="der">'+mxn(sSub)+'</td>'+/* I */
+    '<td class="der">'+dash(sB0)+'</td>'+/* J */
+    '<td class="der">'+dash(sB16)+'</td>'+/* K */
+    '<td class="der">'+dash(sIVA)+'</td>'+/* L */
+    '<td class="der">'+dash(sIEPS)+'</td>'+/* M */
+    '<td class="der">'+dash(sHosp)+'</td>'+/* N */
+    '<td class="der">'+dash(sTUA)+'</td>'+/* O */
+    '<td class="der">'+dash(sAero)+'</td>'+/* P */
+    '<td class="der">'+dash(sLoc)+'</td>'+/* Q */
+    '<td class="der">'+dash(sOtrV)+'</td>'+/* R */
+    '<td class="der">'+dash(sRetIVA)+'</td>'+/* S */
+    '<td class="der">'+dash(sRetISR)+'</td>'+/* T */
+    '<td class="col-s">'+mxn(sTotal)+'</td>'+/* U */
     '<td class="col-t"></td></tr>'+
     '</tbody></table>'+
     '<div class="vcheque"><div class="vcheque-label">ELABORAR&nbsp; CHEQUE A<br>NOMBRE DE:</div>'+
