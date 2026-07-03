@@ -386,7 +386,6 @@ function App() {
       {page === 'area' && <AreaPage areaKey={areaKey} setPage={setPage} />}
       {page === 'infotools' && <InfotoolsPage />}
       {page === 'cfdi' && <CfdiPage />}
-      {page === 'proveedores' && <ProveedoresPage />}
       <Footer />
     </div>
   );
@@ -413,7 +412,6 @@ function Topbar({ page, setPage }) {
         <button onClick={()=>scrollTo('sec-deps')}>Por área</button>
         <button className={page==='infotools'?'active':''} onClick={()=>setPage('infotools')}>Infotools E-Learning</button>
         <button className={page==='cfdi'?'active':''} onClick={()=>setPage('cfdi')}>Reembolsos · CFDI</button>
-        <button className={page==='proveedores'?'active':''} onClick={()=>setPage('proveedores')}>Registro Proveedores</button>
       </nav>
       <div className="topbar-right">
         <div className="status-pill"><span className="status-dot"/>En línea</div>
@@ -825,48 +823,6 @@ function CfdiPage() {
     </>
   );
 }
-
-function ProveedoresPage() {
-  return (
-    <>
-      <div className="cfdi-hero">
-        <div className="cfdi-hero-inner">
-          <div className="cfdi-pills">
-            <span className="cfdi-pill cfdi-pill-family">✦ Pomoca-IA · Familia de herramientas internas</span>
-            <span className="cfdi-pill cfdi-pill-privacy"><span className="cfdi-privacy-dot"/>Tu CSF nunca sale de tu computadora</span>
-          </div>
-          <div className="cfdi-meta">
-            <div>
-              <div className="eyebrow" style={{marginBottom:'12px'}}>Contabilidad · Registro SGC: CO-CEP-03</div>
-              <h1 className="hero-title" style={{fontSize:'clamp(36px,5vw,64px)',marginBottom:'14px'}}>Alta de <em>Proveedores</em></h1>
-              <p style={{fontSize:'17px',color:'var(--ink-soft)',lineHeight:'1.6',maxWidth:'52ch',marginBottom:'18px'}}>
-                Sube la Constancia de Situación Fiscal del proveedor y la herramienta detecta automáticamente RFC, régimen y retenciones aplicables. Completa los datos faltantes y genera la ficha lista para firmas.
-              </p>
-              <div className="cfdi-badges">
-                <span className="cfdi-badge">Lectura automática de CSF</span>
-                <span className="cfdi-badge">Cálculo de retenciones</span>
-                <span className="cfdi-badge">Persona física y moral</span>
-                <span className="cfdi-badge">Checklist de documentos</span>
-                <span className="cfdi-badge">Ficha imprimible</span>
-              </div>
-            </div>
-            <div style={{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'14px',padding:'20px 24px',minWidth:'200px',textAlign:'center'}}>
-              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:'10px',textTransform:'uppercase',letterSpacing:'0.1em',color:'var(--ink-mute)',marginBottom:'8px'}}>Herramienta</div>
-              <div style={{fontFamily:"'Instrument Serif',serif",fontSize:'32px',letterSpacing:'-0.02em',lineHeight:1}}>v 1.0</div>
-              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:'10px',color:'var(--ink-mute)',marginTop:'6px'}}>Área: Contabilidad</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="cfdi-frame-wrap">
-        <div className="cfdi-frame">
-          <iframe src="./proveedores.html" title="Alta de Proveedores" allow="clipboard-write" />
-        </div>
-      </div>
-    </>
-  );
-}
-
 
 function Footer() {
   return (
