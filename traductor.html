@@ -141,6 +141,7 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
 .vtable th{background:#C0C0C0;font-weight:700;text-align:center;font-size:4.3pt;line-height:1.05}
 .vtable th.gc{background:#BFBFBF}
 .vtable th.gcl{background:#D9D9D9}
+.vtable th.cod{background:#C0C0C0;font-size:3.6pt;font-weight:400;color:#555}
 .vtable .th-big{background:#BFBFBF;border-bottom:1px solid #888}
 .vtable td{text-align:center;font-size:4.5pt}
 .vtable td.der{text-align:right}
@@ -674,20 +675,25 @@ function generarVale(){
     '<col style="width:4.6%"><col style="width:4.2%"></colgroup>'+/* U V */
     '<thead>'+
     '<tr>'+
-    '<th rowspan="3">No.</th><th rowspan="3">FECHA</th><th rowspan="3">FACTURA</th><th rowspan="3">TIPO DE GASTOS</th>'+
-    '<th rowspan="3">JUSTIFICACION</th><th rowspan="3">PRESUPUESTO</th><th rowspan="3">PARTIDA PRESUPUESTADA</th>'+
-    '<th rowspan="3">SIN COMP. FISCAL</th>'+
+    '<th rowspan="4">No.</th><th rowspan="4">FECHA</th><th rowspan="4">FACTURA</th><th rowspan="4">TIPO DE GASTOS</th>'+
+    '<th rowspan="4">JUSTIFICACION</th><th rowspan="4">PRESUPUESTO</th><th rowspan="4">PARTIDA PRESUPUESTADA</th>'+
+    '<th rowspan="4">SIN COMP. FISCAL</th>'+
     '<th class="th-big gc" colspan="3">SUBTOTAL</th>'+
     '<th class="th-big gc" colspan="7">IMPUESTOS</th>'+
     '<th class="th-big gc" colspan="2">Retenciones</th>'+
-    '<th rowspan="3" class="gc">TOTAL</th><th rowspan="3" class="gcl">Orden de compra</th>'+
+    '<th rowspan="4" class="gc">TOTAL</th><th rowspan="4" class="gcl">Orden de compra</th>'+
     '</tr>'+
     '<tr>'+
-    '<th rowspan="2">SUBTOTAL (Base)</th><th colspan="2">DESGLOSE DE LA BASE</th>'+
-    '<th rowspan="2">I.V.A. ACREDITABLE</th><th rowspan="2">IEPS</th><th rowspan="2">IMP. HOSPEDAJE</th><th rowspan="2">TUA</th><th rowspan="2">OTROS IMP. AEROPORT.</th><th rowspan="2">IMPUESTOS LOCALES</th><th rowspan="2">OTROS IMP. VARIOS</th>'+
-    '<th rowspan="2">I.V.A</th><th rowspan="2">I.S.R</th>'+
+    '<th rowspan="3">SUBTOTAL<br>(Base - descuentos)</th><th colspan="2">DESGLOSE DE LA BASE</th>'+
+    '<th rowspan="3">I.V.A.<br>ACREDITABLE</th>'+
+    '<th class="cod">5105.101</th><th class="cod">5105.44</th><th class="cod">5105.103</th><th class="cod">5105.104</th><th class="cod">5105.105</th><th class="cod">5105.106</th>'+
+    '<th rowspan="3">I.V.A</th><th rowspan="3">I.S.R</th>'+
     '</tr>'+
-    '<tr><th>IVA AL 0%</th><th>IVA AL 16%</th></tr>'+
+    '<tr>'+
+    '<th rowspan="2">IVA AL 0%</th><th rowspan="2">IVA AL 16%</th>'+
+    '<th rowspan="2">IEPS</th><th rowspan="2">Impuesto sobre hospedaje</th><th rowspan="2">TUA</th><th rowspan="2">Otros impuestos aeroportuarios</th><th rowspan="2">Impuestos locales</th><th rowspan="2">Otros impuestos varios</th>'+
+    '</tr>'+
+    '<tr></tr>'+
     '</thead><tbody>'+filasHTML+
     '<tr class="vtotal">'+
     '<td colspan="7" style="text-align:right;font-size:5pt">SUMA:</td>'+
