@@ -620,7 +620,6 @@ function generarVale(){
           '<td>'+esc(folio)+'</td>'+
           '<td class="izq">'+esc(c.tipoGasto)+'</td>'+
           '<td class="izq txt">'+esc(c.justificacion)+'</td>'+
-          '<td>'+esc(fd.presupuesto)+'</td>'+
           '<td class="txt">'+esc(c.partida)+'</td>'+
           '<td class="der">-</td>'+/* H sin comprobante */
           '<td class="der">'+mxn(d.subtotal)+'</td>'+/* I subtotal */
@@ -646,7 +645,6 @@ function generarVale(){
           '<td>Sin CFDI</td>'+
           '<td class="izq">'+esc(c.tipoGasto)+'</td>'+
           '<td class="izq txt">'+esc(c.justificacion)+'</td>'+
-          '<td>'+esc(fd.presupuesto)+'</td>'+
           '<td class="txt">'+esc(c.partida)+'</td>'+
           '<td class="der">'+mxn(c.monto)+'</td>'+/* H sin comprobante */
           '<td class="der"></td>'+/* I vacío */
@@ -673,18 +671,19 @@ function generarVale(){
     '<span style="font-weight:700">AREA:</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:.5mm 1mm">'+esc(fd.area)+'</span>'+
     '<span style="font-weight:700;padding-left:4mm">OFICINAS</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:.5mm 1mm">'+esc(fd.oficina)+'</span>'+
     '<span style="font-weight:700;padding-left:4mm">FOLIO:</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:0 2mm .5mm;min-width:10mm;text-align:center">'+esc(fd.folio)+'</span></div>'+
+    '<div style="display:grid;grid-template-columns:auto 1fr;gap:0 3mm;align-items:end;margin-bottom:2mm;font-size:8pt"><span style="font-weight:700">PRESUPUESTO:</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:.5mm 1mm">'+esc(fd.presupuesto)+'</span></div>'+
     '<div class="vsep"></div>'+
     '<table class="vtable"><colgroup>'+
-    '<col style="width:2%"><col style="width:3.6%"><col style="width:3.8%"><col style="width:4%"><col style="width:6.3%"><col style="width:5%"><col style="width:5.6%">'+
-    '<col style="width:3.5%">'+
-    '<col style="width:3.8%"><col style="width:3.2%"><col style="width:3.2%"><col style="width:4.6%">'+
-    '<col style="width:3.2%"><col style="width:4.3%"><col style="width:3%"><col style="width:4.7%"><col style="width:4%"><col style="width:4.3%">'+
-    '<col style="width:3.2%"><col style="width:3.2%">'+
-    '<col style="width:4.4%"><col style="width:4%"></colgroup>'+/* U V */
+    '<col style="width:2.2%"><col style="width:4%"><col style="width:4.2%"><col style="width:4.5%"><col style="width:7.5%"><col style="width:7%">'+
+    '<col style="width:4%">'+
+    '<col style="width:4.2%"><col style="width:3.6%"><col style="width:3.6%"><col style="width:5%">'+
+    '<col style="width:3.6%"><col style="width:4.8%"><col style="width:3.4%"><col style="width:5.2%"><col style="width:4.4%"><col style="width:4.8%">'+
+    '<col style="width:3.6%"><col style="width:3.6%">'+
+    '<col style="width:4.8%"><col style="width:4.4%"></colgroup>'+/* U V */
     '<thead>'+
     '<tr>'+
     '<th rowspan="4">No.</th><th rowspan="4">FECHA DE FACTURA</th><th rowspan="4">FOLIO FACTURA</th><th rowspan="4">TIPO DE GASTOS</th>'+
-    '<th rowspan="4">JUSTIFICACION</th><th rowspan="4">PRESUPUESTO</th><th rowspan="4">PARTIDA PRESUPUESTADA</th>'+
+    '<th rowspan="4">JUSTIFICACION</th><th rowspan="4">PARTIDA PRESUPUESTADA</th>'+
     '<th rowspan="4">SIN COMP. FISCAL</th>'+
     '<th class="th-big gc" colspan="3">SUBTOTAL</th>'+
     '<th class="th-big gc" colspan="7">IMPUESTOS</th>'+
@@ -704,7 +703,7 @@ function generarVale(){
     '<tr></tr>'+
     '</thead><tbody>'+filasHTML+
     '<tr class="vtotal">'+
-    '<td colspan="7" style="text-align:right;font-size:5pt">SUMA:</td>'+
+    '<td colspan="6" style="text-align:right;font-size:5pt">SUMA:</td>'+
     '<td class="der">'+dash(sSin)+'</td>'+/* H */
     '<td class="der">'+mxn(sSub)+'</td>'+/* I */
     '<td class="der">'+dash(sB0)+'</td>'+/* J */
