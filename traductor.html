@@ -131,19 +131,22 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
 .vh{display:grid;grid-template-columns:36mm 1fr 36mm;gap:2mm;margin-bottom:2mm;align-items:center}
 .vh-logo img{width:100%;display:block}
 .vh-centro{text-align:center}
-.vh-empresa{font-size:10pt;font-weight:700;margin-bottom:1mm}
-.vh-tipo{font-size:9pt;font-weight:700}
+.vh-empresa{font-size:13pt;font-weight:700;margin-bottom:1mm;color:#161616}
+.vh-tipo{font-size:12pt;font-weight:700;color:#161616}
 .vsep{border-top:2px solid #161616;margin:1.5mm 0}
 .vsep-firmas{border-top:3px solid #161616;margin:2mm 0 0}
 
-.vtable{width:100%;border-collapse:collapse;font-size:5pt;table-layout:fixed}
-.vtable th,.vtable td{border:0.4px solid #888;padding:0.4mm 0.2mm;vertical-align:middle}
-.vtable th{background:#C0C0C0;font-weight:700;text-align:center;font-size:4.3pt;line-height:1.05}
+.vtable{width:100%;border-collapse:collapse;font-size:6.5pt;table-layout:fixed}
+.vtable th,.vtable td{border:0.4px solid #888;padding:0.6mm 0.3mm;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;word-break:break-word}
+.vtable th{background:#C0C0C0;font-weight:700;text-align:center;font-size:5.5pt;line-height:1.1;color:#161616}
 .vtable th.gc{background:#BFBFBF}
 .vtable th.gcl{background:#D9D9D9}
-.vtable th.cod{background:#C0C0C0;font-size:3.6pt;font-weight:400;color:#555}
+.vtable th.cod{background:#C0C0C0;font-size:4.5pt;font-weight:700;color:#161616}
 .vtable .th-big{background:#BFBFBF;border-bottom:1px solid #888}
-.vtable td{text-align:center;font-size:4.5pt}
+.vtable td{text-align:center;font-size:6.5pt;color:#161616}
+.vtable td.txt{font-size:5.5pt}
+/* thead ocupa su altura natural; las filas de datos se reparten el resto */
+.vtable thead th{height:auto}
 .vtable td.der{text-align:right}
 .vtable td.izq{text-align:left}
 .vtable td.col-s{background:#BFBFBF;font-weight:700;text-align:right}
@@ -590,26 +593,29 @@ function generarVale(){
 
   let sSin=0,sSub=0,sB0=0,sB16=0,sIVA=0,sIEPS=0,sHosp=0,sTUA=0,sAero=0,sLoc=0,sOtrV=0,sRetIVA=0,sRetISR=0,sTotal=0;
   let filasHTML="";
-  for(let i=0;i<20;i++){
-    if(i<conceptos.length){
+  const nFilas=conceptos.length;
+  // Altura por fila: reparte ~105mm entre las filas usadas (mín 6mm, máx 26mm)
+  const altoFilaMM = Math.max(6, Math.min(26, Math.floor(105/Math.max(1,nFilas))));
+  for(let i=0;i<nFilas;i++){
+    {
       const c=conceptos[i];
       if(c.tipo==="cfdi"){
         const d=impDet(c.cfdi);
         const folio=[c.cfdi.serie,c.cfdi.folio].filter(Boolean).join("-")||"—";
         const fechaF=c.cfdi.fecha?new Date(c.cfdi.fecha).toLocaleDateString("es-MX"):"";
         // U = H + I + L + M + N + O + P + Q + R - S - T   (H=0 para facturas)
-        const totalRen=d.subtotal+d.ivaAcred+d.ieps+d.hosp+d.tua+d.aero+d.locales+d.otrosVarios-d.retIVA-d.retISR;
+        const totalRen=d.subtotal+d.ivaAcred+d.ieps+d.hosp+d.otrosVarios-d.retIVA-d.retISR;/* U=H+I+L+M+N+R-S-T (TUA/aero/locales NO entran) */
         sSub+=d.subtotal;sB0+=d.base0+d.baseOtra;sB16+=d.base16;sIVA+=d.ivaAcred;
         sIEPS+=d.ieps;sHosp+=d.hosp;sTUA+=d.tua;sAero+=d.aero;sLoc+=d.locales;sOtrV+=d.otrosVarios;
         sRetIVA+=d.retIVA;sRetISR+=d.retISR;sTotal+=totalRen;
-        filasHTML+='<tr>'+
+        filasHTML+='<tr style="height:'+altoFilaMM+'mm">'+
           '<td>'+(i+1)+'</td>'+
-          '<td style="font-size:5pt">'+esc(fechaF)+'</td>'+
-          '<td style="font-size:4.5pt">'+esc(folio)+'</td>'+
-          '<td class="izq" style="font-size:4.5pt">'+esc(c.tipoGasto)+'</td>'+
-          '<td class="izq" style="font-size:4pt">'+esc(c.justificacion)+'</td>'+
-          '<td style="font-size:4.5pt">'+esc(fd.presupuesto)+'</td>'+
-          '<td style="font-size:3.5pt">'+esc(c.partida)+'</td>'+
+          '<td>'+esc(fechaF)+'</td>'+
+          '<td>'+esc(folio)+'</td>'+
+          '<td class="izq">'+esc(c.tipoGasto)+'</td>'+
+          '<td class="izq txt">'+esc(c.justificacion)+'</td>'+
+          '<td>'+esc(fd.presupuesto)+'</td>'+
+          '<td class="txt">'+esc(c.partida)+'</td>'+
           '<td class="der">-</td>'+/* H sin comprobante */
           '<td class="der">'+mxn(d.subtotal)+'</td>'+/* I subtotal */
           '<td class="der">'+dash(d.base0+d.baseOtra)+'</td>'+/* J base 0% */
@@ -628,14 +634,14 @@ function generarVale(){
       } else {
         // Manual: solo H y U llevan el monto; I y todo impuesto vacío
         sSin+=c.monto;sTotal+=c.monto;
-        filasHTML+='<tr>'+
+        filasHTML+='<tr style="height:'+altoFilaMM+'mm">'+
           '<td>'+(i+1)+'</td>'+
-          '<td style="font-size:5pt">'+esc(c.fecha)+'</td>'+
-          '<td style="font-size:4.5pt">Sin CFDI</td>'+
-          '<td class="izq" style="font-size:4.5pt">'+esc(c.tipoGasto)+'</td>'+
-          '<td class="izq" style="font-size:4pt">'+esc(c.justificacion)+'</td>'+
-          '<td style="font-size:4.5pt">'+esc(fd.presupuesto)+'</td>'+
-          '<td style="font-size:3.5pt">'+esc(c.partida)+'</td>'+
+          '<td>'+esc(c.fecha)+'</td>'+
+          '<td>Sin CFDI</td>'+
+          '<td class="izq">'+esc(c.tipoGasto)+'</td>'+
+          '<td class="izq txt">'+esc(c.justificacion)+'</td>'+
+          '<td>'+esc(fd.presupuesto)+'</td>'+
+          '<td class="txt">'+esc(c.partida)+'</td>'+
           '<td class="der">'+mxn(c.monto)+'</td>'+/* H sin comprobante */
           '<td class="der"></td>'+/* I vacío */
           '<td class="der"></td><td class="der"></td><td class="der"></td>'+/* J K L */
@@ -645,10 +651,6 @@ function generarVale(){
           '<td class="col-s">'+mxn(c.monto)+'</td>'+/* U */
           '<td class="col-t"></td></tr>';/* V */
       }
-    } else {
-      filasHTML+='<tr><td>'+(i+1)+'</td><td></td><td></td><td></td><td></td><td></td><td></td>'+
-        '<td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>'+
-        '<td class="col-s">-</td><td class="col-t"></td></tr>';
     }
   }
   const letra=numALetra(sTotal);
@@ -675,7 +677,7 @@ function generarVale(){
     '<col style="width:4.6%"><col style="width:4.2%"></colgroup>'+/* U V */
     '<thead>'+
     '<tr>'+
-    '<th rowspan="4">No.</th><th rowspan="4">FECHA</th><th rowspan="4">FACTURA</th><th rowspan="4">TIPO DE GASTOS</th>'+
+    '<th rowspan="4">No.</th><th rowspan="4">FECHA DE FACTURA</th><th rowspan="4">FOLIO FACTURA</th><th rowspan="4">TIPO DE GASTOS</th>'+
     '<th rowspan="4">JUSTIFICACION</th><th rowspan="4">PRESUPUESTO</th><th rowspan="4">PARTIDA PRESUPUESTADA</th>'+
     '<th rowspan="4">SIN COMP. FISCAL</th>'+
     '<th class="th-big gc" colspan="3">SUBTOTAL</th>'+
@@ -690,7 +692,7 @@ function generarVale(){
     '<th rowspan="3">I.V.A</th><th rowspan="3">I.S.R</th>'+
     '</tr>'+
     '<tr>'+
-    '<th rowspan="2">IVA AL 0%</th><th rowspan="2">IVA AL 16%</th>'+
+    '<th rowspan="2">IVA EXENTO</th><th rowspan="2">IVA AL 16%</th>'+
     '<th rowspan="2">IEPS</th><th rowspan="2">Impuesto sobre hospedaje</th><th rowspan="2">TUA</th><th rowspan="2">Otros impuestos aeroportuarios</th><th rowspan="2">Impuestos locales</th><th rowspan="2">Otros impuestos varios</th>'+
     '</tr>'+
     '<tr></tr>'+
