@@ -138,21 +138,21 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
 
 .vtable{width:100%;border-collapse:collapse;font-size:6.5pt;table-layout:fixed}
 .vtable th,.vtable td{border:0.4px solid #888;padding:0.6mm 0.3mm;vertical-align:middle}
-.vtable th{background:#C0C0C0;font-weight:700;text-align:center;font-size:5.6pt;line-height:1.15;color:#161616;white-space:normal;word-break:keep-all;overflow-wrap:normal;word-wrap:normal;overflow:visible;hyphens:none}
+.vtable th{background:#C0C0C0;font-weight:700;text-align:center;font-size:6.2pt;line-height:1.2;color:#161616;white-space:normal;word-break:keep-all;overflow-wrap:normal;word-wrap:normal;overflow:visible;hyphens:none}
 .vtable th.gc{background:#BFBFBF}
 .vtable th.gcl{background:#D9D9D9}
-.vtable th.cod{background:#C0C0C0;font-size:6.5pt;font-weight:700;color:#161616;white-space:nowrap}
+.vtable th.cod{background:#C0C0C0;font-size:7pt;font-weight:700;color:#161616;white-space:nowrap}
 .vtable .th-big{background:#BFBFBF;border-bottom:1px solid #888}
 .vtable td{text-align:center;font-size:6.5pt;color:#161616}
 .vtable td.txt{font-size:5.5pt;overflow:hidden;word-break:break-word;line-height:1.1}
 /* thead ocupa su altura natural; las filas de datos se reparten el resto */
-.vtable thead th{height:auto;padding:0.8mm 0.4mm}
+.vtable thead th{height:auto;padding:0.6mm 0.5mm}
 .vtable thead tr:first-child th{height:4mm}
-.vtable thead .cod{height:3.5mm;padding:0.3mm}
-/* Las celdas de nombre de impuesto (rowspan) necesitan altura para 2-3 líneas */
-.vtable thead th[rowspan="2"]{height:9mm;min-height:9mm}
-.vtable thead th[rowspan="3"]{height:12mm}
-.vtable thead th[rowspan="4"]{height:16mm}
+.vtable thead .cod{height:4mm;padding:0.4mm}
+/* Las celdas de nombre de impuesto (rowspan) necesitan altura para varias líneas */
+.vtable thead th[rowspan="2"]{height:15mm;min-height:15mm}
+.vtable thead th[rowspan="3"]{height:19mm}
+.vtable thead th[rowspan="4"]{height:23mm}
 .vtable td.der{text-align:right}
 .vtable td.izq{text-align:left}
 .vtable td.col-s{background:#BFBFBF;font-weight:700;text-align:right}
@@ -675,9 +675,9 @@ function generarVale(){
     '<span style="font-weight:700;padding-left:4mm">FOLIO:</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:0 2mm .5mm;min-width:10mm;text-align:center">'+esc(fd.folio)+'</span></div>'+
     '<div class="vsep"></div>'+
     '<table class="vtable"><colgroup>'+
-    '<col style="width:2%"><col style="width:3.8%"><col style="width:4%"><col style="width:4.2%"><col style="width:7%"><col style="width:4.3%"><col style="width:6%">'+
-    '<col style="width:3.7%">'+
-    '<col style="width:4%"><col style="width:3.3%"><col style="width:3.3%"><col style="width:3.6%">'+
+    '<col style="width:2%"><col style="width:3.6%"><col style="width:3.8%"><col style="width:4%"><col style="width:6.3%"><col style="width:5%"><col style="width:5.6%">'+
+    '<col style="width:3.5%">'+
+    '<col style="width:3.8%"><col style="width:3.2%"><col style="width:3.2%"><col style="width:4.6%">'+
     '<col style="width:3.2%"><col style="width:4.3%"><col style="width:3%"><col style="width:4.7%"><col style="width:4%"><col style="width:4.3%">'+
     '<col style="width:3.2%"><col style="width:3.2%">'+
     '<col style="width:4.4%"><col style="width:4%"></colgroup>'+/* U V */
