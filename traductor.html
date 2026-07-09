@@ -597,66 +597,162 @@ function generarVale(){
   const codigo=CODIGOS[fd.empresa]||"SG-FR-05";
   const logoImg='<img src="data:image/png;base64,'+LOGO_B64+'" style="max-width:100%;display:block">';
 
-  let sSin=0,sSub=0,sB0=0,sB16=0,sIVA=0,sIEPS=0,sHosp=0,sTUA=0,sAero=0,sLoc=0,sOtrV=0,sRetIVA=0,sRetISR=0,sTotal=0;
-  let filasHTML="";
-  const nFilas=conceptos.length;
-  // Altura por fila: reparte ~105mm entre las filas usadas (mín 6mm, máx 26mm)
-  const altoFilaMM = Math.max(6, Math.min(26, Math.floor(105/Math.max(1,nFilas))));
-  for(let i=0;i<nFilas;i++){
-    {
-      const c=conceptos[i];
-      if(c.tipo==="cfdi"){
-        const d=impDet(c.cfdi);
-        const folio=[c.cfdi.serie,c.cfdi.folio].filter(Boolean).join("-")||"—";
-        const fechaF=c.cfdi.fecha?new Date(c.cfdi.fecha).toLocaleDateString("es-MX"):"";
-        // U = H + I + L + M + N + O + P + Q + R - S - T   (H=0 para facturas)
-        const totalRen=d.subtotal+d.ivaAcred+d.ieps+d.hosp+d.otrosVarios-d.retIVA-d.retISR;/* U=H+I+L+M+N+R-S-T (TUA/aero/locales NO entran) */
-        sSub+=d.subtotal;sB0+=d.base0+d.baseOtra;sB16+=d.base16;sIVA+=d.ivaAcred;
-        sIEPS+=d.ieps;sHosp+=d.hosp;sTUA+=d.tua;sAero+=d.aero;sLoc+=d.locales;sOtrV+=d.otrosVarios;
-        sRetIVA+=d.retIVA;sRetISR+=d.retISR;sTotal+=totalRen;
-        filasHTML+='<tr style="height:'+altoFilaMM+'mm">'+
-          '<td>'+(i+1)+'</td>'+
-          '<td>'+esc(fechaF)+'</td>'+
-          '<td>'+esc(folio)+'</td>'+
-          '<td class="izq">'+esc(c.tipoGasto)+'</td>'+
-          '<td class="izq txt">'+esc(c.justificacion)+'</td>'+
-          '<td class="txt">'+esc(c.partida)+'</td>'+
-          '<td class="der">-</td>'+/* H sin comprobante */
-          '<td class="der">'+mxn(d.subtotal)+'</td>'+/* I subtotal */
-          '<td class="der">'+dash(d.base0+d.baseOtra)+'</td>'+/* J base 0% */
-          '<td class="der">'+dash(d.base16)+'</td>'+/* K base 16% */
-          '<td class="der">'+dash(d.ivaAcred)+'</td>'+/* L IVA acred */
-          '<td class="der">'+dash(d.ieps)+'</td>'+/* M IEPS */
-          '<td class="der">'+dash(d.hosp)+'</td>'+/* N Hospedaje */
-          '<td class="der">'+dash(d.tua)+'</td>'+/* O TUA */
-          '<td class="der">'+dash(d.aero)+'</td>'+/* P Aeroportuarios */
-          '<td class="der">'+dash(d.locales)+'</td>'+/* Q Locales */
-          '<td class="der">'+dash(d.otrosVarios)+'</td>'+/* R Otros varios */
-          '<td class="der">'+dash(d.retIVA)+'</td>'+/* S Ret IVA */
-          '<td class="der">'+dash(d.retISR)+'</td>'+/* T Ret ISR */
-          '<td class="col-s">'+mxn(totalRen)+'</td>'+/* U Total */
-          '<td class="col-t"></td></tr>';/* V OC */
-      } else {
-        // Manual: solo H y U llevan el monto; I y todo impuesto vacío
-        sSin+=c.monto;sTotal+=c.monto;
-        filasHTML+='<tr style="height:'+altoFilaMM+'mm">'+
-          '<td>'+(i+1)+'</td>'+
-          '<td>'+esc(c.fecha)+'</td>'+
-          '<td>Sin CFDI</td>'+
-          '<td class="izq">'+esc(c.tipoGasto)+'</td>'+
-          '<td class="izq txt">'+esc(c.justificacion)+'</td>'+
-          '<td class="txt">'+esc(c.partida)+'</td>'+
-          '<td class="der">'+mxn(c.monto)+'</td>'+/* H sin comprobante */
-          '<td class="der"></td>'+/* I vacío */
-          '<td class="der"></td><td class="der"></td><td class="der"></td>'+/* J K L */
-          '<td class="der"></td><td class="der"></td><td class="der"></td>'+/* M N O */
-          '<td class="der"></td><td class="der"></td><td class="der"></td>'+/* P Q R */
-          '<td class="der"></td><td class="der"></td>'+/* S T */
-          '<td class="col-s">'+mxn(c.monto)+'</td>'+/* U */
-          '<td class="col-t"></td></tr>';/* V */
-      }
+  // ── 1. Calcular detalle de cada concepto y acumular ──
+  const dets=conceptos.map(c=>{
+    if(c.tipo==="cfdi"){
+      const d=impDet(c.cfdi);
+      d._total=d.subtotal+d.ivaAcred+d.ieps+d.hosp+d.otrosVarios-d.retIVA-d.retISR;
+      d._sinComp=0;
+      return d;
+    } else {
+      return {subtotal:0,base0:0,base16:0,baseOtra:0,ivaAcred:0,ieps:0,hosp:0,tua:0,aero:0,locales:0,otrosVarios:0,retIVA:0,retISR:0,_total:c.monto,_sinComp:c.monto};
     }
+  });
+  const sum=k=>dets.reduce((a,d)=>a+(d[k]||0),0);
+  const sSin=dets.reduce((a,d)=>a+d._sinComp,0);
+  const sSub=sum("subtotal"),sB0=dets.reduce((a,d)=>a+d.base0+d.baseOtra,0),sB16=sum("base16"),sIVA=sum("ivaAcred");
+  const sIEPS=sum("ieps"),sHosp=sum("hosp"),sTUA=sum("tua"),sAero=sum("aero"),sLoc=sum("locales"),sOtrV=sum("otrosVarios");
+  const sRetIVA=sum("retIVA"),sRetISR=sum("retISR"),sTotal=dets.reduce((a,d)=>a+d._total,0);
+
+  // ── 2. Definir columnas dinámicas de impuestos/retenciones ──
+  // Cada una: {key, suma, cod, nombre}. Solo se muestra si suma!=0.
+  const colsImp=[
+    {key:"ieps",   suma:sIEPS, cod:"5105.101", nombre:"IEPS"},
+    {key:"hosp",   suma:sHosp, cod:"5105.44",  nombre:"Impuesto sobre hospedaje"},
+    {key:"tua",    suma:sTUA,  cod:"5105.103", nombre:"TUA"},
+    {key:"aero",   suma:sAero, cod:"5105.104", nombre:"Otros impuestos aeroportuarios"},
+    {key:"locales",suma:sLoc,  cod:"5105.105", nombre:"Impuestos locales"},
+    {key:"otrosVarios",suma:sOtrV,cod:"5105.106",nombre:"Otros impuestos varios"},
+  ].filter(c=>Math.abs(c.suma)>0.001);
+  const colsRet=[
+    {key:"retIVA", suma:sRetIVA, nombre:"I.V.A"},
+    {key:"retISR", suma:sRetISR, nombre:"I.S.R"},
+  ].filter(c=>Math.abs(c.suma)>0.001);
+  // Columna "SIN COMP. FISCAL": solo si hay algún gasto manual
+  const showSin=sSin>0.001;
+
+  // ── 3. Construir anchos dinámicos ──
+  // Columnas fijas base (siempre): No, Fecha, Folio, Tipo, Justif, Presup, Partida
+  // + [SinComp opcional] + Subtotal, IVA0, IVA16, IVAacred
+  // + [colsImp dinámicas] + [colsRet dinámicas] + Total, OC
+  // Reparto de anchos: damos pesos y normalizamos a ~96%.
+  const fijas=[
+    {w:2.2},   // No
+    {w:4},     // Fecha
+    {w:4.2},   // Folio
+    {w:4.5},   // Tipo
+    {w:9},     // Justificacion (más ancha)
+    {w:5},     // Presupuesto
+    {w:8},     // Partida (más ancha)
+  ];
+  if(showSin) fijas.push({w:4.5}); // Sin comp
+  const subCols=[
+    {w:5},   // Subtotal base
+    {w:4},   // IVA exento
+    {w:4},   // IVA 16%
+    {w:5},   // IVA acreditable
+  ];
+  // Impuestos y retenciones dinámicas: peso según longitud del nombre
+  const impCols=colsImp.map(c=>({w: c.nombre.length>18?6:(c.nombre.length>10?5:4)}));
+  const retCols=colsRet.map(()=>({w:4}));
+  const finCols=[{w:5.5},{w:5}]; // Total, OC
+
+  let pesos=[...fijas,...subCols,...impCols,...retCols,...finCols].map(x=>x.w);
+  const totalPeso=pesos.reduce((a,b)=>a+b,0);
+  const factor=96/totalPeso;
+  const colgroup='<colgroup>'+pesos.map(w=>'<col style="width:'+(w*factor).toFixed(2)+'%">').join("")+'</colgroup>';
+
+  // ── 4. Altura de filas dinámica ──
+  const nFilas=conceptos.length;
+  const altoFilaMM=Math.max(6,Math.min(26,Math.floor(105/Math.max(1,nFilas))));
+
+  // ── 5. Construir filas ──
+  let filasHTML="";
+  for(let i=0;i<nFilas;i++){
+    const c=conceptos[i], d=dets[i];
+    const esManual=c.tipo!=="cfdi";
+    const folio=esManual?"Sin CFDI":([c.cfdi.serie,c.cfdi.folio].filter(Boolean).join("-")||"—");
+    const fechaF=esManual?esc(c.fecha):(c.cfdi.fecha?new Date(c.cfdi.fecha).toLocaleDateString("es-MX"):"");
+    let celdas='<td>'+(i+1)+'</td>'+
+      '<td>'+fechaF+'</td>'+
+      '<td>'+esc(folio)+'</td>'+
+      '<td class="izq">'+esc(c.tipoGasto)+'</td>'+
+      '<td class="izq txt">'+esc(c.justificacion)+'</td>'+
+      '<td class="txt">'+esc(fd.presupuesto)+'</td>'+
+      '<td class="txt">'+esc(c.partida)+'</td>';
+    if(showSin) celdas+='<td class="der">'+(esManual?mxn(c.monto):"-")+'</td>';
+    // Subtotal + desglose base + IVA acreditable
+    celdas+='<td class="der">'+(esManual?"":mxn(d.subtotal))+'</td>'+
+      '<td class="der">'+(esManual?"":dash(d.base0+d.baseOtra))+'</td>'+
+      '<td class="der">'+(esManual?"":dash(d.base16))+'</td>'+
+      '<td class="der">'+(esManual?"":dash(d.ivaAcred))+'</td>';
+    // Impuestos dinámicos
+    for(const col of colsImp) celdas+='<td class="der">'+(esManual?"":dash(d[col.key]))+'</td>';
+    // Retenciones dinámicas
+    for(const col of colsRet) celdas+='<td class="der">'+(esManual?"":dash(d[col.key]))+'</td>';
+    // Total + OC
+    celdas+='<td class="col-s">'+mxn(d._total)+'</td>'+'<td class="col-t"></td>';
+    filasHTML+='<tr style="height:'+altoFilaMM+'mm">'+celdas+'</tr>';
   }
+
+  // ── 6. Construir thead dinámico ──
+  const nBaseCols=7+(showSin?1:0); // No..Partida (+SinComp)
+  const nImp=colsImp.length, nRet=colsRet.length;
+  // Fila 1: grupos
+  let thead='<thead><tr>'+
+    '<th rowspan="4">No.</th><th rowspan="4">FECHA DE FACTURA</th><th rowspan="4">FOLIO FACTURA</th><th rowspan="4">TIPO DE GASTOS</th>'+
+    '<th rowspan="4">JUSTIFICACION</th><th rowspan="4">PRESUPUESTO</th><th rowspan="4">PARTIDA PRESUPUESTADA</th>'+
+    (showSin?'<th rowspan="4">SIN COMP. FISCAL</th>':'')+
+    '<th class="th-big gc" colspan="3">SUBTOTAL</th>'+
+    (nImp>0?'<th class="th-big gc" colspan="'+nImp+'">IMPUESTOS</th>':'')+
+    (nRet>0?'<th class="th-big gc" colspan="'+nRet+'">Retenciones</th>':'')+
+    '<th rowspan="4" class="gc">TOTAL</th><th rowspan="4" class="gcl">Orden de compra</th>'+
+    '</tr>';
+  // Fila 2: subgrupos + códigos contables (para impuestos)
+  thead+='<tr>'+
+    '<th rowspan="3">SUBTOTAL<br>(Base - descuentos)</th><th colspan="2">DESGLOSE DE LA BASE</th>'+
+    '<th rowspan="3">I.V.A.<br>ACREDITABLE</th>';
+  // Wait: IVA acreditable es parte de subtotal group? En orig el grupo SUBTOTAL=colspan3 (subtotal, iva0, iva16). IVA acred está en grupo IMPUESTOS.
+  // Corrijo abajo.
+  thead=''; // reconstruir bien
+  // Grupo SUBTOTAL = 3 columnas (Subtotal base, IVA exento, IVA 16%)
+  // Grupo IMPUESTOS = IVA acreditable + colsImp dinámicas
+  const nImpGroup=1+nImp; // IVA acreditable siempre + dinámicas
+  thead='<thead><tr>'+
+    '<th rowspan="4">No.</th><th rowspan="4">FECHA DE FACTURA</th><th rowspan="4">FOLIO FACTURA</th><th rowspan="4">TIPO DE GASTOS</th>'+
+    '<th rowspan="4">JUSTIFICACION</th><th rowspan="4">PRESUPUESTO</th><th rowspan="4">PARTIDA PRESUPUESTADA</th>'+
+    (showSin?'<th rowspan="4">SIN COMP. FISCAL</th>':'')+
+    '<th class="th-big gc" colspan="3">SUBTOTAL</th>'+
+    '<th class="th-big gc" colspan="'+nImpGroup+'">IMPUESTOS</th>'+
+    (nRet>0?'<th class="th-big gc" colspan="'+nRet+'">Retenciones</th>':'')+
+    '<th rowspan="4" class="gc">TOTAL</th><th rowspan="4" class="gcl">Orden de compra</th>'+
+    '</tr>';
+  // Fila 2
+  thead+='<tr>'+
+    '<th rowspan="3">SUBTOTAL<br>(Base - descuentos)</th><th colspan="2">DESGLOSE DE LA BASE</th>'+
+    '<th rowspan="3">I.V.A.<br>ACREDITABLE</th>'+
+    colsImp.map(c=>'<th class="cod">'+c.cod+'</th>').join("")+
+    colsRet.map(c=>'<th rowspan="3">'+c.nombre+'</th>').join("")+
+    '</tr>';
+  // Fila 3
+  thead+='<tr>'+
+    '<th rowspan="2">IVA EXENTO</th><th rowspan="2">IVA AL 16%</th>'+
+    colsImp.map(c=>'<th rowspan="2">'+c.nombre+'</th>').join("")+
+    '</tr><tr></tr></thead>';
+
+  // ── 7. Fila de SUMA dinámica ──
+  const colspanSuma=6; // No..Partida sin presupuesto? -> son 7 base cols pero SUMA arranca en la etiqueta. Ajuste:
+  // Etiqueta SUMA ocupa desde No hasta Partida = 7 columnas base.
+  let sumaRow='<tr class="vtotal"><td colspan="7" style="text-align:right;font-size:5pt">SUMA:</td>';
+  if(showSin) sumaRow+='<td class="der">'+dash(sSin)+'</td>';
+  sumaRow+='<td class="der">'+mxn(sSub)+'</td>'+
+    '<td class="der">'+dash(sB0)+'</td>'+
+    '<td class="der">'+dash(sB16)+'</td>'+
+    '<td class="der">'+dash(sIVA)+'</td>';
+  for(const col of colsImp) sumaRow+='<td class="der">'+dash(col.suma)+'</td>';
+  for(const col of colsRet) sumaRow+='<td class="der">'+dash(col.suma)+'</td>';
+  sumaRow+='<td class="col-s">'+mxn(sTotal)+'</td><td class="col-t"></td></tr>';
+
   const letra=numALetra(sTotal);
 
   document.getElementById("vale").innerHTML=
@@ -671,55 +767,8 @@ function generarVale(){
     '<span style="font-weight:700">AREA:</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:.5mm 1mm">'+esc(fd.area)+'</span>'+
     '<span style="font-weight:700;padding-left:4mm">OFICINAS</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:.5mm 1mm">'+esc(fd.oficina)+'</span>'+
     '<span style="font-weight:700;padding-left:4mm">FOLIO:</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:0 2mm .5mm;min-width:10mm;text-align:center">'+esc(fd.folio)+'</span></div>'+
-    '<div style="display:grid;grid-template-columns:auto 1fr;gap:0 3mm;align-items:end;margin-bottom:2mm;font-size:8pt"><span style="font-weight:700">PRESUPUESTO:</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:.5mm 1mm">'+esc(fd.presupuesto)+'</span></div>'+
     '<div class="vsep"></div>'+
-    '<table class="vtable"><colgroup>'+
-    '<col style="width:2.2%"><col style="width:4%"><col style="width:4.2%"><col style="width:4.5%"><col style="width:7.5%"><col style="width:7%">'+
-    '<col style="width:4%">'+
-    '<col style="width:4.2%"><col style="width:3.6%"><col style="width:3.6%"><col style="width:5%">'+
-    '<col style="width:3.6%"><col style="width:4.8%"><col style="width:3.4%"><col style="width:5.2%"><col style="width:4.4%"><col style="width:4.8%">'+
-    '<col style="width:3.6%"><col style="width:3.6%">'+
-    '<col style="width:4.8%"><col style="width:4.4%"></colgroup>'+/* U V */
-    '<thead>'+
-    '<tr>'+
-    '<th rowspan="4">No.</th><th rowspan="4">FECHA DE FACTURA</th><th rowspan="4">FOLIO FACTURA</th><th rowspan="4">TIPO DE GASTOS</th>'+
-    '<th rowspan="4">JUSTIFICACION</th><th rowspan="4">PARTIDA PRESUPUESTADA</th>'+
-    '<th rowspan="4">SIN COMP. FISCAL</th>'+
-    '<th class="th-big gc" colspan="3">SUBTOTAL</th>'+
-    '<th class="th-big gc" colspan="7">IMPUESTOS</th>'+
-    '<th class="th-big gc" colspan="2">Retenciones</th>'+
-    '<th rowspan="4" class="gc">TOTAL</th><th rowspan="4" class="gcl">Orden de compra</th>'+
-    '</tr>'+
-    '<tr>'+
-    '<th rowspan="3">SUBTOTAL<br>(Base - descuentos)</th><th colspan="2">DESGLOSE DE LA BASE</th>'+
-    '<th rowspan="3">I.V.A.<br>ACREDITABLE</th>'+
-    '<th class="cod">5105.101</th><th class="cod">5105.44</th><th class="cod">5105.103</th><th class="cod">5105.104</th><th class="cod">5105.105</th><th class="cod">5105.106</th>'+
-    '<th rowspan="3">I.V.A</th><th rowspan="3">I.S.R</th>'+
-    '</tr>'+
-    '<tr>'+
-    '<th rowspan="2">IVA EXENTO</th><th rowspan="2">IVA AL 16%</th>'+
-    '<th rowspan="2">IEPS</th><th rowspan="2">Impuesto sobre hospedaje</th><th rowspan="2">TUA</th><th rowspan="2">Otros impuestos aeroportuarios</th><th rowspan="2">Impuestos locales</th><th rowspan="2">Otros impuestos varios</th>'+
-    '</tr>'+
-    '<tr></tr>'+
-    '</thead><tbody>'+filasHTML+
-    '<tr class="vtotal">'+
-    '<td colspan="6" style="text-align:right;font-size:5pt">SUMA:</td>'+
-    '<td class="der">'+dash(sSin)+'</td>'+/* H */
-    '<td class="der">'+mxn(sSub)+'</td>'+/* I */
-    '<td class="der">'+dash(sB0)+'</td>'+/* J */
-    '<td class="der">'+dash(sB16)+'</td>'+/* K */
-    '<td class="der">'+dash(sIVA)+'</td>'+/* L */
-    '<td class="der">'+dash(sIEPS)+'</td>'+/* M */
-    '<td class="der">'+dash(sHosp)+'</td>'+/* N */
-    '<td class="der">'+dash(sTUA)+'</td>'+/* O */
-    '<td class="der">'+dash(sAero)+'</td>'+/* P */
-    '<td class="der">'+dash(sLoc)+'</td>'+/* Q */
-    '<td class="der">'+dash(sOtrV)+'</td>'+/* R */
-    '<td class="der">'+dash(sRetIVA)+'</td>'+/* S */
-    '<td class="der">'+dash(sRetISR)+'</td>'+/* T */
-    '<td class="col-s">'+mxn(sTotal)+'</td>'+/* U */
-    '<td class="col-t"></td></tr>'+
-    '</tbody></table>'+
+    '<table class="vtable">'+colgroup+thead+'<tbody>'+filasHTML+sumaRow+'</tbody></table>'+
     '<div class="vcheque"><div class="vcheque-label">ELABORAR&nbsp; CHEQUE A<br>NOMBRE DE:</div>'+
     '<div class="vcheque-nombre">'+esc(fd.beneficiario)+'</div>'+
     '<div class="vcheque-totales"><div class="vcheque-suma-row"><span>TOTAL:</span><span class="vcheque-suma-val">'+mxn(sTotal)+'</span></div>'+
