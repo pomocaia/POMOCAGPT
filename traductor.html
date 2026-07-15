@@ -94,6 +94,10 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
   background-repeat:no-repeat;background-position:right 8px center;appearance:none;-webkit-appearance:none;
 }
 .campo input[type=text],.campo input[type=date]{background-image:none}
+.campo .sw input[type=text]{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a8a29e' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 8px center;padding-right:30px;
+}
 .campo select:focus,.campo input:focus{outline:none;border-color:var(--verde);box-shadow:0 0 0 3px rgba(4,120,87,.1)}
 .contador-chars{font-size:10px;color:var(--gris);margin-top:2px;align-self:flex-end}
 
@@ -156,7 +160,7 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
 .vtable thead th[rowspan="2"]{height:15mm;min-height:15mm}
 .vtable thead th[rowspan="3"]{height:19mm}
 .vtable thead th[rowspan="4"]{height:23mm}
-.vtable td.der{text-align:right}
+.vtable td.der{text-align:center}
 .vtable td.izq{text-align:left}
 .vtable td.col-s{background:#BFBFBF;font-weight:700;text-align:right}
 .vtable td.col-t{background:#D9D9D9}
