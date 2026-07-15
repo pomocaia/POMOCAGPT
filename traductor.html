@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -96,6 +95,7 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
 }
 .campo input[type=text],.campo input[type=date]{background-image:none}
 .campo select:focus,.campo input:focus{outline:none;border-color:var(--verde);box-shadow:0 0 0 3px rgba(4,120,87,.1)}
+.contador-chars{font-size:10px;color:var(--gris);margin-top:2px;align-self:flex-end}
 
 .sw{position:relative}
 .sw .dd{position:absolute;top:100%;left:0;right:0;max-height:200px;overflow-y:auto;
@@ -147,7 +147,7 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
 .vtable th.cod{background:#C0C0C0;font-size:5.5pt;font-weight:700;color:#161616;white-space:nowrap;overflow:hidden;padding:0.3mm 0.2mm}
 .vtable .th-big{background:#BFBFBF;border-bottom:1px solid #888}
 .vtable td{text-align:center;font-size:6.5pt;color:#161616}
-.vtable td.txt{font-size:5.5pt;overflow:hidden;word-break:break-word;line-height:1.1}
+.vtable td.txt{font-size:5.5pt;word-break:break-word;line-height:1.15}
 /* thead ocupa su altura natural; las filas de datos se reparten el resto */
 .vtable thead th{height:auto;padding:0.6mm 0.5mm}
 .vtable thead tr:first-child th{height:4mm}
@@ -291,7 +291,7 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
         <div class="sw"><input type="text" id="m_partida_txt" placeholder="Buscar…" autocomplete="off">
         <input type="hidden" id="m_partida"><ul class="dd" id="m_dd_partida"></ul></div></div>
       <div class="campo" style="grid-column:1/-1"><label>Justificación <span class="req">*</span></label>
-        <input type="text" id="m_justificacion" placeholder="Ej: Propina, estacionamiento sin recibo…"></div>
+        <input type="text" id="m_justificacion" maxlength="32" placeholder="Ej: Propina, estacionamiento sin recibo…" oninput="document.getElementById('m_cnt').textContent=this.value.length"><span class="contador-chars" id="m_cnt">0</span>/32</div>
     </div>
     <div id="modal-error"></div>
     <div class="modal-acciones">
@@ -626,7 +626,7 @@ function abrirModalSinCFDI(){
   document.getElementById("m_monto").value="";
   document.getElementById("m_tipo").value="";
   document.getElementById("m_partida").value="";document.getElementById("m_partida_txt").value="";
-  document.getElementById("m_justificacion").value="";
+  document.getElementById("m_justificacion").value="";document.getElementById("m_cnt").textContent="0";
   document.getElementById("modal-error").innerHTML="";
   document.getElementById("modal-sincfdi").classList.add("open");
 }
@@ -667,7 +667,7 @@ function renderFilasGastos(){
       return '<div class="fila-gasto" id="fila-'+i+'"><div class="fila-gasto-header"><span class="fila-gasto-titulo">#'+(i+1)+' 📄 '+esc(c.cfdi.emisor.nombre)+' · Folio '+esc(folio)+' · '+mxn(c.cfdi.total)+'</span></div>'+
         '<div class="grid2">'+
         '<div class="campo"><label>Tipo de gasto <span class="req">*</span></label><select id="fg_tipo_'+i+'" onchange="conceptos['+i+'].tipoGasto=this.value"><option value="">— Selecciona —</option>'+tipos+'</select></div>'+
-        '<div class="campo"><label>Justificación <span class="req">*</span></label><input type="text" id="fg_just_'+i+'" value="'+esc(c.justificacion||"")+'" placeholder="Ej: Consumo de alimentos…" oninput="conceptos['+i+'].justificacion=this.value"></div>'+
+        '<div class="campo"><label>Justificación <span class="req">*</span></label><input type="text" id="fg_just_'+i+'" maxlength="32" value="'+esc(c.justificacion||"")+'" placeholder="Ej: Consumo de alimentos…" oninput="conceptos['+i+'].justificacion=this.value;document.getElementById(\'fg_cnt_'+i+'\').textContent=this.value.length"><span class="contador-chars" id="fg_cnt_'+i+'">'+String((c.justificacion||"").length)+'</span>/32</div>'+
         '<div class="campo" style="grid-column:1/-1"><label>Partida presupuestada <span class="req">*</span></label><div class="sw"><input type="text" id="fg_partida_txt_'+i+'" value="'+esc(c.partida||"")+'" placeholder="Buscar partida…" autocomplete="off"><input type="hidden" id="fg_partida_'+i+'" value="'+esc(c.partida||"")+'"><ul class="dd" id="fg_dd_partida_'+i+'"></ul></div></div>'+
         '</div></div>';
     } else {
@@ -676,7 +676,7 @@ function renderFilasGastos(){
       return '<div class="fila-gasto sincfdi" id="fila-'+i+'"><div class="fila-gasto-header"><span class="fila-gasto-titulo">#'+(i+1)+' ✏️ Sin comprobante · '+esc(c.fecha||"")+' · '+mxn(c.monto)+'</span></div>'+
         '<div class="grid2">'+
         '<div class="campo"><label>Tipo de gasto <span class="req">*</span></label><select id="fg_tipo_'+i+'" onchange="conceptos['+i+'].tipoGasto=this.value"><option value="">— Selecciona —</option>'+tipos+'</select></div>'+
-        '<div class="campo"><label>Justificación <span class="req">*</span></label><input type="text" id="fg_just_'+i+'" value="'+esc(c.justificacion||"")+'" oninput="conceptos['+i+'].justificacion=this.value"></div>'+
+        '<div class="campo"><label>Justificación <span class="req">*</span></label><input type="text" id="fg_just_'+i+'" maxlength="32" value="'+esc(c.justificacion||"")+'" oninput="conceptos['+i+'].justificacion=this.value;document.getElementById(\'fg_cnt_'+i+'\').textContent=this.value.length"><span class="contador-chars" id="fg_cnt_'+i+'">'+String((c.justificacion||"").length)+'</span>/32</div>'+
         '<div class="campo" style="grid-column:1/-1"><label>Partida presupuestada <span class="req">*</span></label><div class="sw"><input type="text" id="fg_partida_txt_'+i+'" value="'+esc(c.partida||"")+'" placeholder="Buscar partida…" autocomplete="off"><input type="hidden" id="fg_partida_'+i+'" value="'+esc(c.partida||"")+'"><ul class="dd" id="fg_dd_partida_'+i+'"></ul></div></div>'+
         '</div></div>';
     }
