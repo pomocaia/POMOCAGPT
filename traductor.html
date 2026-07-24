@@ -143,14 +143,14 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
 .vsep{border-top:2px solid #161616;margin:1.5mm 0}
 .vsep-firmas{border-top:3px solid #161616;margin:1mm 0 0}
 
-.vtable{width:100%;border-collapse:collapse;font-size:6.5pt;table-layout:fixed}
+.vtable{width:100%;border-collapse:collapse;font-size:7.3pt;table-layout:fixed}
 .vtable th,.vtable td{border:0.4px solid #888;padding:0.6mm 0.3mm;vertical-align:middle}
-.vtable th{background:#C0C0C0;font-weight:700;text-align:center;font-size:5.8pt;line-height:1.12;color:#161616;white-space:normal;overflow-wrap:break-word;word-break:normal;overflow:hidden;hyphens:none;box-sizing:border-box}
+.vtable th{background:#C0C0C0;font-weight:700;text-align:center;font-size:6.3pt;line-height:1.14;color:#161616;white-space:normal;overflow-wrap:break-word;word-break:normal;overflow:hidden;hyphens:none;box-sizing:border-box}
 .vtable th.gc{background:#BFBFBF}
 .vtable th.gcl{background:#D9D9D9}
 .vtable th.cod{background:#C0C0C0;font-size:5.5pt;font-weight:700;color:#161616;white-space:nowrap;overflow:hidden;padding:0.3mm 0.2mm}
 .vtable .th-big{background:#BFBFBF;border-bottom:1px solid #888}
-.vtable td{text-align:center;font-size:6.5pt;color:#161616}
+.vtable td{text-align:center;font-size:7.3pt;color:#161616}
 .vtable td.txt{font-size:5.5pt;word-break:break-word;line-height:1.15}
 /* thead ocupa su altura natural; las filas de datos se reparten el resto */
 .vtable thead th{height:auto;padding:0.6mm 0.5mm}
@@ -167,13 +167,13 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
 .vtable tr.vtotal td{background:#e8e8e8;font-weight:700}
 .vtable tr.vtotal td.col-s{background:#aaaaaa}
 
-.vcheque{display:grid;grid-template-columns:38mm 1fr auto;gap:0;border:2px solid #161616;margin-top:1.5mm}
-.vcheque-label{padding:2mm;font-size:8pt;font-weight:700;text-align:center;border-right:2px solid #161616;display:flex;align-items:center;justify-content:center;line-height:1.4}
-.vcheque-nombre{padding:2mm 3mm;font-size:10pt;font-weight:700;display:flex;align-items:center;border-right:1px solid #999;flex:1}
-.vcheque-totales{padding:2mm 3mm;min-width:54mm;display:flex;flex-direction:column;justify-content:center;gap:1mm}
-.vcheque-suma-row{display:flex;justify-content:space-between;align-items:baseline;gap:2mm;font-size:7pt;font-weight:700}
-.vcheque-suma-val{font-size:10pt;font-weight:700;font-family:monospace;text-align:right}
-.vletra-box{border:1.5px solid #161616;padding:1.5mm 3mm;margin-top:1mm;text-align:center;font-size:7pt;font-weight:700}
+.vcheque{display:grid;grid-template-columns:34mm 1fr auto;gap:0;border:2px solid #161616;margin-top:1mm}
+.vcheque-label{padding:1mm;font-size:7pt;font-weight:700;text-align:center;border-right:2px solid #161616;display:flex;align-items:center;justify-content:center;line-height:1.25}
+.vcheque-nombre{padding:1mm 3mm;font-size:9pt;font-weight:700;display:flex;align-items:center;border-right:1px solid #999;flex:1}
+.vcheque-totales{padding:1mm 3mm;min-width:50mm;display:flex;flex-direction:column;justify-content:center;gap:0.6mm}
+.vcheque-suma-row{display:flex;justify-content:space-between;align-items:baseline;gap:2mm;font-size:6.5pt;font-weight:700}
+.vcheque-suma-val{font-size:9pt;font-weight:700;font-family:monospace;text-align:right}
+.vletra-box{border:1.5px solid #161616;padding:0.8mm 3mm;margin-top:0.6mm;text-align:center;font-size:6.5pt;font-weight:700}
 
 .vfirmas-titulo{font-size:10pt;font-weight:700;text-align:center;padding:0.5mm 0 1mm}
 .vfirmas{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6mm;margin-top:1.5mm}
@@ -517,7 +517,7 @@ function llenaSelect(id,lista,ph="— Selecciona —"){const s=document.getEleme
 function initSearch(tId,hId,dId,lista,permitirLibre){
   const t=document.getElementById(tId),h=document.getElementById(hId),d=document.getElementById(dId);
   if(!t||!h||!d)return;
-  const render=q=>{const fl=lista.filter(v=>v.toLowerCase().includes(q.toLowerCase())).slice(0,60);
+  const render=q=>{const fl=lista.filter(v=>v.toLowerCase().includes(q.toLowerCase())).slice(0,300);
     d.innerHTML=fl.length?fl.map(v=>'<li data-v="'+esc(v)+'">'+esc(v)+'</li>').join(""):(permitirLibre?'<li class="nm">Sin resultados — puedes escribir el nombre y usarlo tal cual</li>':'<li class="nm">Sin resultados</li>');d.classList.add("open");};
   t.addEventListener("focus",()=>render(t.value));
   t.addEventListener("input",()=>{h.value="";render(t.value)});
@@ -775,7 +775,7 @@ function generarVale(){
   // ── 4. Altura de fila FIJA — siempre se muestran las 15 filas del formato, usadas o no ──
   const MAX_FILAS=15;
   const nFilas=conceptos.length;
-  const altoFilaMM=5.2;
+  const altoFilaMM=5.6;
 
   // ── 5. Filas de datos (sin columna presupuesto) — siempre 15, se llenan vacías al final ──
   let filasHTML="";
@@ -834,7 +834,7 @@ function generarVale(){
     '</tr><tr></tr></thead>';
 
   // ── 7. Fila de SUMA ──
-  let sumaRow='<tr class="vtotal"><td colspan="6" style="text-align:right;font-size:5pt">SUMA:</td>';
+  let sumaRow='<tr class="vtotal"><td colspan="6" style="text-align:right;font-size:8.5pt;font-weight:700">SUMA:</td>';
   if(showSin) sumaRow+='<td class="der">'+dash(sSin)+'</td>';
   sumaRow+='<td class="der">'+mxn(sSub)+'</td>'+
     '<td class="der">'+dash(sB0)+'</td>'+
