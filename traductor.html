@@ -79,6 +79,16 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
 
 .facturas-lista{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
 .factura-item{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.pendiente-item{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;margin-bottom:8px}
+.pendiente-item.err{background:#fef2f2;border-color:#fecaca}
+.pendiente-item.dup{background:#fffbeb;border-color:#fcd34d}
+.pendiente-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.pendiente-nombre{font-size:12px;font-weight:700;color:#1c1917}
+.pendiente-detalle{font-size:11px;color:#78716c;margin-top:2px}
+.pendiente-monto{font-size:13px;font-weight:700;font-family:monospace;color:#065f46;white-space:nowrap}
+.pendiente-msg{font-size:11px;margin-top:4px}
+.pendiente-msg.err{color:var(--rojo)}
+.pendiente-msg.dup{color:var(--ambar)}
 .factura-item.sincfdi{background:#eff6ff;border-color:#bfdbfe}
 .factura-num{font-size:11px;font-weight:700;color:var(--verde-osc);background:var(--verde-claro);padding:2px 8px;border-radius:999px;flex-shrink:0}
 .factura-num.azul{color:var(--azul);background:var(--azul-claro)}
@@ -226,16 +236,18 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
     <!-- Zona dropzone XML (oculta hasta elegir Factura) -->
     <div id="zona-xml" style="display:none">
       <div class="dropzone" id="dropzone">
-        <p id="drop-label">Arrastra el <strong>XML de la factura</strong> o</p>
+        <p id="drop-label">Arrastra <strong>una o varias facturas XML</strong> o</p>
         <div class="botones-drop">
-          <label class="btn btn-p"><span id="lbl-xml-txt">Elegir archivo XML</span>
-            <input type="file" id="inputXML" accept=".xml,text/xml" style="display:none"></label>
+          <label class="btn btn-p"><span id="lbl-xml-txt">Elegir archivos XML</span>
+            <input type="file" id="inputXML" accept=".xml,text/xml" multiple style="display:none"></label>
           <button class="btn btn-s" id="btnCancelarXML">Cancelar</button>
         </div>
-        <p class="nombre-arch" id="nombreArch"></p>
       </div>
       <div id="zonaError1"></div>
-      <div id="resumenXML" style="display:none"></div>
+      <div id="pendientes-lista"></div>
+      <div id="pendientes-acciones" style="display:none">
+        <button class="btn btn-verde" id="btnAgregarPendientes" style="width:100%"></button>
+      </div>
     </div>
 
     <!-- Botón continuar -->
@@ -578,64 +590,114 @@ function renderListaConceptos(){
 }
 function eliminarConcepto(i){conceptos.splice(i,1);renderListaConceptos();}
 
-// ══ AGREGAR FACTURA XML ══
-function mostrarResumenXML(cfdi,nombre){
-  const det=impDet(cfdi);
-  const solo16=cfdi.retenciones.length===0&&cfdi.traslados.length>0&&cfdi.traslados.every(t=>t.impuesto==="002"&&t.tipoFactor==="Tasa"&&_n(t.tasa)===0.16);
-  let filas='<tr><td>Subtotal</td><td></td><td>'+mxn(cfdi.subtotal)+'</td></tr>';
-  if(cfdi.descuento>0)filas+='<tr><td class="neg">Descuento</td><td></td><td class="neg">-'+mxn(cfdi.descuento)+'</td></tr>';
-  for(const t of cfdi.traslados){
-    const verde=t.impuesto==="002"&&t.tipoFactor==="Tasa"&&_n(t.tasa)===0.16;
-    filas+='<tr><td><span class="pill '+(verde?"pv":"pa")+'">'+esc(etiq(t))+'</span></td><td style="color:#a8a29e">'+mxn(t.base)+'</td><td>'+(t.tipoFactor==="Exento"?"—":mxn(t.importe))+'</td></tr>';
-  }
-  for(const r of cfdi.retenciones)filas+='<tr><td><span class="pill pr">Ret. '+esc(IMP[r.impuesto]||r.impuesto)+'</span></td><td></td><td class="neg">-'+mxn(r.importe)+'</td></tr>';
-  filas+='<tr class="tot"><td><b>Total</b></td><td></td><td><b>'+mxn(cfdi.total)+'</b></td></tr>';
-  let verd=solo16?'<div class="alerta alerta-ok" style="margin-bottom:10px">✓ <strong>IVA 16% simple.</strong></div>':'<div class="alerta alerta-ojo" style="margin-bottom:10px">⚠ <strong>Mixto:</strong> '+cfdi.traslados.map(etiq).join(", ")+(cfdi.retenciones.length?" + ret.":"")+'</div>';
-  if(det.tasasRaras.length)verd+='<div class="alerta alerta-info" style="margin-bottom:10px">ℹ La factura tiene IVA a tasa '+det.tasasRaras.join(", ")+' (distinta de 0%/16%). El IVA acreditable se toma exacto del XML; la base se reporta aparte.</div>';
-  const r=document.getElementById("resumenXML");r.style.display="block";
-  r.innerHTML=verd+'<div class="tarjeta"><h2>✓ '+esc(nombre)+'</h2>'+
-    '<div style="font-size:12px;color:#57534e;margin-bottom:10px"><strong>'+esc(cfdi.emisor.nombre)+'</strong> · RFC '+esc(cfdi.emisor.rfc)+'<br>Folio: '+esc([cfdi.serie,cfdi.folio].filter(Boolean).join("-")||"—")+' · '+esc((cfdi.fecha||"").replace("T"," "))+'</div>'+
-    '<table class="imp"><thead><tr><th>Concepto</th><th>Base</th><th>Importe</th></tr></thead><tbody>'+filas+'</tbody></table>'+
-    '<button class="btn btn-verde" id="btnAgregar">+ Agregar al vale</button></div>';
-  document.getElementById("btnAgregar").onclick=()=>agregarFacturaCfdi(cfdi,nombre);
-}
-function agregarFacturaCfdi(cfdi,nombre){
-  if(conceptos.length>=15){document.getElementById("zonaError1").innerHTML='<div class="alerta alerta-error">Máximo 15 conceptos por vale.</div>';return}
-  if(cfdi.uuid&&conceptos.some(c=>c.tipo==="cfdi"&&c.cfdi.uuid===cfdi.uuid)){
-    document.getElementById("zonaError1").innerHTML='<div class="alerta alerta-ojo">⚠ Esta factura ya fue agregada (mismo UUID).</div>';return;}
-  conceptos.push({tipo:"cfdi",cfdi,nombre,tipoGasto:"",justificacion:"",partida:""});
-  renderListaConceptos();
-  ocultarZonaXML();
-}
-function procesar(txt,nombre){
-  document.getElementById("nombreArch").textContent=nombre||"";
+// ══ AGREGAR FACTURAS XML (EN LOTE) ══
+let pendientes=[]; // [{id,nombre,cfdi,error,dupInterno,dupExistente}]
+let _pendId=0;
+
+function leerArchivos(fileList){
+  const archivos=Array.from(fileList||[]);
+  if(!archivos.length)return;
   document.getElementById("zonaError1").innerHTML="";
+  let restantes=archivos.length;
+  archivos.forEach(f=>{
+    const r=new FileReader();
+    r.onload=()=>{
+      procesarUno(r.result,f.name);
+      restantes--;
+      if(restantes===0)renderPendientes();
+    };
+    r.onerror=()=>{
+      pendientes.push({id:++_pendId,nombre:f.name,cfdi:null,error:"No se pudo leer el archivo."});
+      restantes--;
+      if(restantes===0)renderPendientes();
+    };
+    r.readAsText(f);
+  });
+}
+
+function procesarUno(txt,nombre){
   try{
     const cfdi=parseCFDI(txt);
-    if(cfdi.uuid&&conceptos.some(c=>c.tipo==="cfdi"&&c.cfdi.uuid===cfdi.uuid)){
-      document.getElementById("resumenXML").style.display="none";
-      document.getElementById("zonaError1").innerHTML='<div class="alerta alerta-ojo">⚠ Esta factura ya fue agregada (mismo UUID).</div>';return;}
-    mostrarResumenXML(cfdi,nombre);
-    // ── Verificación antifraude en SharePoint (no bloquea, avisa) ──
+    const dupInterno=cfdi.uuid&&pendientes.some(p=>p.cfdi&&p.cfdi.uuid===cfdi.uuid);
+    const dupExistente=cfdi.uuid&&conceptos.some(c=>c.tipo==="cfdi"&&c.cfdi.uuid===cfdi.uuid);
+    const entry={id:++_pendId,nombre,cfdi,error:null,dupInterno,dupExistente};
+    pendientes.push(entry);
+    // Verificación antifraude en SharePoint (no bloquea, solo avisa en la tarjeta)
     if(spDisponible()&&cfdi.uuid){
       spConsultarUUID(cfdi.uuid).then(reg=>{
-        if(reg){
-          document.getElementById("zonaError1").innerHTML=
-            '<div class="alerta alerta-error"><strong>🚨 FACTURA YA COBRADA:</strong> este UUID se registró el '+esc(reg.fecha)+
-            ' por <strong>'+esc(reg.quien)+'</strong> (vale '+esc(reg.vale)+', $'+esc(String(reg.monto))+
-            '). Verifica con contabilidad antes de continuar.</div>';
-        }
+        if(reg){entry.spDup=reg;renderPendientes();}
       });
     }
   }catch(e){
-    document.getElementById("resumenXML").style.display="none";
-    document.getElementById("zonaError1").innerHTML='<div class="alerta alerta-error"><strong>No pude leer el archivo.</strong> '+esc(e.message)+'</div>';
+    pendientes.push({id:++_pendId,nombre,cfdi:null,error:e.message||"XML inválido."});
   }
 }
-function leerArchivo(f){if(!f)return;const r=new FileReader();r.onload=()=>procesar(r.result,f.name);r.readAsText(f)}
 
-function mostrarZonaXML(){document.getElementById("opciones-agregar").style.display="none";document.getElementById("zona-xml").style.display="block";document.getElementById("resumenXML").style.display="none";document.getElementById("nombreArch").textContent="";document.getElementById("zonaError1").innerHTML="";document.getElementById("inputXML").value="";}
-function ocultarZonaXML(){document.getElementById("zona-xml").style.display="none";document.getElementById("opciones-agregar").style.display="block";document.getElementById("resumenXML").style.display="none";}
+function eliminarPendiente(id){
+  pendientes=pendientes.filter(p=>p.id!==id);
+  renderPendientes();
+}
+
+function renderPendientes(){
+  const cont=document.getElementById("pendientes-lista");
+  const acciones=document.getElementById("pendientes-acciones");
+  if(!pendientes.length){cont.innerHTML="";acciones.style.display="none";return;}
+
+  cont.innerHTML=pendientes.map(p=>{
+    if(p.error){
+      return '<div class="pendiente-item err"><div class="pendiente-top">'+
+        '<div><div class="pendiente-nombre">✕ '+esc(p.nombre)+'</div><div class="pendiente-msg err">'+esc(p.error)+'</div></div>'+
+        '<button class="btn-del" onclick="eliminarPendiente('+p.id+')">✕</button></div></div>';
+    }
+    const folio=[p.cfdi.serie,p.cfdi.folio].filter(Boolean).join("-")||"—";
+    let msg="";
+    if(p.dupInterno)msg='<div class="pendiente-msg dup">⚠ Repetida dentro de estos mismos archivos.</div>';
+    else if(p.dupExistente)msg='<div class="pendiente-msg dup">⚠ Ya está agregada en este vale.</div>';
+    else if(p.spDup)msg='<div class="pendiente-msg err">🚨 Ya cobrada: registrada el '+esc(p.spDup.fecha)+' por '+esc(p.spDup.quien)+' (vale '+esc(p.spDup.vale)+').</div>';
+    const clase=(p.dupInterno||p.dupExistente||p.spDup)?"pendiente-item dup":"pendiente-item";
+    return '<div class="'+clase+'"><div class="pendiente-top">'+
+      '<div><div class="pendiente-nombre">'+esc(p.cfdi.emisor.nombre)+'</div>'+
+      '<div class="pendiente-detalle">Folio '+esc(folio)+' · '+esc((p.cfdi.fecha||"").slice(0,10))+'</div>'+msg+'</div>'+
+      '<div style="display:flex;align-items:center;gap:8px"><span class="pendiente-monto">'+mxn(p.cfdi.total)+'</span>'+
+      '<button class="btn-del" onclick="eliminarPendiente('+p.id+')">✕</button></div></div></div>';
+  }).join("");
+
+  const validas=pendientes.filter(p=>!p.error&&!p.dupInterno&&!p.dupExistente);
+  const btn=document.getElementById("btnAgregarPendientes");
+  if(validas.length){
+    acciones.style.display="block";
+    btn.disabled=false;
+    btn.textContent="+ Agregar "+validas.length+" factura"+(validas.length>1?"s":"")+" al vale";
+  } else {
+    acciones.style.display=pendientes.length?"block":"none";
+    btn.disabled=true;
+    btn.textContent="Ninguna factura válida para agregar";
+  }
+}
+
+function agregarPendientesAlVale(){
+  const validas=pendientes.filter(p=>!p.error&&!p.dupInterno&&!p.dupExistente);
+  if(!validas.length)return;
+  const espacio=15-conceptos.length;
+  if(espacio<=0){document.getElementById("zonaError1").innerHTML='<div class="alerta alerta-error">Máximo 15 conceptos por vale. Ya lo alcanzaste.</div>';return;}
+  const aAgregar=validas.slice(0,espacio);
+  aAgregar.forEach(p=>{
+    conceptos.push({tipo:"cfdi",cfdi:p.cfdi,nombre:p.nombre,tipoGasto:"",justificacion:"",partida:""});
+  });
+  const idsAgregados=new Set(aAgregar.map(p=>p.id));
+  pendientes=pendientes.filter(p=>!idsAgregados.has(p.id));
+  if(validas.length>aAgregar.length){
+    document.getElementById("zonaError1").innerHTML='<div class="alerta alerta-ojo">⚠ Solo se agregaron '+aAgregar.length+' (límite de 15 conceptos por vale). Las demás quedaron en la lista.</div>';
+  }
+  renderListaConceptos();
+  renderPendientes();
+  if(!pendientes.length)ocultarZonaXML();
+}
+
+function leerArchivo(f){if(f)leerArchivos([f]);}
+
+function mostrarZonaXML(){document.getElementById("opciones-agregar").style.display="none";document.getElementById("zona-xml").style.display="block";document.getElementById("zonaError1").innerHTML="";document.getElementById("inputXML").value="";pendientes=[];renderPendientes();}
+function ocultarZonaXML(){document.getElementById("zona-xml").style.display="none";document.getElementById("opciones-agregar").style.display="block";pendientes=[];document.getElementById("pendientes-lista").innerHTML="";document.getElementById("pendientes-acciones").style.display="none";}
 
 // ══ MODAL GASTO SIN COMPROBANTE ══
 function abrirModalSinCFDI(){
@@ -970,8 +1032,9 @@ document.addEventListener("DOMContentLoaded",()=>{
   const dz=document.getElementById("dropzone");
   dz.addEventListener("dragover",e=>{e.preventDefault();dz.classList.add("activa")});
   dz.addEventListener("dragleave",()=>dz.classList.remove("activa"));
-  dz.addEventListener("drop",e=>{e.preventDefault();dz.classList.remove("activa");leerArchivo(e.dataTransfer.files[0])});
-  document.getElementById("inputXML").addEventListener("change",e=>{leerArchivo(e.target.files[0]);e.target.value=""});
+  dz.addEventListener("drop",e=>{e.preventDefault();dz.classList.remove("activa");leerArchivos(e.dataTransfer.files)});
+  document.getElementById("inputXML").addEventListener("change",e=>{leerArchivos(e.target.files);e.target.value="";});
+  document.getElementById("btnAgregarPendientes").addEventListener("click",agregarPendientesAlVale);
   document.getElementById("m_cancelar").addEventListener("click",cerrarModalSinCFDI);
   document.getElementById("m_guardar").addEventListener("click",guardarSinCFDI);
   document.getElementById("modal-sincfdi").addEventListener("click",e=>{if(e.target.id==="modal-sincfdi")cerrarModalSinCFDI()});
