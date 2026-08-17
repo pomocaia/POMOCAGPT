@@ -147,6 +147,12 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
   #vale-container{display:block!important;margin:0;padding:0}
   body{background:white}
   @page{size:letter landscape;margin:5mm}
+  .salto-hoja{page-break-after:always;break-after:page}
+  .vale-hoja{page-break-inside:avoid;break-inside:avoid}
+}
+/* Separación visual entre hojas solo en pantalla */
+@media screen{
+  .vale-hoja+.vale-hoja{margin-top:20px;border-top:2px dashed #cbd5e1;padding-top:20px}
 }
 .vale{width:100%;background:white;font-family:Arial,sans-serif;font-size:7pt;color:#161616;margin:0 auto;padding:4mm}
 .vh{display:grid;grid-template-columns:36mm 1fr 36mm;gap:2mm;margin-bottom:2mm;align-items:center}
@@ -532,6 +538,7 @@ function numALetra(n){
 //  manual: {tipo:'manual', fecha, monto, tipoGasto, partida, justificacion}
 let conceptos=[];
 let ultimoFD=null; // datos del último vale generado (para nombrar el PDF con el folio)
+const MAX_CONCEPTOS=45; // hasta 3 hojas de 15 conceptos
 
 // ══ SELECTS ══
 function llenaSelect(id,lista,ph="— Selecciona —"){const s=document.getElementById(id);if(s)s.innerHTML='<option value="">'+ph+'</option>'+lista.map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join("");}
@@ -678,8 +685,8 @@ function renderPendientes(){
 function agregarPendientesAlVale(){
   const validas=pendientes.filter(p=>!p.error&&!p.dupInterno&&!p.dupExistente);
   if(!validas.length)return;
-  const espacio=15-conceptos.length;
-  if(espacio<=0){document.getElementById("zonaError1").innerHTML='<div class="alerta alerta-error">Máximo 15 conceptos por vale. Ya lo alcanzaste.</div>';return;}
+  const espacio=MAX_CONCEPTOS-conceptos.length;
+  if(espacio<=0){document.getElementById("zonaError1").innerHTML='<div class="alerta alerta-error">Máximo '+MAX_CONCEPTOS+' conceptos por vale. Ya lo alcanzaste.</div>';return;}
   const aAgregar=validas.slice(0,espacio);
   aAgregar.forEach(p=>{
     conceptos.push({tipo:"cfdi",cfdi:p.cfdi,nombre:p.nombre,tipoGasto:"",justificacion:"",partida:""});
@@ -687,7 +694,7 @@ function agregarPendientesAlVale(){
   const idsAgregados=new Set(aAgregar.map(p=>p.id));
   pendientes=pendientes.filter(p=>!idsAgregados.has(p.id));
   if(validas.length>aAgregar.length){
-    document.getElementById("zonaError1").innerHTML='<div class="alerta alerta-ojo">⚠ Solo se agregaron '+aAgregar.length+' (límite de 15 conceptos por vale). Las demás quedaron en la lista.</div>';
+    document.getElementById("zonaError1").innerHTML='<div class="alerta alerta-ojo">⚠ Solo se agregaron '+aAgregar.length+' (límite de '+MAX_CONCEPTOS+' conceptos por vale). Las demás quedaron en la lista.</div>';
   }
   renderListaConceptos();
   renderPendientes();
@@ -722,7 +729,7 @@ function guardarSinCFDI(){
   if(!tipo)return err("Selecciona el tipo de gasto.");
   if(!partida)return err("Selecciona la partida presupuestada.");
   if(!just)return err("Escribe la justificación.");
-  if(conceptos.length>=15)return err("Máximo 15 conceptos por vale.");
+  if(conceptos.length>=MAX_CONCEPTOS)return err("Máximo "+MAX_CONCEPTOS+" conceptos por vale.");
   conceptos.push({tipo:"manual",fecha,monto,tipoGasto:tipo,partida,justificacion:just});
   cerrarModalSinCFDI();
   renderListaConceptos();
@@ -789,6 +796,7 @@ function validarPaso2(){
 }
 
 // ══ GENERAR VALE ══
+const MAX_POR_HOJA=15;
 function generarVale(){
   if(!validarPaso2())return;
   const fd=getFD();
@@ -816,7 +824,8 @@ function generarVale(){
   const sIEPS=sum("ieps"),sHosp=sum("hosp"),sTUA=sum("tua"),sAero=sum("aero"),sLoc=sum("locales"),sOtrV=sum("otrosVarios");
   const sRetIVA=sum("retIVA"),sRetISR=sum("retISR"),sTotal=dets.reduce((a,d)=>a+d._total,0);
 
-  // ── 2. Columnas dinámicas de impuestos/retenciones (solo las que se usan) ──
+  // ── 2. Columnas dinámicas de impuestos/retenciones (calculadas sobre TODO el vale,
+  //      para que todas las hojas tengan exactamente las mismas columnas) ──
   const colsImp=[
     {key:"ieps",   suma:sIEPS, cod:"5105.101", nombre:"IEPS"},
     {key:"hosp",   suma:sHosp, cod:"5105.44",  nombre:"Impuesto sobre hospedaje"},
@@ -831,58 +840,23 @@ function generarVale(){
   ].filter(c=>Math.abs(c.suma)>0.001);
   const showSin=sSin>0.001;
 
-  // ── 3. Anchos de columnas (SIN presupuesto — ahora vive en el encabezado) ──
-  const fijas=[{w:2.2},{w:4},{w:4.2},{w:4.5},{w:9.5},{w:9}]; // No,Fecha,Folio,Tipo,Justif,Partida
+  // ── 3. Anchos de columnas ──
+  const fijas=[{w:2.2},{w:4},{w:4.2},{w:4.5},{w:9.5},{w:9}];
   if(showSin) fijas.push({w:4.5});
-  const subCols=[{w:5},{w:4},{w:4},{w:5}]; // Subtotal, IVA exento, IVA16, IVAacred
+  const subCols=[{w:5},{w:4},{w:4},{w:5}];
   const impCols=colsImp.map(c=>({w:c.nombre.length>18?6:(c.nombre.length>10?5:4)}));
   const retCols=colsRet.map(()=>({w:4}));
-  const finCols=[{w:5.5},{w:5}]; // Total, OC
-
+  const finCols=[{w:5.5},{w:5}];
   let pesos=[...fijas,...subCols,...impCols,...retCols,...finCols].map(x=>x.w);
   const totalPeso=pesos.reduce((a,b)=>a+b,0);
   const factor=96/totalPeso;
   const colgroup='<colgroup>'+pesos.map(w=>'<col style="width:'+(w*factor).toFixed(2)+'%">').join("")+'</colgroup>';
 
-  // ── 4. Altura de fila FIJA — siempre se muestran las 15 filas del formato, usadas o no ──
-  const MAX_FILAS=15;
-  const nFilas=conceptos.length;
   const altoFilaMM=5.6;
+  const nColsFijas=6+(showSin?1:0);
+  const nColsTotal=nColsFijas+4+colsImp.length+colsRet.length+2;
 
-  // ── 5. Filas de datos (sin columna presupuesto) — siempre 15, se llenan vacías al final ──
-  let filasHTML="";
-  for(let i=0;i<nFilas;i++){
-    const c=conceptos[i], d=dets[i];
-    const esManual=c.tipo!=="cfdi";
-    const folio=esManual?"Sin CFDI":([c.cfdi.serie,c.cfdi.folio].filter(Boolean).join("-")||"—");
-    const fechaF=esManual?esc(c.fecha):(c.cfdi.fecha?new Date(c.cfdi.fecha).toLocaleDateString("es-MX"):"");
-    let celdas='<td>'+(i+1)+'</td>'+
-      '<td>'+fechaF+'</td>'+
-      '<td>'+esc(folio)+'</td>'+
-      '<td class="izq">'+esc(c.tipoGasto)+'</td>'+
-      '<td class="izq txt">'+esc(c.justificacion)+'</td>'+
-      '<td class="txt">'+esc(c.partida)+'</td>';
-    if(showSin) celdas+='<td class="der">'+(esManual?mxn(c.monto):"-")+'</td>';
-    celdas+='<td class="der">'+(esManual?"":mxn(d.subtotal))+'</td>'+
-      '<td class="der">'+(esManual?"":dash(d.base0+d.baseOtra))+'</td>'+
-      '<td class="der">'+(esManual?"":dash(d.base16))+'</td>'+
-      '<td class="der">'+(esManual?"":dash(d.ivaAcred))+'</td>';
-    for(const col of colsImp) celdas+='<td class="der">'+(esManual?"":dash(d[col.key]))+'</td>';
-    for(const col of colsRet) celdas+='<td class="der">'+(esManual?"":dash(d[col.key]))+'</td>';
-    celdas+='<td class="col-s">'+mxn(d._total)+'</td>'+'<td class="col-t"></td>';
-    filasHTML+='<tr style="height:'+altoFilaMM+'mm">'+celdas+'</tr>';
-  }
-  // Filas vacías hasta completar las 15 del formato
-  const nColsFijas=6+(showSin?1:0); // No,Fecha,Folio,Tipo,Justif,Partida [+SinComp]
-  const nColsTotal=nColsFijas+4+colsImp.length+colsRet.length+2; // +Subtotal/IVAexento/IVA16/IVAacred +imp +ret +Total+OC
-  for(let i=nFilas;i<MAX_FILAS;i++){
-    let vac='<td>'+(i+1)+'</td>';
-    for(let k=1;k<nColsTotal-2;k++) vac+='<td></td>';
-    vac+='<td class="col-s"></td><td class="col-t"></td>';
-    filasHTML+='<tr style="height:'+altoFilaMM+'mm">'+vac+'</tr>';
-  }
-
-  // ── 6. Encabezado de tabla dinámico (sin columna Presupuesto) ──
+  // ── 4. Encabezado de tabla (igual en todas las hojas) ──
   const nImp=colsImp.length, nRet=colsRet.length;
   const nImpGroup=1+nImp;
   let thead='<thead><tr>'+
@@ -905,7 +879,36 @@ function generarVale(){
     colsImp.map(c=>'<th rowspan="2">'+c.nombre+'</th>').join("")+
     '</tr><tr></tr></thead>';
 
-  // ── 7. Fila de SUMA ──
+  // ── 5. Construir una fila de datos ──
+  function filaDatos(i){
+    const c=conceptos[i], d=dets[i];
+    const esManual=c.tipo!=="cfdi";
+    const folio=esManual?"Sin CFDI":([c.cfdi.serie,c.cfdi.folio].filter(Boolean).join("-")||"—");
+    const fechaF=esManual?esc(c.fecha):(c.cfdi.fecha?new Date(c.cfdi.fecha).toLocaleDateString("es-MX"):"");
+    let celdas='<td>'+(i+1)+'</td>'+
+      '<td>'+fechaF+'</td>'+
+      '<td>'+esc(folio)+'</td>'+
+      '<td class="izq">'+esc(c.tipoGasto)+'</td>'+
+      '<td class="izq txt">'+esc(c.justificacion)+'</td>'+
+      '<td class="txt">'+esc(c.partida)+'</td>';
+    if(showSin) celdas+='<td class="der">'+(esManual?mxn(c.monto):"-")+'</td>';
+    celdas+='<td class="der">'+(esManual?"":mxn(d.subtotal))+'</td>'+
+      '<td class="der">'+(esManual?"":dash(d.base0+d.baseOtra))+'</td>'+
+      '<td class="der">'+(esManual?"":dash(d.base16))+'</td>'+
+      '<td class="der">'+(esManual?"":dash(d.ivaAcred))+'</td>';
+    for(const col of colsImp) celdas+='<td class="der">'+(esManual?"":dash(d[col.key]))+'</td>';
+    for(const col of colsRet) celdas+='<td class="der">'+(esManual?"":dash(d[col.key]))+'</td>';
+    celdas+='<td class="col-s">'+mxn(d._total)+'</td>'+'<td class="col-t"></td>';
+    return '<tr style="height:'+altoFilaMM+'mm">'+celdas+'</tr>';
+  }
+  function filaVacia(numero){
+    let vac='<td>'+numero+'</td>';
+    for(let k=1;k<nColsTotal-2;k++) vac+='<td></td>';
+    vac+='<td class="col-s"></td><td class="col-t"></td>';
+    return '<tr style="height:'+altoFilaMM+'mm">'+vac+'</tr>';
+  }
+
+  // ── 6. Fila de SUMA (solo en la última hoja) ──
   let sumaRow='<tr class="vtotal"><td colspan="6" style="text-align:right;font-size:8.5pt;font-weight:700">SUMA:</td>';
   if(showSin) sumaRow+='<td class="der">'+dash(sSin)+'</td>';
   sumaRow+='<td class="der">'+mxn(sSub)+'</td>'+
@@ -918,24 +921,29 @@ function generarVale(){
 
   const letra=numALetra(sTotal);
 
-  // ── 8. Encabezado del vale: 3 líneas (Responsable/Presupuesto/FolioViaticos · Area · Oficinas/Folio/Fecha) ──
-  document.getElementById("vale").innerHTML=
-    '<div class="vh"><div class="vh-logo">'+logoImg+'</div>'+
-    '<div class="vh-centro"><div class="vh-empresa">'+esc(fd.empresa)+'</div><div class="vh-tipo">'+esc(fd.tipodoc)+'</div></div>'+
-    '<div class="vh-logo">'+logoImg+'</div></div>'+
-    '<div style="display:grid;grid-template-columns:auto 1fr auto auto auto auto;gap:0 3mm;align-items:end;margin-bottom:1.5mm;font-size:8pt">'+
-    '<span style="font-weight:700">RESPONSABLE:</span><span style="border-bottom:1px solid #161616;font-weight:700;padding-bottom:.5mm">'+esc(fd.responsable)+'</span>'+
-    '<span style="font-weight:700;padding-left:4mm">PRESUPUESTO:</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:0 2mm .5mm;min-width:22mm;text-align:center">'+esc(fd.presupuesto)+'</span>'+
-    '<span style="font-weight:700;padding-left:4mm">FOLIO VIATICOS:</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:0 2mm .5mm;min-width:14mm;text-align:center">'+esc(fd.folioviaticos||"")+'</span></div>'+
-    '<div style="display:grid;grid-template-columns:auto 1fr;gap:0 3mm;align-items:end;margin-bottom:1.5mm;font-size:8pt">'+
-    '<span style="font-weight:700">AREA:</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:.5mm 1mm">'+esc(fd.area)+'</span></div>'+
-    '<div style="display:grid;grid-template-columns:auto 1fr auto auto auto auto auto auto;gap:0 3mm;align-items:end;margin-bottom:2mm;font-size:8pt">'+
-    '<span style="font-weight:700">OFICINAS</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:.5mm 1mm">'+esc(fd.oficina)+'</span>'+
-    '<span style="font-weight:700;padding-left:4mm">FOLIO:</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:0 2mm .5mm;min-width:10mm;text-align:center">'+esc(fd.folio)+'</span>'+
-    '<span style="font-weight:700;padding-left:4mm">FECHA:</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:0 2mm .5mm;min-width:16mm;text-align:center">'+fechaFmt+'</span>'+
-    '</div>'+
-    '<div class="vsep"></div>'+
-    '<table class="vtable">'+colgroup+thead+'<tbody>'+filasHTML+sumaRow+'</tbody></table>'+
+  // ── 7. Encabezado del vale (se repite en cada hoja) ──
+  function encabezadoHoja(nHoja,totalHojas){
+    const indicador=totalHojas>1?'<span style="font-weight:700;padding-left:4mm;font-size:7.5pt">HOJA '+nHoja+' DE '+totalHojas+'</span>':'';
+    return '<div class="vh"><div class="vh-logo">'+logoImg+'</div>'+
+      '<div class="vh-centro"><div class="vh-empresa">'+esc(fd.empresa)+'</div><div class="vh-tipo">'+esc(fd.tipodoc)+'</div></div>'+
+      '<div class="vh-logo">'+logoImg+'</div></div>'+
+      '<div style="display:grid;grid-template-columns:auto 1fr auto auto auto auto;gap:0 3mm;align-items:end;margin-bottom:1.5mm;font-size:8pt">'+
+      '<span style="font-weight:700">RESPONSABLE:</span><span style="border-bottom:1px solid #161616;font-weight:700;padding-bottom:.5mm">'+esc(fd.responsable)+'</span>'+
+      '<span style="font-weight:700;padding-left:4mm">PRESUPUESTO:</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:0 2mm .5mm;min-width:22mm;text-align:center">'+esc(fd.presupuesto)+'</span>'+
+      '<span style="font-weight:700;padding-left:4mm">FOLIO VIATICOS:</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:0 2mm .5mm;min-width:14mm;text-align:center">'+esc(fd.folioviaticos||"")+'</span></div>'+
+      '<div style="display:grid;grid-template-columns:auto 1fr;gap:0 3mm;align-items:end;margin-bottom:1.5mm;font-size:8pt">'+
+      '<span style="font-weight:700">AREA:</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:.5mm 1mm">'+esc(fd.area)+'</span></div>'+
+      '<div style="display:grid;grid-template-columns:auto 1fr auto auto auto auto auto auto;gap:0 3mm;align-items:end;margin-bottom:2mm;font-size:8pt">'+
+      '<span style="font-weight:700">OFICINAS</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:.5mm 1mm">'+esc(fd.oficina)+'</span>'+
+      '<span style="font-weight:700;padding-left:4mm">FOLIO:</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:0 2mm .5mm;min-width:10mm;text-align:center">'+esc(fd.folio)+'</span>'+
+      '<span style="font-weight:700;padding-left:4mm">FECHA:</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:0 2mm .5mm;min-width:16mm;text-align:center">'+fechaFmt+'</span>'+
+      indicador+
+      '</div>'+
+      '<div class="vsep"></div>';
+  }
+
+  // ── 8. Bloque de cheque + firmas (solo en la última hoja) ──
+  const bloqueFinal=
     '<div class="vcheque"><div class="vcheque-label">ELABORAR&nbsp; CHEQUE A<br>NOMBRE DE:</div>'+
     '<div class="vcheque-nombre">'+esc(fd.beneficiario)+'</div>'+
     '<div class="vcheque-totales"><div class="vcheque-suma-row"><span>TOTAL:</span><span class="vcheque-suma-val">'+mxn(sTotal)+'</span></div>'+
@@ -948,11 +956,32 @@ function generarVale(){
     '<div class="vfirma"><div class="vfirma-label">AUTORIZÓ</div><div class="vfirma-linea"><div class="vfirma-nombre">ING. GUSTAVO CARRERA FALCON</div><div class="vfirma-cargo">DIRECTOR GENERAL</div></div></div>'+
     '</div>'+
     '<div style="margin-top:3mm;font-size:4.5pt;color:#888;border-top:.5px solid #ccc;padding-top:1mm">'+
-    conceptos.filter(c=>c.tipo==="cfdi").map((c,i)=>'UUID: '+esc(c.cfdi.uuid||"—")+' · RFC: '+esc(c.cfdi.emisor.rfc||"—")).join(" &nbsp;|&nbsp; ")+'</div>';
+    conceptos.filter(c=>c.tipo==="cfdi").map(c=>'UUID: '+esc(c.cfdi.uuid||"—")+' · RFC: '+esc(c.cfdi.emisor.rfc||"—")).join(" &nbsp;|&nbsp; ")+'</div>';
+
+  // ── 9. Armar las hojas ──
+  // Cada hoja lleva SIEMPRE sus 15 espacios (usados o vacíos).
+  // La SUMA, el cheque y las firmas van SOLO en la última hoja.
+  const totalHojas=Math.max(1,Math.ceil(conceptos.length/MAX_POR_HOJA));
+  let htmlHojas="";
+  for(let hoja=0;hoja<totalHojas;hoja++){
+    const desde=hoja*MAX_POR_HOJA;
+    const hasta=Math.min(desde+MAX_POR_HOJA,conceptos.length);
+    let filasHTML="";
+    for(let i=desde;i<hasta;i++) filasHTML+=filaDatos(i);
+    for(let n=hasta;n<desde+MAX_POR_HOJA;n++) filasHTML+=filaVacia(n+1);
+    const esUltima=(hoja===totalHojas-1);
+    htmlHojas+='<div class="vale-hoja'+(esUltima?"":" salto-hoja")+'">'+
+      encabezadoHoja(hoja+1,totalHojas)+
+      '<table class="vtable">'+colgroup+thead+'<tbody>'+filasHTML+(esUltima?sumaRow:"")+'</tbody></table>'+
+      (esUltima?bloqueFinal:"")+
+      '</div>';
+  }
+  document.getElementById("vale").innerHTML=htmlHojas;
 
   document.getElementById("vale-container").style.display="block";
   const cnt=conceptos.length;
-  document.getElementById("alerta-paso3").innerHTML='✓ <strong>Vale generado.</strong> '+cnt+' concepto'+(cnt>1?"s":"")+' · Total: <strong>'+mxn(sTotal)+'</strong>. Revisa abajo y descárgalo.';
+  document.getElementById("alerta-paso3").innerHTML='✓ <strong>Vale generado.</strong> '+cnt+' concepto'+(cnt>1?"s":"")+
+    (totalHojas>1?' en '+totalHojas+' hojas':'')+' · Total: <strong>'+mxn(sTotal)+'</strong>. Revisa abajo y descárgalo.';
   const cfdis=conceptos.filter(c=>c.tipo==="cfdi");
   if(spDisponible()&&cfdis.length){
     document.getElementById("alerta-paso3").innerHTML+=' <span id="sp-status" style="font-size:11px;color:#78716c">⏳ Registrando en sistema…</span>';
@@ -986,7 +1015,8 @@ function descargarPDF(){
     filename:nombreArchivo(),
     image:{type:"jpeg",quality:0.98},
     html2canvas:{scale:2,windowWidth:1056,useCORS:true},
-    jsPDF:{unit:"mm",format:"letter",orientation:"landscape"}
+    jsPDF:{unit:"mm",format:"letter",orientation:"landscape"},
+    pagebreak:{mode:["css","legacy"],before:".salto-hoja-antes",after:".salto-hoja"}
   };
   html2pdf().set(opciones).from(el).save().then(()=>{
     btn.disabled=false;btn.innerHTML=textoOriginal;
