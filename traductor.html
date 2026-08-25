@@ -274,9 +274,6 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
         <div class="campo"><label>Tipo de documento <span class="req">*</span></label><select id="f_tipodoc"></select></div>
         <div class="campo"><label>Área <span class="req">*</span></label><select id="f_area"></select></div>
         <div class="campo"><label>Oficinas <span class="req">*</span></label><select id="f_oficina"></select></div>
-        <div class="campo"><label>Presupuesto <span class="req">*</span></label>
-          <div class="sw"><input type="text" id="f_presupuesto_txt" placeholder="Buscar…" autocomplete="off">
-          <input type="hidden" id="f_presupuesto"><ul class="dd" id="dd_presupuesto"></ul></div></div>
         <div class="campo"><label>Gerente que autoriza <span class="req">*</span></label><select id="f_gerente"></select></div>
         <div class="campo"><label>Folio del vale</label><input type="text" id="f_folio" placeholder="001"></div>
         <div class="campo"><label>Folio de viáticos</label><input type="text" id="f_folioviaticos" placeholder="Opcional"></div>
@@ -319,7 +316,7 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
         <div class="sw"><input type="text" id="m_partida_txt" placeholder="Buscar…" autocomplete="off">
         <input type="hidden" id="m_partida"><ul class="dd" id="m_dd_partida"></ul></div></div>
       <div class="campo" style="grid-column:1/-1"><label>Justificación <span class="req">*</span></label>
-        <input type="text" id="m_justificacion" maxlength="32" placeholder="Ej: Propina, estacionamiento sin recibo…" oninput="document.getElementById('m_cnt').textContent=this.value.length"><span class="contador-chars" id="m_cnt">0</span>/32</div>
+        <input type="text" id="m_justificacion" maxlength="150" placeholder="Ej: Propina, estacionamiento sin recibo…" oninput="document.getElementById('m_cnt').textContent=this.value.length"><span class="contador-chars" id="m_cnt">0</span>/150</div>
     </div>
     <div id="modal-error"></div>
     <div class="modal-acciones">
@@ -433,7 +430,7 @@ async function spRegistrarVale(fd, conceptosCfdi){
 }
 </script>
 <script>
-const CAT={"empresas": ["VIVE POMOCA, S.A. DE C.V.", "CONSTRUVIVIENDA ACELERADA, S.A. DE C.V.", "VALLE REAL CONSTRUCCIONES, S.A. DE C.V.", "CONSTRUCCIONES ESMERALDA, S.A. DE C.V.", "CONSTRUVIVIENDA TECNOLOGICAS, S.A. DE C.V.", "CORPORATIVO DE CONSTRUCCION DE VIVIENDA SUSTENTABLE DEL BOSQUE S.A. DE C.V."], "tiposDoc": ["FONDO REVOLVENTE", "COMPROBACION DE GASTOS"], "areas": ["ADMINISTRACION", "CONTRALORIA", "DIRECCION GENERAL", "GERENCIA CAMPECHE", "OBRA", "OBRA ( MAQUINARIA )", "POST VENTA", "PROYECTOS", "RECURSOS HUMANOS", "SEGURIDAD INDUSTRIAL", "VENTAS"], "oficinas": ["CAMPECHE", "CARDENAS", "CD CARMEN", "EDIFICIO CARRIZAL", "NACAJUCA", "PARAISO", "BOSQUES"], "presupuestos": ["RESIDENCIAL LOS BOSQUES", "POMOCA BICENTENARIO", "HACIENDA POMOCA", "POMOCA PALENQUE", "BRISAS DEL MAR", "INDIRECTOS", "INFRAESTRUCTURA", "SEGURIDAD INDUSTRIAL", "PLAZA COMERCIAL", "RESIDENCIAL LOS BOSQUES ZAF", "HIPOTECA CON SERVICIO", "GASTOS GENERALES", "UNIDAD HABITACIONAL BIENESTAR", "POMOCA NACAJUCA", "PRIVADA PARAISO", "BICENTENARIO INFONAVIT", "BOSQUES INFONAVIT"], "partidas": ["ACARREOS DE MATERIAL PARA OBRA", "ACCESORIOS CELULAR", "ACONDICIONAMIENTO OFICINA", "ACONDICIONANIENTO DEL AREA", "ACTIVACIONES", "ACTUALIZACION DE SFOTWARE", "ADQUISICION DE AUTO", "ADQUISICION DE EQUIPO DE COMPUTO", "ADQUISICION DE EQUIPO DE OFICINA", "ADQUISICION DE SOFTWARE", "AGUA", "AGUA CEAS", "AGUINALDO", "ALINEAMIENTO Y # OFICIAL", "ANUALIDAD INFOTOOLS", "ANUNCIOS DE VANCANTES", "ARENILLA PARA RELLENO", "ARTICULOS DE LIMPIEZA", "ASESORIA FISCAL Y JURIDICA", "ASIMILADOS A SALARIOS", "ASISTENCIA MEDICA", "ATENCION MEDICA", "AUDITORIA DE INFOTOOLS", "AVALUO", "AVISO DE TERMINACION DE OBRA", "CAFE", "CALL CENTER NUXIBA", "CAPACITACION", "CELULAR", "CERTIFICACION DE ASESORES", "COMBUSTIBLE Y LUBRICANTES", "COMIDA REUNION CONSEJO", "COMISION BANCARIOS X VTA TC", "COMISION POR COMBISTIBLE", "COMISIONES BANCARIAS", "COMPENSACION", "COMPRA O RENTA DE STANDS", "CONSTANACIA DE NO ADEUDO", "CONSTANCIA DE TRANSLADO DE DOMINIO", "CONSUMO DE ALIMENTOS", "CONTRATO Y MEDIDORES DE AGUA", "COPIAS", "CUOTA DE INSCRIPCION DE OFERTA DE VIVIENDA", "CUOTA DE VERIFICACION DE OBRA", "CUOTA EXTRAORDINARIA", "CUOTA UNION", "CUOTA Y SUSCRIPCIONES", "CUOTAS DE VERIFICACION DE VIVIENDA", "CUOTAS IMSS", "DISENO DE CASA MUESTRA", "DISENO ESTRUCTURAL DE VIVIENDA", "DIVERSOS", "DONATIVOS", "EDECANES Y BOTARGUERO", "EDZNA PAL ($2,500)", "ELAB DE PROYECTO ARQUITECTONICO", "ELABORACION / REPARACION/ LAVANDERIA BOTARGA", "ENERGIA ELECTRICA", "ENTREGA DE MATERIAL", "EQUIPAMIENTO DE PLAZA", "EQUIPO DE COMPUTO", "EQUIPO DE COMUNICACION", "EQUIPO DE OFICINA", "EQUIPO DE SEGURIDAD", "EQUIPO DE SEGURIDAD INDUSTRIAL", "EQUIPO DE TRABAJO", "EQUIPO PARA EVENTOS", "EQUIPOS DE CONTROL DE ASISTENCIA", "ESPECTACULAR", "ESTUDIOS VARIOS", "EVENTO DE FIN DE ANO", "EVENTO MOTONAUTICA", "EVENTOS Y EXPOS ADICIONALES", "EVENTOS Y REUNIONES CON SOCIOS", "FINIQUITO", "FLETES", "FUMIGACION", "GASTO DE AUDITORIA", "GASTOS ADMINISTRATIVOS", "GASTOS DE VIAJE COORDINACION", "GASTOS DE ENTREGA DE VIVIENDA", "GASTOS DE ESCRITURACION DE VIVIENDA", "GASTOS DE EVENTO DE VIVIENDAS", "GASTOS DE FERIA", "GASTOS DE OFICINA", "GASTOS DE PLANEACION EJECUTIVOS", "GASTOS DE PLANEACION ESTRATEGICA", "GASTOS DE REPRESENTACION", "GASTOS DE VIAJES Y VIATICOS", "GASTOS INDIRECTOS", "GASTOS ING JUAN JOSE ZARAGOZA CANO", "GASTOS PLANEACION", "GASTOS X EXP Ambar (3000)", "GASTOS X EXP DIAMANTE Y ESPLENDOR ($1,250)", "GASTOS X EXP ELITE ($3,000)", "GASTOS X EXP ESMERALDA ($2,500)", "GASTOS X EXP ESPLENDOR ($1,850)", "GASTOS X EXP PREMIER (3000)", "GASTOS X EXP REAL ($1,500)", "GASTOS X EXP RESIDENCIAL ($3500)", "GASTOS X EXP TURQUEZA ($2,500)", "GATOS ISO 9001-2008", "GRATIFICACION", "GRAVA", "HONORARIOS", "HORAS EXTRAS", "HOSPEDAJE", "IMP DE TUA", "IMPRESION DE FORMATOS", "IMPRESION DE LONAS", "IMPRESION DE MANUALES", "IMPRESIONES Y COPIAS", "IMPUESTO S/HOSPEDAJE", "IMPUESTOS Y DERECHOS", "INDEMNIZACION X LIQUIDACION DE EMPLEADO", "INDEMNIZACIONES", "INFRAESTRUCTURA", "INSTALACION DE RED", "INTREGRACION (GASTOS VARIOS)", "ISTALACION DE INTERNET", "JARDINERIA", "LIBERTAD DE GRAVAMEN", "LICENCIA DE CONSTRUCCION", "LINTERNAS PARA CASCOS", "LIQUIDACION DE EMPLEADOS", "MANIOBRAS", "MAQUETAS", "MATERIAL APOYO GRAFICO (BANNER, LONAS)", "MATERIAL IMPRESO (TRIPTICOS, VOLANTES)", "MATERIAL PARA DECORACION", "MATERIALES", "MOBILIAR Y EQUIPO DE OFICINA", "MODIFICACION AL SISTEMA INFOTOOLS", "MTTO. DE AIRES ACONDICIONADOS", "MTTO. DE CIMBRA", "MTTO. DE CLIMAS", "MTTO. DE EQUIPO DE COMPUTO", "MTTO. DE MAQUINARIA Y EQUIPO PESADO", "MTTO. DE MOLDE", "MTTO. DE OFICINA", "MTTO. DE SOFTWARE", "MTTO. EQUIPO DE OFICINA", "MTTO. EQUIPO DE TRANSPORTE", "MTTO. PLAZA COMERCIAL", "N/A", "OBSEQUIOS", "OFICINAS CARRIZAL", "OTROS MEDIOS", "PAGO DE CATASTRO", "PAPELERIA Y ART. OFICINA", "PAQUETERIA Y ENVIOS", "PEAJES", "PERIFONEO", "PERIODICO", "PERMISO COLOCACION DE MODULOS IMSS", "PLANEACION ESTRATEGICA (GASTOS VARIOS)", "PORUDCCION EDICION DE VIDEOS", "POSADA (FIN DE ANO)", "POSTVENTA", "PRECIOS TRANSFERENCIAS", "PREDIALES", "PRIMAS POR CREDITO", "PRODUCCION EDICION DE VIDEOS", "PROG. DE SOFTWARE", "PROGRAMA DE INTEGRACION", "PROMOMOCION DE CASAS", "PROYECTO DE CASCO", "PTU", "PUBLICACION SECCION AMARILLA", "PUBLICIDAD DIGITAL (FACEBOOK)", "PUBLICIDAD EN PRENSA", "PUBLICIDAD EN RADIO", "PUBLICIDAD EN TV", "RADIO", "RECARGOS", "REGIMEN CONDOMINIO", "RENTA DE BARDAS Y ROTULACION DE BARDAS", "RENTA DE CASA", "RENTA DE CASA MUESTRA", "RENTA DE ESPACIOS PARA MODULO", "RENTA DE ESPECTACULARES", "RENTA DE MAQUINARIA", "RENTA DE MODULOS EN PLAZA", "RENTA DE MOLDE", "RENTA DE OFICINA", "RENTA DE SANITARIOS", "RENTA DE VEHICULO", "REUNIONES CON JEFES DE AREA", "REUNIONES DE CONSEJO", "REUNIONES DE TRABAJO", "SEGURO DE AUTOMOVILES", "SEGURO DE CALIDAD Y PRIMA", "SEGURO DE FLETES", "SEGURO DE VEHICULO", "SEGUROS POR CREDITOS", "SEGUROS Y FIANZAS", "SENALIZADOR VIALES", "SERV. LAB. CONTROL DE CALIDAD", "SERVICIO ADUANAL", "SERVICIO DE DESCARGA", "SERVICIO DE PAQUETERIA Y ENVIO", "SERVICIOS DE CONSULTORIA", "SISTEMA INFOTOOLS", "SISTEMA INFOTOOLS-MIZZAR", "SOFTWARE (LICENCIA)", "SOUVENIRS", "STAND", "TELEFONO CELULARES", "TELEFONO E INTERNET", "TELEFONO Y BAM", "TELEVISION", "TENENCIA", "TENENCIA DE VEHICULO", "TRABAJOS EN FRACCIONAMIENTO", "TRABAJOS TOPOGRAFICOS", "TRAMITES VARIOS", "TRAMITES Y AVALUOS", "TRANSPORTACION (COMBUSTIBLE)", "UNIFORMES", "URBANIZACION", "VALORES CATRASTALES", "VOLANTES Y TRIPTICOS"], "beneficiarios": ["ADRIANA HERNANDEZ REYES", "ADRIANA REYES LOPEZ", "ALDO CARRILLO CRUZ", "AMAIRANI GUADALUPE DOMINGUEZ ALEJO", "BEATRIZ RAMIREZ GALVEZ", "BRENDA NANCY FLORES BALCHE", "CARLOS ALBERTO DE LOS SANTOS LOPEZ", "CARLOS BERNARDO CAMPOS CASTRO", "CARLOS ENRIQUE CETINA JIMENEZ", "CARLOS ERIK CAMPOS CADENA", "CARMEN GUADALUPE DE TILA RUIZ DOMINGUEZ", "CAROLINA BRITO MIRANDA", "CAROLINA GARCIA GARCIA", "CLAUDIA MARCELA SOSA GONZALEZ", "DANIEL PEREZ ARENAS", "DANIEL RAMOS SANTIAGO", "DAVID DIAZ DE LA CRUZ", "DEYSI DEL CARMEN GALLEGOS JIMENEZ", "DIANA RAMIREZ SOLIS", "DIANEY VALDEZ RAMOS", "EDISON PATINO ANTONIO", "ELISANDER SANCHEZ MENDOZA", "ELSY DEL CARMEN POTENCIANO RAMOS", "ERIKA CANALES CUPIDO", "FABIAN ALBERTO CORROY LANDERO", "FABIAN JIMENEZ PEREZ", "FABIOLA COLL SILVA", "FERNANDO JOSE GUTIERREZ DE ALBA", "FLORITA SOBERANO HERNANDEZ", "FRANCISCO HERNANDEZ HERNANDEZ", "GABRIEL CAMACHO CAMARA", "GADIEL HERNANDEZ PEREZ", "GERARDO DE JESUS SOSA CONTRERAS", "GERARDO GONZALEZ GUTIERREZ", "GLORIA ALICIA FRANCO ESTANOL", "GLORIA LINEY SANTOS LEDESMA", "GREGORIO NARVAEZ PEREZ", "GUSTAVO CARRERA FALCON", "GUSTAVO RAMOS MARTINEZ", "HEIDI LOPEZ GARCIA", "HILDA PATRICIA ALVAREZ HERNANDEZ", "HUGO ENRIQUE SANCHEZ SALAZAR", "IGNACIO GARCIA CARRASCO", "IRMA ESTELA TESCUM MARQUEZ", "ISAI CRUZ ARIAS", "ISIDRO BAUTISTA MENDOZA", "JAVIER BAEZ CORNELIO", "JAVIER DE JESUS HERNANDEZ", "JAZMANY JAMIR CAMBRANIS MARIN", "JESUS HUMBERTO CAHUICH CHAN", "JESUS OLAN MADRIGAL", "JORGE LUIS GARCIA SALVADOR", "JOSE ALFREDO HERNANDEZ CONTRERAS", "JOSE BELISARIO TEJERO DIAZ", "JOSE BUSTAMANTE RABELO", "JOSE DEL CARMEN ACOSTA RODRIGUEZ", "JOSE DEONICIO ALVAREZ PEREZ", "JOSE MANUEL GARCIA GARCIA", "JOSE MANUEL RAMIREZ DE LA CRUZ", "JOSE MATEO MONTES JACOBO", "JOSE PAUL NUNEZ HERNANDEZ", "JOSE RAFAEL MURUETA NOEMI", "JOSE TORRES RAMON", "JUAN CARLOS VELASQUEZ SANTIAGO", "JUAN MANUEL GONZALEZ GALLEGOS", "LEON YE YOANI", "LIDIA DEL CARMEN CHUC GARCIA", "LIZBETH DEL CARMEN FRIAS OLAN", "LUCIA ALVAREZ MACDONELL", "LUCIA ZENTELLA AGUILAR", "LUIS FERNANDO LAZO TAPIA", "MAGALI HERNANDEZ HERNANDEZ", "MANUEL ANTONIO PEREZ JIMENEZ", "MARA KRISTELL LARA SANCHEZ", "MARCELA GUADALUPE YANES JIMENEZ", "MARCOS OVANDO DOMINGUEZ", "MARGARITA RAMIREZ CHABLE", "MARIA ANTONIA LOPEZ OPORTO", "MARIA CRISTINA GONZALEZ MORALES", "MARIA DE JESUS GOMEZ HERNANDEZ", "MARIA DEL ROSARIO FALCON CURI", "MARIA DEL ROSARIO SEVERIANO HERNANDEZ", "MARIA ELIZABETH LOPEZ HIPOLITO", "MARIA ISABEL REYES MORALES", "MARIA JOSE DE LOS MILAGRO RAMON HERNANDEZ", "MARIA LOPEZ JIMENEZ", "MARIANELLA ALVAREZ LUNA", "MARISOL DE LA CRUZ ACOSTA", "MARTIN ALONSO HERNANDEZ TOSCA", "MARTIN DE LA CRUZ LOPEZ", "MAYRA ALEJANDRA ALVAREZ GOMEZ", "MIGUELINA PEREZ PEREZ", "MINERVA DE LOS SANTOS CALCANEO SANCHEZ", "MIRNA ARACELI BELLO PARADA", "MOISES TRINIDAD CRUZ", "NESTOR JOSUE ALCAZAR SUAREZ", "OLIVA MARTINEZ VASQUEZ", "ORLANDO CORDOVA GARCIA", "OVET ARIAS LEON", "PENSION ALIMENTICIA", "PERLA CRISTHELL DE LA O ROMAN", "RENE CARRILLO HERNANDEZ", "RICARDO DE LA CRUZ TOSCA", "RODRIGO CRUZ CRUZ", "ROGER PALACIO ZURITA", "ROXANA LOPEZ RODRIGUEZ", "RUBEN SUAREZ OVANDO", "SANDRA MORALES GUZMAN", "SARAI HERNANDEZ DE LA CRUZ", "SERGIO BURGOS GOMEZ", "SIMBRON CARLOS PEREZ", "SYLVANA PEREZ MARTINEZ", "TITO MONTEJO HERNANDEZ", "TORRES ELISEO LOPEZ", "URIEL ULISES REYES ROQUE", "URSULA RUEDA SANCHEZ", "VERONICA DEL ROSARIO HERNANDEZ CRUZ", "VERONICA HERNANDEZ CRUZ", "VERONICA ROMAN DE LA CRUZ", "VICTOR HUGO GONZALEZ GONZALEZ", "WENDY DEL ROSARIO BRITO POOT", "YENI DEL CARMEN LOPEZ JIMENEZ", "YOSHIRA DEL CARMEN CRUZ DE LA CRUZ", "YULIANA FAJARDO TORRES"], "gerentes": ["GUSTAVO CARRERA FALCON", "MARIA DEL ROSARIO FALCON CURI", "MARIA DEL ROSARIO SEVERIANO HERNANDEZ", "EDISON PATIÑO ANTONIO", "MINERVA CALCANEO  SANCHEZ", "JOSE MANUEL GARCIA GARCIA"], "tiposGasto": ["Viáticos", "Compras", "Servicios", "Mantenimiento", "Materiales", "Combustible", "Hospedaje", "Transporte", "Publicidad", "Accesorio equipos", "Otros"]};
+const CAT={"empresas": ["VIVE POMOCA, S.A. DE C.V.", "CONSTRUVIVIENDA ACELERADA, S.A. DE C.V.", "VALLE REAL CONSTRUCCIONES, S.A. DE C.V.", "CONSTRUCCIONES ESMERALDA, S.A. DE C.V.", "CONSTRUVIVIENDA TECNOLOGICAS, S.A. DE C.V.", "CORPORATIVO DE CONSTRUCCION DE VIVIENDA SUSTENTABLE DEL BOSQUE S.A. DE C.V."], "tiposDoc": ["FONDO REVOLVENTE", "COMPROBACION DE GASTOS"], "areas": ["ADMINISTRACION Y FINANZAS", "OBRA", "MARKETING", "VENTAS", "POSTVENTA", "DIRECCION GENERAL", "PROYECTOS", "EDIFICIO CARRIZAL", "CONTRALORIA", "GERENCIA DE CAMPECHE", "RECURSOS HUMANOS", "TRAMITES", "CONSEJEROS"], "oficinas": ["CAMPECHE", "CARDENAS", "CD CARMEN", "EDIFICIO CARRIZAL", "NACAJUCA", "PARAISO", "BOSQUES"], "partidas": ["IMPUESTOS", "TEL.CELULARES", "TENENCIAS", "SEGUROS Y FIANZAS", "EVENTO DE FIN DE AÑO", "ENERGIA ELECTRICA", "SERVICIO DE INTERNET", "AGUA (CEAS)", "LICENCIAS DE OTROS SOFTWARE", "PROGRAMA DE INTEGREACION", "GASTOS DE PLANEACION DE CONSEJO", "COMIDA DE CONSEJO", "COMBUSTIBLE", "PAPELERIA", "CAPACITACION", "GASTOS DE VIAJES Y VIATICOS", "GASTOS DE REPRESENTACION", "GASTOS DE OFICINA", "ARTICULOS DE LIMPIEZA", "IMPRESION DE FORMATOS", "COPIAS", "COMISION DE TDC (AMERICAN EXPRESS, BMX Y BBVA)", "CUOTAS Y SUSCRIPCIONES", "TRAMITES", "DISEÑO DE CASA MUESTRA", "MANTENIMIENTO DE SOFTWARE (PAGINA WEB Y CORREOS)", "FERIA DE LA SALUD", "REFORESTACION ANUAL", "CAFE", "AGUA (consumo)", "CAMION DE BASURA", "MANTENIMIENTO DE PORTONES", "MANTENIMIENTO DE COLINDANCIA", "MANTENIMIENTO DE INTERIORES", "PREDIAL", "HIELO", "ESCANEO DE PLANOS", "GASTOS DE ENTREGA DE VIVIENDA", "DUPLICADOS DE LLAVES PARA REJAS DE ACCESO", "OTROS GASTOS", "MANTENIMIENTO DE OFICINA", "DESARROLLO ESTRATÉGICO", "MATERIAL DE APOYO GRAFICO (BANNER, LONAS, ETC)", "MATERIAL IMPRESO (TRIPTICOS, VOLANTES)", "PUBLICIDAD DIGITAL REDES SOCIALES", "PRODUCCION EDICION DE VIDEO", "PUBLICIDAD EN BARDAS", "ESPECTACULAR", "DONATIVOS"], "beneficiarios": ["ADRIANA HERNANDEZ REYES", "ADRIANA REYES LOPEZ", "ALDO CARRILLO CRUZ", "AMAIRANI GUADALUPE DOMINGUEZ ALEJO", "BEATRIZ RAMIREZ GALVEZ", "BRENDA NANCY FLORES BALCHE", "CARLOS ALBERTO DE LOS SANTOS LOPEZ", "CARLOS BERNARDO CAMPOS CASTRO", "CARLOS ENRIQUE CETINA JIMENEZ", "CARLOS ERIK CAMPOS CADENA", "CARMEN GUADALUPE DE TILA RUIZ DOMINGUEZ", "CAROLINA BRITO MIRANDA", "CAROLINA GARCIA GARCIA", "CLAUDIA MARCELA SOSA GONZALEZ", "DANIEL PEREZ ARENAS", "DANIEL RAMOS SANTIAGO", "DAVID DIAZ DE LA CRUZ", "DEYSI DEL CARMEN GALLEGOS JIMENEZ", "DIANA RAMIREZ SOLIS", "DIANEY VALDEZ RAMOS", "EDISON PATINO ANTONIO", "ELISANDER SANCHEZ MENDOZA", "ELSY DEL CARMEN POTENCIANO RAMOS", "ERIKA CANALES CUPIDO", "FABIAN ALBERTO CORROY LANDERO", "FABIAN JIMENEZ PEREZ", "FABIOLA COLL SILVA", "FERNANDO JOSE GUTIERREZ DE ALBA", "FLORITA SOBERANO HERNANDEZ", "FRANCISCO HERNANDEZ HERNANDEZ", "GABRIEL CAMACHO CAMARA", "GADIEL HERNANDEZ PEREZ", "GERARDO DE JESUS SOSA CONTRERAS", "GERARDO GONZALEZ GUTIERREZ", "GLORIA ALICIA FRANCO ESTANOL", "GLORIA LINEY SANTOS LEDESMA", "GREGORIO NARVAEZ PEREZ", "GUSTAVO CARRERA FALCON", "GUSTAVO RAMOS MARTINEZ", "HEIDI LOPEZ GARCIA", "HILDA PATRICIA ALVAREZ HERNANDEZ", "HUGO ENRIQUE SANCHEZ SALAZAR", "IGNACIO GARCIA CARRASCO", "IRMA ESTELA TESCUM MARQUEZ", "ISAI CRUZ ARIAS", "ISIDRO BAUTISTA MENDOZA", "JAVIER BAEZ CORNELIO", "JAVIER DE JESUS HERNANDEZ", "JAZMANY JAMIR CAMBRANIS MARIN", "JESUS HUMBERTO CAHUICH CHAN", "JESUS OLAN MADRIGAL", "JORGE LUIS GARCIA SALVADOR", "JOSE ALFREDO HERNANDEZ CONTRERAS", "JOSE BELISARIO TEJERO DIAZ", "JOSE BUSTAMANTE RABELO", "JOSE DEL CARMEN ACOSTA RODRIGUEZ", "JOSE DEONICIO ALVAREZ PEREZ", "JOSE MANUEL GARCIA GARCIA", "JOSE MANUEL RAMIREZ DE LA CRUZ", "JOSE MATEO MONTES JACOBO", "JOSE PAUL NUNEZ HERNANDEZ", "JOSE RAFAEL MURUETA NOEMI", "JOSE TORRES RAMON", "JUAN CARLOS VELASQUEZ SANTIAGO", "JUAN MANUEL GONZALEZ GALLEGOS", "LEON YE YOANI", "LIDIA DEL CARMEN CHUC GARCIA", "LIZBETH DEL CARMEN FRIAS OLAN", "LUCIA ALVAREZ MACDONELL", "LUCIA ZENTELLA AGUILAR", "LUIS FERNANDO LAZO TAPIA", "MAGALI HERNANDEZ HERNANDEZ", "MANUEL ANTONIO PEREZ JIMENEZ", "MARA KRISTELL LARA SANCHEZ", "MARCELA GUADALUPE YANES JIMENEZ", "MARCOS OVANDO DOMINGUEZ", "MARGARITA RAMIREZ CHABLE", "MARIA ANTONIA LOPEZ OPORTO", "MARIA CRISTINA GONZALEZ MORALES", "MARIA DE JESUS GOMEZ HERNANDEZ", "MARIA DEL ROSARIO FALCON CURI", "MARIA DEL ROSARIO SEVERIANO HERNANDEZ", "MARIA ELIZABETH LOPEZ HIPOLITO", "MARIA ISABEL REYES MORALES", "MARIA JOSE DE LOS MILAGRO RAMON HERNANDEZ", "MARIA LOPEZ JIMENEZ", "MARIANELLA ALVAREZ LUNA", "MARISOL DE LA CRUZ ACOSTA", "MARTIN ALONSO HERNANDEZ TOSCA", "MARTIN DE LA CRUZ LOPEZ", "MAYRA ALEJANDRA ALVAREZ GOMEZ", "MIGUELINA PEREZ PEREZ", "MINERVA DE LOS SANTOS CALCANEO SANCHEZ", "MIRNA ARACELI BELLO PARADA", "MOISES TRINIDAD CRUZ", "NESTOR JOSUE ALCAZAR SUAREZ", "OLIVA MARTINEZ VASQUEZ", "ORLANDO CORDOVA GARCIA", "OVET ARIAS LEON", "PENSION ALIMENTICIA", "PERLA CRISTHELL DE LA O ROMAN", "RENE CARRILLO HERNANDEZ", "RICARDO DE LA CRUZ TOSCA", "RODRIGO CRUZ CRUZ", "ROGER PALACIO ZURITA", "ROXANA LOPEZ RODRIGUEZ", "RUBEN SUAREZ OVANDO", "SANDRA MORALES GUZMAN", "SARAI HERNANDEZ DE LA CRUZ", "SERGIO BURGOS GOMEZ", "SIMBRON CARLOS PEREZ", "SYLVANA PEREZ MARTINEZ", "TITO MONTEJO HERNANDEZ", "TORRES ELISEO LOPEZ", "URIEL ULISES REYES ROQUE", "URSULA RUEDA SANCHEZ", "VERONICA DEL ROSARIO HERNANDEZ CRUZ", "VERONICA HERNANDEZ CRUZ", "VERONICA ROMAN DE LA CRUZ", "VICTOR HUGO GONZALEZ GONZALEZ", "WENDY DEL ROSARIO BRITO POOT", "YENI DEL CARMEN LOPEZ JIMENEZ", "YOSHIRA DEL CARMEN CRUZ DE LA CRUZ", "YULIANA FAJARDO TORRES"], "gerentes": ["GUSTAVO CARRERA FALCON", "MARIA DEL ROSARIO FALCON CURI", "MARIA DEL ROSARIO SEVERIANO HERNANDEZ", "EDISON PATIÑO ANTONIO", "MINERVA CALCANEO  SANCHEZ", "JOSE MANUEL GARCIA GARCIA"], "tiposGasto": ["Viáticos", "Compras", "Servicios", "Mantenimiento", "Materiales", "Combustible", "Hospedaje", "Transporte", "Publicidad", "Accesorio equipos", "Otros"]};
 
 
 // Mapa de cargo por gerente (para la firma dinámica junto a ELABORÓ)
@@ -559,7 +556,6 @@ function initSelects(){
   llenaSelect("f_empresa",CAT.empresas);llenaSelect("f_tipodoc",CAT.tiposDoc);llenaSelect("f_area",CAT.areas);
   llenaSelect("f_oficina",CAT.oficinas);llenaSelect("f_gerente",CAT.gerentes);
   llenaSelect("m_tipo",CAT.tiposGasto);
-  initSearch("f_presupuesto_txt","f_presupuesto","dd_presupuesto",CAT.presupuestos);
   initSearch("f_beneficiario_txt","f_beneficiario","dd_beneficiario",CAT.beneficiarios,true);
   initSearch("m_partida_txt","m_partida","m_dd_partida",CAT.partidas);
 }
@@ -753,7 +749,7 @@ function renderFilasGastos(){
       return '<div class="fila-gasto" id="fila-'+i+'"><div class="fila-gasto-header"><span class="fila-gasto-titulo">#'+(i+1)+' 📄 '+esc(c.cfdi.emisor.nombre)+' · Folio '+esc(folio)+' · '+mxn(c.cfdi.total)+'</span></div>'+
         '<div class="grid2">'+
         '<div class="campo"><label>Tipo de gasto <span class="req">*</span></label><select id="fg_tipo_'+i+'" onchange="conceptos['+i+'].tipoGasto=this.value"><option value="">— Selecciona —</option>'+tipos+'</select></div>'+
-        '<div class="campo"><label>Justificación <span class="req">*</span></label><input type="text" id="fg_just_'+i+'" maxlength="32" value="'+esc(c.justificacion||"")+'" placeholder="Ej: Consumo de alimentos…" oninput="conceptos['+i+'].justificacion=this.value;document.getElementById(\'fg_cnt_'+i+'\').textContent=this.value.length"><span class="contador-chars" id="fg_cnt_'+i+'">'+String((c.justificacion||"").length)+'</span>/32</div>'+
+        '<div class="campo"><label>Justificación <span class="req">*</span></label><input type="text" id="fg_just_'+i+'" maxlength="150" value="'+esc(c.justificacion||"")+'" placeholder="Ej: Consumo de alimentos…" oninput="conceptos['+i+'].justificacion=this.value;document.getElementById(\'fg_cnt_'+i+'\').textContent=this.value.length"><span class="contador-chars" id="fg_cnt_'+i+'">'+String((c.justificacion||"").length)+'</span>/150</div>'+
         '<div class="campo" style="grid-column:1/-1"><label>Partida presupuestada <span class="req">*</span></label><div class="sw"><input type="text" id="fg_partida_txt_'+i+'" value="'+esc(c.partida||"")+'" placeholder="Buscar partida…" autocomplete="off"><input type="hidden" id="fg_partida_'+i+'" value="'+esc(c.partida||"")+'"><ul class="dd" id="fg_dd_partida_'+i+'"></ul></div></div>'+
         '</div></div>';
     } else {
@@ -762,7 +758,7 @@ function renderFilasGastos(){
       return '<div class="fila-gasto sincfdi" id="fila-'+i+'"><div class="fila-gasto-header"><span class="fila-gasto-titulo">#'+(i+1)+' ✏️ Sin comprobante · '+esc(c.fecha||"")+' · '+mxn(c.monto)+'</span></div>'+
         '<div class="grid2">'+
         '<div class="campo"><label>Tipo de gasto <span class="req">*</span></label><select id="fg_tipo_'+i+'" onchange="conceptos['+i+'].tipoGasto=this.value"><option value="">— Selecciona —</option>'+tipos+'</select></div>'+
-        '<div class="campo"><label>Justificación <span class="req">*</span></label><input type="text" id="fg_just_'+i+'" maxlength="32" value="'+esc(c.justificacion||"")+'" oninput="conceptos['+i+'].justificacion=this.value;document.getElementById(\'fg_cnt_'+i+'\').textContent=this.value.length"><span class="contador-chars" id="fg_cnt_'+i+'">'+String((c.justificacion||"").length)+'</span>/32</div>'+
+        '<div class="campo"><label>Justificación <span class="req">*</span></label><input type="text" id="fg_just_'+i+'" maxlength="150" value="'+esc(c.justificacion||"")+'" oninput="conceptos['+i+'].justificacion=this.value;document.getElementById(\'fg_cnt_'+i+'\').textContent=this.value.length"><span class="contador-chars" id="fg_cnt_'+i+'">'+String((c.justificacion||"").length)+'</span>/150</div>'+
         '<div class="campo" style="grid-column:1/-1"><label>Partida presupuestada <span class="req">*</span></label><div class="sw"><input type="text" id="fg_partida_txt_'+i+'" value="'+esc(c.partida||"")+'" placeholder="Buscar partida…" autocomplete="off"><input type="hidden" id="fg_partida_'+i+'" value="'+esc(c.partida||"")+'"><ul class="dd" id="fg_dd_partida_'+i+'"></ul></div></div>'+
         '</div></div>';
     }
@@ -773,7 +769,7 @@ function renderFilasGastos(){
 function getFD(){return{
   responsable:document.getElementById("f_responsable").value.trim(),
   empresa:document.getElementById("f_empresa").value,area:document.getElementById("f_area").value,
-  oficina:document.getElementById("f_oficina").value,presupuesto:document.getElementById("f_presupuesto").value,
+  oficina:document.getElementById("f_oficina").value,presupuesto:"INDIRECTOS",
   beneficiario:document.getElementById("f_beneficiario").value,gerente:document.getElementById("f_gerente").value,
   folio:document.getElementById("f_folio").value.trim()||"001",
   folioviaticos:document.getElementById("f_folioviaticos").value.trim(),
@@ -781,7 +777,7 @@ function getFD(){return{
 
 function validarPaso2(){
   const fd=getFD();
-  const g=[["responsable","Responsable"],["empresa","Empresa"],["tipodoc","Tipo de documento"],["area","Área"],["oficina","Oficinas"],["presupuesto","Presupuesto"],["beneficiario","Beneficiario"],["gerente","Gerente"]];
+  const g=[["responsable","Responsable"],["empresa","Empresa"],["tipodoc","Tipo de documento"],["area","Área"],["oficina","Oficinas"],["beneficiario","Beneficiario"],["gerente","Gerente"]];
   for(const[k,lbl]of g)if(!fd[k]){document.getElementById("zonaError2").innerHTML='<div class="alerta alerta-error">Llena el campo: <strong>'+lbl+'</strong></div>';return false}
   for(let i=0;i<conceptos.length;i++){
     const c=conceptos[i];
@@ -852,7 +848,8 @@ function generarVale(){
   const factor=96/totalPeso;
   const colgroup='<colgroup>'+pesos.map(w=>'<col style="width:'+(w*factor).toFixed(2)+'%">').join("")+'</colgroup>';
 
-  const altoFilaMM=5.6;
+  const MMPX=96/25.4;              // px por milímetro a 96dpi
+  const altoFilaPx=5.6*MMPX;       // alto mínimo de una fila vacía
   const nColsFijas=6+(showSin?1:0);
   const nColsTotal=nColsFijas+4+colsImp.length+colsRet.length+2;
 
@@ -899,13 +896,13 @@ function generarVale(){
     for(const col of colsImp) celdas+='<td class="der">'+(esManual?"":dash(d[col.key]))+'</td>';
     for(const col of colsRet) celdas+='<td class="der">'+(esManual?"":dash(d[col.key]))+'</td>';
     celdas+='<td class="col-s">'+mxn(d._total)+'</td>'+'<td class="col-t"></td>';
-    return '<tr style="height:'+altoFilaMM+'mm">'+celdas+'</tr>';
+    return '<tr data-fila="'+i+'">'+celdas+'</tr>';
   }
-  function filaVacia(numero){
+  function filaVacia(numero,alturaPx){
     let vac='<td>'+numero+'</td>';
     for(let k=1;k<nColsTotal-2;k++) vac+='<td></td>';
     vac+='<td class="col-s"></td><td class="col-t"></td>';
-    return '<tr style="height:'+altoFilaMM+'mm">'+vac+'</tr>';
+    return '<tr style="height:'+(alturaPx||altoFilaPx)+'px">'+vac+'</tr>';
   }
 
   // ── 6. Fila de SUMA (solo en la última hoja) ──
@@ -958,18 +955,91 @@ function generarVale(){
     '<div style="margin-top:3mm;font-size:4.5pt;color:#888;border-top:.5px solid #ccc;padding-top:1mm">'+
     conceptos.filter(c=>c.tipo==="cfdi").map(c=>'UUID: '+esc(c.cfdi.uuid||"—")+' · RFC: '+esc(c.cfdi.emisor.rfc||"—")).join(" &nbsp;|&nbsp; ")+'</div>';
 
-  // ── 9. Armar las hojas ──
-  // Cada hoja lleva SIEMPRE sus 15 espacios (usados o vacíos).
-  // La SUMA, el cheque y las firmas van SOLO en la última hoja.
-  const totalHojas=Math.max(1,Math.ceil(conceptos.length/MAX_POR_HOJA));
+  // ── 9. Armar las hojas (PAGINACIÓN DINÁMICA POR MEDICIÓN REAL) ──
+  // No hay número fijo de conceptos por hoja: se mide la altura real de cada fila
+  // (ya con su justificación envuelta en las líneas que necesite) y se llena
+  // cada hoja hasta donde alcance. La SUMA, el cheque y las firmas van SOLO en
+  // la última hoja, y esa hoja reserva su espacio desde el cálculo.
+
+  // 9.1 Medición: se dibuja todo en un contenedor invisible con el ANCHO EXACTO de impresión
+  const ANCHO_UTIL_MM=269.4;   // carta horizontal (279.4mm) menos márgenes de 5mm
+  const ALTO_UTIL_MM=205.9;    // carta horizontal (215.9mm) menos márgenes de 5mm
+  const PAD_VALE_MM=8;         // padding vertical de .vale (4mm arriba + 4mm abajo)
+  const COLCHON_PX=6;          // margen de seguridad para evitar desbordes por redondeo
+
+  const med=document.createElement("div");
+  med.className="vale";
+  med.style.cssText="position:absolute;left:-99999px;top:0;width:"+(ANCHO_UTIL_MM*MMPX)+"px;visibility:hidden;";
+  let filasTodas="";
+  for(let i=0;i<conceptos.length;i++) filasTodas+=filaDatos(i);
+  med.innerHTML='<div id="med-head">'+encabezadoHoja(1,2)+'</div>'+
+    '<table class="vtable" id="med-tabla">'+colgroup+thead+'<tbody>'+filasTodas+
+    '<tr id="med-suma" class="vtotal">'+sumaRow.replace(/^<tr class="vtotal">/,"").replace(/<\/tr>$/,"")+'</tr>'+
+    '</tbody></table>'+
+    '<div id="med-foot">'+bloqueFinal+'</div>';
+  document.body.appendChild(med);
+
+  const headH=med.querySelector("#med-head").getBoundingClientRect().height;
+  const theadH=med.querySelector("#med-tabla thead").getBoundingClientRect().height;
+  const sumaH=med.querySelector("#med-suma").getBoundingClientRect().height;
+  const footH=med.querySelector("#med-foot").getBoundingClientRect().height+6; // +margen del bloque
+  const alturas=[];
+  med.querySelectorAll('#med-tabla tbody tr[data-fila]').forEach(tr=>{
+    alturas.push(tr.getBoundingClientRect().height);
+  });
+  document.body.removeChild(med);
+
+  // 9.2 Espacio disponible para filas en cada hoja
+  const altoContenido=(ALTO_UTIL_MM-PAD_VALE_MM)*MMPX-COLCHON_PX;
+  const dispNormal=altoContenido-headH-theadH;               // hoja intermedia
+  const dispUltima=altoContenido-headH-theadH-sumaH-footH;   // hoja final (reserva totales+firmas)
+
+  // 9.3 Repartir conceptos en hojas según lo que realmente quepa
+  const paginas=[];
+  let idx=0;
+  while(idx<conceptos.length){
+    const pagina=[];let acum=0;
+    while(idx<conceptos.length){
+      const hFila=alturas[idx];
+      if(pagina.length&&acum+hFila>dispNormal)break;
+      pagina.push(idx);acum+=hFila;idx++;
+    }
+    paginas.push(pagina);
+  }
+  // La última hoja debe además dejar sitio al total y las firmas.
+  // Se mueve el MÍNIMO de conceptos necesarios: las hojas previas quedan llenas
+  // y solo el sobrante pasa a la hoja siguiente.
+  let guardia=0;
+  while(guardia++<50){
+    const ult=paginas[paginas.length-1];
+    let accU=ult.reduce((a,i)=>a+alturas[i],0);
+    if(accU<=dispUltima)break;
+    const nueva=[];let accN=0;
+    while(ult.length>1){
+      const m=ult[ult.length-1];
+      if(nueva.length&&accN+alturas[m]>dispUltima)break;
+      ult.pop();nueva.unshift(m);accN+=alturas[m];accU-=alturas[m];
+      if(accU<=dispNormal)break;   // la hoja previa ya cabe como hoja intermedia
+    }
+    if(!nueva.length)break;
+    paginas.push(nueva);
+  }
+
+  // 9.4 Dibujar cada hoja, rellenando el espacio sobrante
+  const totalHojas=paginas.length;
   let htmlHojas="";
+  let numeroFila=1;
   for(let hoja=0;hoja<totalHojas;hoja++){
-    const desde=hoja*MAX_POR_HOJA;
-    const hasta=Math.min(desde+MAX_POR_HOJA,conceptos.length);
-    let filasHTML="";
-    for(let i=desde;i<hasta;i++) filasHTML+=filaDatos(i);
-    for(let n=hasta;n<desde+MAX_POR_HOJA;n++) filasHTML+=filaVacia(n+1);
     const esUltima=(hoja===totalHojas-1);
+    const disp=esUltima?dispUltima:dispNormal;
+    const indices=paginas[hoja];
+    let filasHTML="";
+    let usado=0;
+    for(const i of indices){filasHTML+=filaDatos(i);usado+=alturas[i];numeroFila++;}
+    // Rellenar con filas vacías mientras quepan (mantiene el aspecto del formato)
+    let libre=disp-usado;
+    const vacias=Math.max(0,Math.floor(libre/altoFilaPx));
+    for(let v=0;v<vacias;v++){filasHTML+=filaVacia(numeroFila++);}
     htmlHojas+='<div class="vale-hoja'+(esUltima?"":" salto-hoja")+'">'+
       encabezadoHoja(hoja+1,totalHojas)+
       '<table class="vtable">'+colgroup+thead+'<tbody>'+filasHTML+(esUltima?sumaRow:"")+'</tbody></table>'+
