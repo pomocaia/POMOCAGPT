@@ -285,6 +285,10 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
     <div class="tarjeta">
       <h2>Detalles por concepto</h2>
       <div id="filas-gastos"></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn btn-verde" id="btnAgregarXmlP2" style="flex:1;margin-top:0">📄 + Agregar otra factura (XML)</button>
+        <button class="btn btn-verde" id="btnAgregarManualP2" style="flex:1;margin-top:0">✏️ + Agregar gasto sin comprobante</button>
+      </div>
     </div>
     <div id="zonaError2"></div>
     <button class="btn btn-azul" id="btnGenerar">Generar vale →</button>
@@ -535,6 +539,7 @@ function numALetra(n){
 //  manual: {tipo:'manual', fecha, monto, tipoGasto, partida, justificacion}
 let conceptos=[];
 let ultimoFD=null; // datos del último vale generado (para nombrar el PDF con el folio)
+let volverAPaso2=false; // true si se agregó un concepto desde el Paso 2 (para regresar ahí al terminar)
 const MAX_CONCEPTOS=45; // hasta 3 hojas de 15 conceptos
 
 // ══ SELECTS ══
@@ -700,7 +705,14 @@ function agregarPendientesAlVale(){
 function leerArchivo(f){if(f)leerArchivos([f]);}
 
 function mostrarZonaXML(){document.getElementById("opciones-agregar").style.display="none";document.getElementById("zona-xml").style.display="block";document.getElementById("zonaError1").innerHTML="";document.getElementById("inputXML").value="";pendientes=[];renderPendientes();}
-function ocultarZonaXML(){document.getElementById("zona-xml").style.display="none";document.getElementById("opciones-agregar").style.display="block";pendientes=[];document.getElementById("pendientes-lista").innerHTML="";document.getElementById("pendientes-acciones").style.display="none";}
+function ocultarZonaXML(){
+  document.getElementById("zona-xml").style.display="none";document.getElementById("opciones-agregar").style.display="block";
+  pendientes=[];document.getElementById("pendientes-lista").innerHTML="";document.getElementById("pendientes-acciones").style.display="none";
+  if(volverAPaso2){volverAPaso2=false;irPaso2();}
+}
+// ── Agregar conceptos SIN salir del Paso 2 (ya llenando datos generales) ──
+function agregarXmlDesdeP2(){volverAPaso2=true;setStep(1);mostrarZonaXML();}
+function agregarManualDesdeP2(){volverAPaso2=true;abrirModalSinCFDI();}
 
 // ══ MODAL GASTO SIN COMPROBANTE ══
 function abrirModalSinCFDI(){
@@ -712,7 +724,7 @@ function abrirModalSinCFDI(){
   document.getElementById("modal-error").innerHTML="";
   document.getElementById("modal-sincfdi").classList.add("open");
 }
-function cerrarModalSinCFDI(){document.getElementById("modal-sincfdi").classList.remove("open");}
+function cerrarModalSinCFDI(){document.getElementById("modal-sincfdi").classList.remove("open");volverAPaso2=false;}
 function guardarSinCFDI(){
   const fecha=document.getElementById("m_fecha").value;
   const monto=parseFloat(document.getElementById("m_monto").value)||0;
@@ -727,8 +739,10 @@ function guardarSinCFDI(){
   if(!just)return err("Escribe la justificación.");
   if(conceptos.length>=MAX_CONCEPTOS)return err("Máximo "+MAX_CONCEPTOS+" conceptos por vale.");
   conceptos.push({tipo:"manual",fecha,monto,tipoGasto:tipo,partida,justificacion:just});
+  const volver=volverAPaso2;
   cerrarModalSinCFDI();
-  renderListaConceptos();
+  if(volver)irPaso2();
+  else renderListaConceptos();
 }
 
 // ══ PASO 2 ══
@@ -1139,6 +1153,8 @@ document.addEventListener("DOMContentLoaded",()=>{
   document.getElementById("m_guardar").addEventListener("click",guardarSinCFDI);
   document.getElementById("modal-sincfdi").addEventListener("click",e=>{if(e.target.id==="modal-sincfdi")cerrarModalSinCFDI()});
   document.getElementById("btnIrPaso2").addEventListener("click",irPaso2);
+  document.getElementById("btnAgregarXmlP2").addEventListener("click",agregarXmlDesdeP2);
+  document.getElementById("btnAgregarManualP2").addEventListener("click",agregarManualDesdeP2);
   document.getElementById("btnGenerar").addEventListener("click",generarVale);
   document.getElementById("btnVolver1").addEventListener("click",()=>setStep(1));
   document.getElementById("btnNuevo").addEventListener("click",resetTodo);
