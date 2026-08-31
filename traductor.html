@@ -407,7 +407,8 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
     <div id="inv-leyendo" style="display:none;font-size:12px;color:var(--gris);margin-bottom:10px">⏳ Leyendo el PDF…</div>
     <div class="grid2">
       <div class="campo"><label>Fecha <span class="req">*</span></label><input type="date" id="i_fecha"></div>
-      <div class="campo"><label>Monto <span class="req">*</span></label><input type="text" id="i_monto" placeholder="0.00"></div>
+      <div class="campo"><label>Monto en la moneda del documento</label><input type="text" id="i_monto" placeholder="0.00"></div>
+      <div class="campo"><label>Monto en pesos (MXN) <span class="req">*</span></label><input type="text" id="i_monto_pesos" placeholder="Con el que se hace el vale"></div>
       <div class="campo"><label>Proveedor <span class="req">*</span></label><input type="text" id="i_proveedor" placeholder="Ej: Meta, Railway…"></div>
       <div class="campo"><label>No. de invoice / referencia</label><input type="text" id="i_referencia" placeholder="Opcional"></div>
       <div class="campo"><label>Tipo de gasto <span class="req">*</span></label><select id="i_tipo"></select></div>
@@ -902,11 +903,19 @@ async function leerInvoicePDF(file){
     }
     const datos=extraerDatosInvoice(texto);
     if(datos.fecha)document.getElementById("i_fecha").value=datos.fecha;
-    if(datos.monto!==null)document.getElementById("i_monto").value=datos.monto.toFixed(2);
+    if(datos.monto!==null){
+      if(datos.moneda==="MXN"){
+        document.getElementById("i_monto_pesos").value=datos.monto.toFixed(2);
+      } else {
+        document.getElementById("i_monto").value=datos.monto.toFixed(2);
+      }
+    }
     if(datos.proveedor)document.getElementById("i_proveedor").value=datos.proveedor;
     if(datos.referencia)document.getElementById("i_referencia").value=datos.referencia;
     if(!datos.monto){
       document.getElementById("modal-invoice-error").innerHTML='<div class="alerta alerta-ojo" style="margin-top:8px">⚠ No se pudo detectar el monto automáticamente. Complétalo a mano.</div>';
+    } else if(datos.moneda!=="MXN"){
+      document.getElementById("modal-invoice-error").innerHTML='<div class="alerta alerta-ojo" style="margin-top:8px">⚠ El documento está en '+esc(datos.moneda||"otra moneda")+'. Falta que captures el <strong>monto en pesos (MXN)</strong> con el tipo de cambio correspondiente.</div>';
     }
   }catch(e){
     console.error("Error leyendo PDF:",e);
@@ -920,6 +929,7 @@ function abrirModalInvoice(){
   document.getElementById("inputInvoicePDF").value="";
   document.getElementById("i_fecha").value=new Date().toISOString().slice(0,10);
   document.getElementById("i_monto").value="";
+  document.getElementById("i_monto_pesos").value="";
   document.getElementById("i_proveedor").value="";
   document.getElementById("i_referencia").value="";
   document.getElementById("i_tipo").value="";
@@ -931,7 +941,8 @@ function abrirModalInvoice(){
 function cerrarModalInvoice(){document.getElementById("modal-invoice").classList.remove("open");volverAPaso2=false;}
 function guardarInvoice(){
   const fecha=document.getElementById("i_fecha").value;
-  const monto=parseFloat(document.getElementById("i_monto").value)||0;
+  const montoOriginal=parseFloat(document.getElementById("i_monto").value)||0;
+  const montoPesos=parseFloat(document.getElementById("i_monto_pesos").value)||0;
   const proveedor=document.getElementById("i_proveedor").value.trim();
   const referencia=document.getElementById("i_referencia").value.trim();
   const tipo=document.getElementById("i_tipo").value;
@@ -939,13 +950,13 @@ function guardarInvoice(){
   const just=document.getElementById("i_justificacion").value.trim();
   const err=(m)=>{document.getElementById("modal-invoice-error").innerHTML='<div class="alerta alerta-error" style="margin:12px 0 0">'+m+'</div>';};
   if(!fecha)return err("Indica la fecha.");
-  if(!monto||monto<=0)return err("Indica un monto válido.");
+  if(!montoPesos||montoPesos<=0)return err("Indica el monto en pesos (MXN) — es el que se usa para el vale.");
   if(!proveedor)return err("Indica el proveedor.");
   if(!tipo)return err("Selecciona el tipo de gasto.");
   if(!partida)return err("Selecciona la partida presupuestada.");
   if(!just)return err("Escribe la justificación.");
   if(conceptos.length>=MAX_CONCEPTOS)return err("Máximo "+MAX_CONCEPTOS+" conceptos por vale.");
-  conceptos.push({tipo:"invoice",fecha,monto,proveedor,referencia,tipoGasto:tipo,partida,justificacion:just});
+  conceptos.push({tipo:"invoice",fecha,montoOriginal,monto:montoPesos,proveedor,referencia,tipoGasto:tipo,partida,justificacion:just});
   const volver=volverAPaso2;
   cerrarModalInvoice();
   if(volver)irPaso2();
@@ -1071,7 +1082,7 @@ function generarVale(){
       d._sinComp=0;d._invoice=0;d._subtotalMostrado=d.subtotal;
       return d;
     } else if(c.tipo==="invoice"){
-      return {subtotal:0,base0:0,base16:0,baseOtra:0,ivaAcred:0,ieps:0,hosp:0,tua:0,aero:0,locales:0,otrosVarios:0,retIVA:0,retISR:0,_total:c.monto,_sinComp:0,_invoice:c.monto,_subtotalMostrado:c.monto};
+      return {subtotal:0,base0:0,base16:0,baseOtra:0,ivaAcred:0,ieps:0,hosp:0,tua:0,aero:0,locales:0,otrosVarios:0,retIVA:0,retISR:0,_total:c.monto,_sinComp:0,_invoice:c.montoOriginal||0,_subtotalMostrado:c.monto};
     } else {
       return {subtotal:0,base0:0,base16:0,baseOtra:0,ivaAcred:0,ieps:0,hosp:0,tua:0,aero:0,locales:0,otrosVarios:0,retIVA:0,retISR:0,_total:c.monto,_sinComp:c.monto,_invoice:0,_subtotalMostrado:0};
     }
@@ -1164,7 +1175,7 @@ function generarVale(){
       '<td class="izq txt">'+esc(c.justificacion)+'</td>'+
       '<td class="txt">'+esc(c.partida)+'</td>';
     if(showSin) celdas+='<td class="der">'+(c.tipo==="manual"?mxn(c.monto):"-")+'</td>';
-    if(showInvoice) celdas+='<td class="der">'+(c.tipo==="invoice"?mxn(c.monto):"-")+'</td>';
+    if(showInvoice) celdas+='<td class="der">'+(c.tipo==="invoice"&&c.montoOriginal?mxn(c.montoOriginal):"-")+'</td>';
     celdas+='<td class="der">'+(c.tipo==="invoice"?mxn(d._subtotalMostrado):(esManual?"":mxn(d.subtotal)))+'</td>'+
       '<td class="der">'+(esManual?"":dash(d.base0+d.baseOtra))+'</td>'+
       '<td class="der">'+(esManual?"":dash(d.base16))+'</td>'+
