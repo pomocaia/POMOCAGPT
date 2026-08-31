@@ -1068,18 +1068,18 @@ function generarVale(){
     if(c.tipo==="cfdi"){
       const d=impDet(c.cfdi);
       d._total=d.subtotal+d.ivaAcred+d.ieps+d.hosp+d.otrosVarios-d.retIVA-d.retISR;
-      d._sinComp=0;d._invoice=0;
+      d._sinComp=0;d._invoice=0;d._subtotalMostrado=d.subtotal;
       return d;
     } else if(c.tipo==="invoice"){
-      return {subtotal:0,base0:0,base16:0,baseOtra:0,ivaAcred:0,ieps:0,hosp:0,tua:0,aero:0,locales:0,otrosVarios:0,retIVA:0,retISR:0,_total:c.monto,_sinComp:0,_invoice:c.monto};
+      return {subtotal:0,base0:0,base16:0,baseOtra:0,ivaAcred:0,ieps:0,hosp:0,tua:0,aero:0,locales:0,otrosVarios:0,retIVA:0,retISR:0,_total:c.monto,_sinComp:0,_invoice:c.monto,_subtotalMostrado:c.monto};
     } else {
-      return {subtotal:0,base0:0,base16:0,baseOtra:0,ivaAcred:0,ieps:0,hosp:0,tua:0,aero:0,locales:0,otrosVarios:0,retIVA:0,retISR:0,_total:c.monto,_sinComp:c.monto,_invoice:0};
+      return {subtotal:0,base0:0,base16:0,baseOtra:0,ivaAcred:0,ieps:0,hosp:0,tua:0,aero:0,locales:0,otrosVarios:0,retIVA:0,retISR:0,_total:c.monto,_sinComp:c.monto,_invoice:0,_subtotalMostrado:0};
     }
   });
   const sum=k=>dets.reduce((a,d)=>a+(d[k]||0),0);
   const sSin=dets.reduce((a,d)=>a+d._sinComp,0);
   const sInvoice=dets.reduce((a,d)=>a+d._invoice,0);
-  const sSub=sum("subtotal"),sB0=dets.reduce((a,d)=>a+d.base0+d.baseOtra,0),sB16=sum("base16"),sIVA=sum("ivaAcred");
+  const sSub=dets.reduce((a,d)=>a+d._subtotalMostrado,0),sB0=dets.reduce((a,d)=>a+d.base0+d.baseOtra,0),sB16=sum("base16"),sIVA=sum("ivaAcred");
   const sIEPS=sum("ieps"),sHosp=sum("hosp"),sTUA=sum("tua"),sAero=sum("aero"),sLoc=sum("locales"),sOtrV=sum("otrosVarios");
   const sRetIVA=sum("retIVA"),sRetISR=sum("retISR"),sTotal=dets.reduce((a,d)=>a+d._total,0);
 
@@ -1103,7 +1103,7 @@ function generarVale(){
   // ── 3. Anchos de columnas ──
   const fijas=[{w:2.2},{w:4},{w:4.2},{w:4.5},{w:9.5},{w:9}];
   if(showSin) fijas.push({w:4.5});
-  if(showInvoice) fijas.push({w:4.5});
+  if(showInvoice) fijas.push({w:6});
   const subCols=[{w:5},{w:4},{w:4},{w:5}];
   const impCols=colsImp.map(c=>({w:c.nombre.length>18?6:(c.nombre.length>10?5:4)}));
   const retCols=colsRet.map(()=>({w:4}));
@@ -1125,7 +1125,7 @@ function generarVale(){
     '<th rowspan="4">No.</th><th rowspan="4">FECHA DE FACTURA</th><th rowspan="4">FOLIO FACTURA</th><th rowspan="4">TIPO DE GASTOS</th>'+
     '<th rowspan="4">JUSTIFICACION</th><th rowspan="4">PARTIDA PRESUPUESTADA</th>'+
     (showSin?'<th rowspan="4">SIN COMP. FISCAL</th>':'')+
-    (showInvoice?'<th rowspan="4">INVOICE</th>':'')+
+    (showInvoice?'<th rowspan="4">INVOICE (DÓLARES)</th>':'')+
     '<th class="th-big gc" colspan="3">SUBTOTAL</th>'+
     '<th class="th-big gc" colspan="'+nImpGroup+'">IMPUESTOS</th>'+
     (nRet>0?'<th class="th-big gc" colspan="'+nRet+'">Retenciones</th>':'')+
@@ -1165,7 +1165,7 @@ function generarVale(){
       '<td class="txt">'+esc(c.partida)+'</td>';
     if(showSin) celdas+='<td class="der">'+(c.tipo==="manual"?mxn(c.monto):"-")+'</td>';
     if(showInvoice) celdas+='<td class="der">'+(c.tipo==="invoice"?mxn(c.monto):"-")+'</td>';
-    celdas+='<td class="der">'+(esManual?"":mxn(d.subtotal))+'</td>'+
+    celdas+='<td class="der">'+(c.tipo==="invoice"?mxn(d._subtotalMostrado):(esManual?"":mxn(d.subtotal)))+'</td>'+
       '<td class="der">'+(esManual?"":dash(d.base0+d.baseOtra))+'</td>'+
       '<td class="der">'+(esManual?"":dash(d.base16))+'</td>'+
       '<td class="der">'+(esManual?"":dash(d.ivaAcred))+'</td>';
@@ -1184,7 +1184,7 @@ function generarVale(){
   // ── 6. Fila de SUMA (solo en la última hoja) ──
   let sumaRow='<tr class="vtotal"><td colspan="6" style="text-align:right;font-size:8.5pt;font-weight:700">SUMA:</td>';
   if(showSin) sumaRow+='<td class="der">'+dash(sSin)+'</td>';
-  if(showInvoice) sumaRow+='<td class="der">'+dash(sInvoice)+'</td>';
+  if(showInvoice) sumaRow+='<td class="der"></td>';
   sumaRow+='<td class="der">'+mxn(sSub)+'</td>'+
     '<td class="der">'+dash(sB0)+'</td>'+
     '<td class="der">'+dash(sB16)+'</td>'+
