@@ -588,9 +588,11 @@ function parseCFDI(txt){
     const imp=_a(r,"Impuesto"),cur=rm.get(imp)||{impuesto:imp,importe:0};
     cur.importe+=_n(_a(r,"Importe"));rm.set(imp,cur);
   }
+  const metodoPago=_a(comp,"MetodoPago");
+  if(metodoPago==="PPD")throw new Error("Esta factura es PPD (pago en parcialidades o diferido). Solo se aceptan facturas PUE (pago en una sola exhibición).");
   return{serie:_a(comp,"Serie"),folio:_a(comp,"Folio"),fecha:_a(comp,"Fecha"),
     subtotal:_n(_a(comp,"SubTotal")),descuento:_n(_a(comp,"Descuento")),
-    total:_n(_a(comp,"Total")),moneda:_a(comp,"Moneda"),
+    total:_n(_a(comp,"Total")),moneda:_a(comp,"Moneda"),metodoPago,
     emisor:{rfc:_a(em,"Rfc"),nombre:_a(em,"Nombre")},receptor:{rfc:_a(re,"Rfc"),nombre:_a(re,"Nombre")},
     uuid:_a(ti,"UUID"),
     traslados:[...tm.values()].sort((a,b)=>a.impuesto.localeCompare(b.impuesto)||_n(b.tasa)-_n(a.tasa)),
@@ -984,7 +986,6 @@ function guardarInvoice(){
 function abrirModalSinCFDI(){
   document.getElementById("m_fecha").value=new Date().toISOString().slice(0,10);
   document.getElementById("m_monto").value="";
-  document.getElementById("m_tipo").value="";
   document.getElementById("m_partida").value="";document.getElementById("m_partida_txt").value="";
   document.getElementById("m_justificacion").value="";document.getElementById("m_cnt").textContent="0";
   document.getElementById("modal-error").innerHTML="";
