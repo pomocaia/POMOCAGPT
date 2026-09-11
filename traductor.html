@@ -361,6 +361,7 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
     <div class="alerta alerta-ok" id="alerta-paso3">✓ Vale generado correctamente.</div>
     <button class="btn btn-pdf" id="btnDescargarPDF" onclick="descargarPDF()">⬇ Descargar PDF</button>
     <button class="btn btn-gray" id="btnImprimir" onclick="imprimirVale()" style="margin-top:8px">🖨 Imprimir</button>
+    <button class="btn btn-gray" id="btnVolverCorregir" style="margin-top:8px">← Volver y corregir</button>
     <button class="btn btn-gray" id="btnNuevo" style="display:block;margin-top:10px">+ Crear otro vale</button>
     <p style="font-size:12px;color:#78716c;margin-top:8px;text-align:center">El vale aparece abajo. Revísalo antes de imprimir.</p>
   </div>
@@ -1478,6 +1479,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   document.getElementById("btnGenerar").addEventListener("click",generarVale);
   document.getElementById("btnVolver1").addEventListener("click",()=>setStep(1));
   document.getElementById("btnNuevo").addEventListener("click",resetTodo);
+  document.getElementById("btnVolverCorregir").addEventListener("click",()=>setStep(2));
 });
 </script>
 </body>
