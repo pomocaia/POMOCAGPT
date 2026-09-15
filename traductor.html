@@ -687,6 +687,13 @@ function initSelects(){
 }
 
 // ══ LISTA DE CONCEPTOS (Paso 1) ══
+// ══ Folio a mostrar: serie+folio si existen, si no los primeros 8 caracteres del UUID ══
+function folioMostrado(cfdi){
+  const f=[cfdi.serie,cfdi.folio].filter(Boolean).join("-");
+  if(f)return f;
+  return cfdi.uuid?cfdi.uuid.slice(0,8):"—";
+}
+
 function nombreConcepto(c){
   if(c.tipo==="cfdi")return c.cfdi.emisor.nombre||"(sin emisor)";
   if(c.tipo==="invoice")return c.proveedor||"Invoice";
@@ -702,7 +709,7 @@ function renderListaConceptos(){
   let total=conceptos.reduce((s,c)=>s+montoConcepto(c),0);
   cont.innerHTML=conceptos.map((c,i)=>{
     if(c.tipo==="cfdi"){
-      const folio=[c.cfdi.serie,c.cfdi.folio].filter(Boolean).join("-")||"—";
+      const folio=folioMostrado(c.cfdi);
       return '<div class="factura-item"><span class="factura-num">#'+(i+1)+'</span>'+
         '<div class="factura-info"><div class="factura-nombre">'+esc(c.cfdi.emisor.nombre)+'</div>'+
         '<div class="factura-detalle">📄 Factura · Folio '+esc(folio)+'</div></div>'+
@@ -785,7 +792,7 @@ function renderPendientes(){
         '<div><div class="pendiente-nombre">✕ '+esc(p.nombre)+'</div><div class="pendiente-msg err">'+esc(p.error)+'</div></div>'+
         '<button class="btn-del" onclick="eliminarPendiente('+p.id+')">✕</button></div></div>';
     }
-    const folio=[p.cfdi.serie,p.cfdi.folio].filter(Boolean).join("-")||"—";
+    const folio=folioMostrado(p.cfdi);
     let msg="";
     if(p.dupInterno)msg='<div class="pendiente-msg dup">⚠ Repetida dentro de estos mismos archivos.</div>';
     else if(p.dupExistente)msg='<div class="pendiente-msg dup">⚠ Ya está agregada en este vale.</div>';
@@ -1024,7 +1031,7 @@ function renderFilasGastos(){
   const cont=document.getElementById("filas-gastos");
   cont.innerHTML=conceptos.map((c,i)=>{
     if(c.tipo==="cfdi"){
-      const folio=[c.cfdi.serie,c.cfdi.folio].filter(Boolean).join("-")||"—";
+      const folio=folioMostrado(c.cfdi);
       const _empresaActual=document.getElementById("f_empresa")?document.getElementById("f_empresa").value:"";
       const tipos=opcionesTipoGasto(_empresaActual,c.tipoGasto);
       const _tipoDisabled=_empresaActual?"":"disabled";
@@ -1182,7 +1189,7 @@ function generarVale(){
     const esManual=c.tipo!=="cfdi";
     let folio, fechaF;
     if(c.tipo==="cfdi"){
-      folio=[c.cfdi.serie,c.cfdi.folio].filter(Boolean).join("-")||"—";
+      folio=folioMostrado(c.cfdi);
       fechaF=c.cfdi.fecha?new Date(c.cfdi.fecha).toLocaleDateString("es-MX"):"";
     } else if(c.tipo==="invoice"){
       folio=c.referencia?("Invoice "+c.referencia):"Invoice";
