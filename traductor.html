@@ -1011,7 +1011,7 @@ function guardarSinCFDI(){
   if(!partida)return err("Selecciona la partida presupuestada.");
   if(!just)return err("Escribe la justificación.");
   if(conceptos.length>=MAX_CONCEPTOS)return err("Máximo "+MAX_CONCEPTOS+" conceptos por vale.");
-  conceptos.push({tipo:"manual",fecha,monto,tipoGasto:"",partida,justificacion:just});
+  conceptos.push({tipo:"manual",fecha,monto,tipoGasto:"Gasto sin comprobante fiscal",partida,justificacion:just});
   const volver=volverAPaso2;
   cerrarModalSinCFDI();
   if(volver)irPaso2();
@@ -1052,13 +1052,11 @@ function renderFilasGastos(){
         '<div class="campo" style="grid-column:1/-1"><label>Partida presupuestada <span class="req">*</span></label><div class="sw"><input type="text" id="fg_partida_txt_'+i+'" value="'+esc(c.partida||"")+'" placeholder="Buscar partida…" autocomplete="off"><input type="hidden" id="fg_partida_'+i+'" value="'+esc(c.partida||"")+'"><ul class="dd" id="fg_dd_partida_'+i+'"></ul></div></div>'+
         '</div></div>';
     } else {
-      // Manual: mostrar resumen, editable rápido
-      const _empresaActual=document.getElementById("f_empresa")?document.getElementById("f_empresa").value:"";
-      const tipos=opcionesTipoGasto(_empresaActual,c.tipoGasto);
-      const _tipoDisabled=_empresaActual?"":"disabled";
+      // Manual: Tipo de gasto siempre fijo a "Gasto sin comprobante fiscal" — no depende de empresa, no es elegible
+      const tipos='<option value="Gasto sin comprobante fiscal" selected>Gasto sin comprobante fiscal</option>';
       return '<div class="fila-gasto sincfdi" id="fila-'+i+'"><div class="fila-gasto-header"><span class="fila-gasto-titulo">#'+(i+1)+' ✏️ Sin comprobante · '+esc(c.fecha||"")+' · '+mxn(c.monto)+'</span></div>'+
         '<div class="grid2">'+
-        '<div class="campo"><label>Tipo de gasto <span class="req">*</span></label><select id="fg_tipo_'+i+'" '+_tipoDisabled+' onchange="conceptos['+i+'].tipoGasto=this.value">'+tipos+'</select></div>'+
+        '<div class="campo"><label>Tipo de gasto <span class="req">*</span></label><select id="fg_tipo_'+i+'" disabled>'+tipos+'</select></div>'+
         '<div class="campo"><label>Justificación <span class="req">*</span></label><input type="text" id="fg_just_'+i+'" maxlength="150" value="'+esc(c.justificacion||"")+'" oninput="conceptos['+i+'].justificacion=this.value;document.getElementById(\'fg_cnt_'+i+'\').textContent=this.value.length"><span class="contador-chars" id="fg_cnt_'+i+'">'+String((c.justificacion||"").length)+'</span>/150</div>'+
         '<div class="campo" style="grid-column:1/-1"><label>Partida presupuestada <span class="req">*</span></label><div class="sw"><input type="text" id="fg_partida_txt_'+i+'" value="'+esc(c.partida||"")+'" placeholder="Buscar partida…" autocomplete="off"><input type="hidden" id="fg_partida_'+i+'" value="'+esc(c.partida||"")+'"><ul class="dd" id="fg_dd_partida_'+i+'"></ul></div></div>'+
         '</div></div>';
@@ -1462,6 +1460,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     const nuevaEmpresa=e.target.value;
     const listaValida=tiposGastoDe(nuevaEmpresa);
     conceptos.forEach(c=>{
+      if(c.tipo==="manual")return; // fijo siempre a "Gasto sin comprobante fiscal", no depende de empresa
       if(c.tipoGasto&&listaValida&&!listaValida.includes(c.tipoGasto))c.tipoGasto="";
       if(c.tipoGasto&&!listaValida)c.tipoGasto="";
     });
