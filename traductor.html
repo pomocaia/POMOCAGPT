@@ -213,7 +213,7 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
 .vsep-firmas{border-top:3px solid #161616;margin:1mm 0 0}
 
 .vtable{width:100%;border-collapse:collapse;font-size:7.3pt;table-layout:fixed}
-.vtable th,.vtable td{border:0.4px solid #888;padding:0.6mm 0.3mm;vertical-align:middle}
+.vtable th,.vtable td{border:0.4px solid #888;padding:0.3mm 0.3mm;vertical-align:middle}
 .vtable th{background:#C0C0C0;font-weight:700;text-align:center;font-size:6.3pt;line-height:1.14;color:#161616;white-space:normal;overflow-wrap:break-word;word-break:normal;overflow:hidden;hyphens:none;box-sizing:border-box}
 .vtable th.gc{background:#BFBFBF}
 .vtable th.gcl{background:#D9D9D9}
@@ -687,6 +687,12 @@ function initSelects(){
 }
 
 // ══ LISTA DE CONCEPTOS (Paso 1) ══
+// ══ Texto seguro para celdas: parte "palabras" muy largas sin espacios (códigos, links)
+// insertando puntos de corte invisibles, para que nunca se salgan de su celda en el PDF ══
+function cortable(s){
+  return esc(String(s||"").replace(/\S{18,}/g,w=>w.replace(/(.{10})/g,"$1\u200B")));
+}
+
 // ══ Folio a mostrar: serie+folio si existen, si no los primeros 8 caracteres del UUID ══
 function folioMostrado(cfdi){
   const f=[cfdi.serie,cfdi.folio].filter(Boolean).join("-");
@@ -741,21 +747,30 @@ function leerArchivos(fileList){
   const archivos=Array.from(fileList||[]);
   if(!archivos.length)return;
   document.getElementById("zonaError1").innerHTML="";
+  const resultados=new Array(archivos.length);
   let restantes=archivos.length;
-  archivos.forEach(f=>{
+  archivos.forEach((f,idx)=>{
     const r=new FileReader();
     r.onload=()=>{
-      procesarUno(r.result,f.name);
+      resultados[idx]={ok:true,texto:r.result,nombre:f.name};
       restantes--;
-      if(restantes===0)renderPendientes();
+      if(restantes===0)finalizarLote();
     };
     r.onerror=()=>{
-      pendientes.push({id:++_pendId,nombre:f.name,cfdi:null,error:"No se pudo leer el archivo."});
+      resultados[idx]={ok:false,nombre:f.name};
       restantes--;
-      if(restantes===0)renderPendientes();
+      if(restantes===0)finalizarLote();
     };
     r.readAsText(f);
   });
+  function finalizarLote(){
+    // Se procesan en el ORDEN en que el usuario los seleccionó, no en el orden en que terminó de leerlos el navegador
+    for(const res of resultados){
+      if(res.ok)procesarUno(res.texto,res.nombre);
+      else pendientes.push({id:++_pendId,nombre:res.nombre,cfdi:null,error:"No se pudo leer el archivo."});
+    }
+    renderPendientes();
+  }
 }
 
 function procesarUno(txt,nombre){
@@ -1200,8 +1215,8 @@ function generarVale(){
       '<td>'+fechaF+'</td>'+
       '<td class="fol">'+esc(folio)+'</td>'+
       '<td class="izq">'+esc(c.tipoGasto)+'</td>'+
-      '<td class="izq txt">'+esc(c.justificacion)+'</td>'+
-      '<td class="txt">'+esc(c.partida)+'</td>';
+      '<td class="izq txt">'+cortable(c.justificacion)+'</td>'+
+      '<td class="txt">'+cortable(c.partida)+'</td>';
     if(showSin) celdas+='<td class="der">'+(c.tipo==="manual"?mxn(c.monto):"-")+'</td>';
     if(showInvoice) celdas+='<td class="der">'+(c.tipo==="invoice"&&c.montoOriginal?mxn(c.montoOriginal):"-")+'</td>';
     celdas+='<td class="der">'+(c.tipo==="invoice"?mxn(d._subtotalMostrado):(esManual?"":mxn(d.subtotal)))+'</td>'+
@@ -1341,21 +1356,61 @@ function generarVale(){
     paginas.push(nueva);
   }
 
+  // ── 9.3b Reequilibrar: ya sabemos cuántas hojas hacen falta. En vez de llenar
+  // al máximo las primeras y dejar casi vacía la última (lo que se ve raro,
+  // ej. 11 conceptos + 1 solito), se reparten de forma pareja según el espacio
+  // real de cada hoja (la última siempre tiene menos por las firmas y el total).
+  if(paginas.length>1){
+    const orden=paginas.flat();
+    const nPag=paginas.length;
+    const budgetHoja=idx2=>idx2===nPag-1?dispUltima:dispNormal;
+    const totalBudget=Array.from({length:nPag},(_,i)=>budgetHoja(i)).reduce((a,b)=>a+b,0);
+    const totalContenido=orden.reduce((a,i)=>a+alturas[i],0);
+    const razon=totalContenido/totalBudget; // qué tan llena debe quedar cada hoja, en proporción
+    const nuevas=[];
+    let pos=0;
+    for(let pg=0;pg<nPag;pg++){
+      const esUltimaPg=pg===nPag-1;
+      const tope=budgetHoja(pg);
+      const objetivo=tope*razon;
+      const pagina=[];let acc=0;
+      while(pos<orden.length){
+        const alt=alturas[orden[pos]];
+        if(pagina.length&&acc+alt>tope)break;                 // nunca exceder el espacio real de la hoja
+        if(!esUltimaPg&&pagina.length&&acc>=objetivo)break;    // hojas intermedias: parar en el reparto parejo
+        pagina.push(orden[pos]);acc+=alt;pos++;
+      }
+      nuevas.push(pagina);
+    }
+    // Solo aplicar el reequilibrio si quedaron acomodados todos los conceptos
+    // y la última hoja sigue cabiendo en su espacio real (nunca arriesgar el total/firmas)
+    const todosColocados=nuevas.flat().length===orden.length;
+    const ultimaCabe=nuevas[nuevas.length-1].reduce((a,i)=>a+alturas[i],0)<=dispUltima;
+    if(todosColocados&&ultimaCabe&&nuevas.every(p=>p.length>0)){
+      paginas.length=0;
+      nuevas.forEach(p=>paginas.push(p));
+    }
+  }
+
   // 9.4 Dibujar cada hoja, rellenando el espacio sobrante
   const totalHojas=paginas.length;
   let htmlHojas="";
-  let numeroFila=1;
   for(let hoja=0;hoja<totalHojas;hoja++){
     const esUltima=(hoja===totalHojas-1);
     const disp=esUltima?dispUltima:dispNormal;
     const indices=paginas[hoja];
     let filasHTML="";
     let usado=0;
-    for(const i of indices){filasHTML+=filaDatos(i);usado+=alturas[i];numeroFila++;}
-    // Rellenar con filas vacías mientras quepan (mantiene el aspecto del formato)
-    let libre=disp-usado;
-    const vacias=Math.max(0,Math.floor(libre/altoFilaPx));
-    for(let v=0;v<vacias;v++){filasHTML+=filaVacia(numeroFila++);}
+    for(const i of indices){filasHTML+=filaDatos(i);usado+=alturas[i];}
+    // Solo la ÚLTIMA hoja se rellena con filas vacías (da el aspecto de formato completo).
+    // Las hojas intermedias NO llevan relleno: la hoja siguiente trae más conceptos reales,
+    // y si aquí se agregaran vacías, sus números chocarían con los de esa hoja siguiente.
+    if(esUltima){
+      let numeroFila=indices.length?indices[indices.length-1]+2:1;
+      let libre=disp-usado;
+      const vacias=Math.max(0,Math.floor(libre/altoFilaPx));
+      for(let v=0;v<vacias;v++){filasHTML+=filaVacia(numeroFila++);}
+    }
     htmlHojas+='<div class="vale-hoja'+(esUltima?"":" salto-hoja")+'">'+
       encabezadoHoja(hoja+1,totalHojas)+
       '<table class="vtable">'+colgroup+thead+'<tbody>'+filasHTML+(esUltima?sumaRow:"")+'</tbody></table>'+
