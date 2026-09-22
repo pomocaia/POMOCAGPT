@@ -577,27 +577,64 @@ function parseCFDI(txt){
   if(!comp||comp.localName!=="Comprobante")throw new Error("No es un CFDI válido.");
   const em=_f(comp,"Emisor"),re=_f(comp,"Receptor"),ti=_f(comp,"TimbreFiscalDigital");
   const gi=[...comp.children].find(c=>c.localName==="Impuestos");
-  const scope=gi||comp;
+  // Los traslados/retenciones normalmente vienen en el nodo global de Impuestos, pero hay
+  // CFDI donde ese nodo trae solo una de las dos partes (o no existe) y el resto queda a
+  // nivel de cada concepto. Se toma el global y, si viene vacío, se cae a los conceptos,
+  // nunca ambos a la vez (evita duplicar importes).
+  let nodosTraslado = gi ? _byL(gi,"Traslado") : [];
+  if(!nodosTraslado.length) nodosTraslado = _byL(comp,"Traslado");
+  let nodosRetencion = gi ? _byL(gi,"Retencion") : [];
+  if(!nodosRetencion.length) nodosRetencion = _byL(comp,"Retencion");
   const tm=new Map();
-  for(const t of _byL(scope,"Traslado")){
+  for(const t of nodosTraslado){
     const imp=_a(t,"Impuesto"),tf=_a(t,"TipoFactor"),tasa=_a(t,"TasaOCuota")||"";
     const k=imp+"|"+tf+"|"+tasa,cur=tm.get(k)||{impuesto:imp,tipoFactor:tf,tasa,base:0,importe:0};
     cur.base+=_n(_a(t,"Base"));cur.importe+=_n(_a(t,"Importe"));tm.set(k,cur);
   }
   const rm=new Map();
-  for(const r of _byL(scope,"Retencion")){
+  for(const r of nodosRetencion){
     const imp=_a(r,"Impuesto"),cur=rm.get(imp)||{impuesto:imp,importe:0};
     cur.importe+=_n(_a(r,"Importe"));rm.set(imp,cur);
   }
+  // Descuento: normalmente viene en el Comprobante; si no, se suma el de cada concepto.
+  let descuento=_n(_a(comp,"Descuento"));
+  if(!descuento){
+    for(const cn of _byL(comp,"Concepto")) descuento+=_n(_a(cn,"Descuento"));
+  }
+  // Moneda extranjera: el vale se hace en pesos, así que todos los importes se convierten
+  // con el TipoCambio declarado en el propio CFDI. Sin ese dato no se puede convertir
+  // sin inventar una cifra, así que se rechaza y se avisa.
+  const moneda=(_a(comp,"Moneda")||"MXN").toUpperCase();
+  const tipoCambio=_n(_a(comp,"TipoCambio"));
+  let factor=1;
+  if(moneda!=="MXN"&&moneda!=="XXX"){
+    if(!(tipoCambio>0))throw new Error("La factura está en "+moneda+" y no trae tipo de cambio en el XML. Captúrala como Invoice desde el menú ⋮ indicando el monto en pesos.");
+    factor=tipoCambio;
+  }
+  const cv=v=>Math.round(v*factor*100)/100;   // convierte a pesos y redondea a centavos
+  const trasladosFinal=[...tm.values()].map(t=>({...t,base:cv(t.base),importe:cv(t.importe)}))
+    .sort((a,b)=>a.impuesto.localeCompare(b.impuesto)||_n(b.tasa)-_n(a.tasa));
+  const retencionesFinal=[...rm.values()].map(r=>({...r,importe:cv(r.importe)}));
   const metodoPago=_a(comp,"MetodoPago");
   if(metodoPago==="PPD")throw new Error("Esta factura es PPD (pago en parcialidades o diferido). Solo se aceptan facturas PUE (pago en una sola exhibición).");
+  // Impuestos locales (complemento implocal): ISH de hoteles, TUA, y otros impuestos estatales.
+  // Viajan fuera del nodo global de Impuestos, por eso se leen aparte.
+  const trasladosLocales=[];
+  for(const t of _byL(comp,"TrasladosLocales")){
+    trasladosLocales.push({nombre:(_a(t,"ImpLocTrasladado")||"").trim(),tasa:_a(t,"TasadeTraslado"),importe:cv(_n(_a(t,"Importe")))});
+  }
+  const retencionesLocales=[];
+  for(const r of _byL(comp,"RetencionesLocales")){
+    retencionesLocales.push({nombre:(_a(r,"ImpLocRetenido")||"").trim(),tasa:_a(r,"TasadeRetencion"),importe:cv(_n(_a(r,"Importe")))});
+  }
   return{serie:_a(comp,"Serie"),folio:_a(comp,"Folio"),fecha:_a(comp,"Fecha"),
-    subtotal:_n(_a(comp,"SubTotal")),descuento:_n(_a(comp,"Descuento")),
-    total:_n(_a(comp,"Total")),moneda:_a(comp,"Moneda"),metodoPago,
+    subtotal:cv(_n(_a(comp,"SubTotal"))),descuento:cv(descuento),
+    total:cv(_n(_a(comp,"Total"))),moneda,tipoCambio,convertida:factor!==1,metodoPago,
     emisor:{rfc:_a(em,"Rfc"),nombre:_a(em,"Nombre")},receptor:{rfc:_a(re,"Rfc"),nombre:_a(re,"Nombre")},
     uuid:_a(ti,"UUID"),
-    traslados:[...tm.values()].sort((a,b)=>a.impuesto.localeCompare(b.impuesto)||_n(b.tasa)-_n(a.tasa)),
-    retenciones:[...rm.values()]};
+    traslados:trasladosFinal,
+    retenciones:retencionesFinal,
+    trasladosLocales,retencionesLocales};
 }
 
 // Desglose según NUEVA plantilla.
@@ -625,10 +662,32 @@ function impDet(cfdi){
     if(r.impuesto==="002")retIVA+=r.importe;
     else if(r.impuesto==="001")retISR+=r.importe;
   }
-  const subtotal=cfdi.subtotal;
+  // Impuestos locales del complemento (ISH de hoteles, TUA, aeroportuarios, otros estatales)
+  let retLocales=0;
+  for(const t of (cfdi.trasladosLocales||[])){
+    const nom=(t.nombre||"").toUpperCase();
+    if(/ISH|HOSPEDA/.test(nom))hosp+=t.importe;
+    else if(/\bTUA\b/.test(nom))tua+=t.importe;
+    else if(/AEROPORT/.test(nom))aero+=t.importe;
+    else locales+=t.importe;
+  }
+  for(const r of (cfdi.retencionesLocales||[]))retLocales+=r.importe;
+  const subtotal=Math.round((cfdi.subtotal-(cfdi.descuento||0))*100)/100; // la columna es "Base - descuentos"
   // Si el XML no trajo desglose de IVA (ej. todo exento o sin nodo), cuadrar base
   if(base0+base16+baseOtra===0){ base0=subtotal; }
-  return{subtotal,base0,base16,baseOtra,ivaAcred,ieps,hosp,tua,aero,locales,otrosVarios,retIVA,retISR,tasasRaras};
+  // Reconciliación contra el Total del CFDI, que es el dato autoritativo.
+  // Si falta algo (un impuesto en un complemento que no contemplamos), se muestra en
+  // "otros impuestos varios" para que las columnas sumen exactamente el total de la factura.
+  // Si sobra (las cuentas dan más que la factura), NO se corrige en silencio: se marca
+  // como descuadre para avisarle a la persona y que lo revise.
+  let descuadre=0;
+  if(cfdi.total>0){
+    const calc=subtotal+ivaAcred+ieps+hosp+tua+aero+locales+otrosVarios-retIVA-retISR-retLocales;
+    const residuo=Math.round((cfdi.total-calc)*100)/100;
+    if(residuo>0.01)otrosVarios=Math.round((otrosVarios+residuo)*100)/100;
+    else if(residuo<-0.01)descuadre=residuo;
+  }
+  return{subtotal,base0,base16,baseOtra,ivaAcred,ieps,hosp,tua,aero,locales,otrosVarios,retIVA,retISR,retLocales,tasasRaras,descuadre};
 }
 
 // ══ UTILS ══
@@ -779,6 +838,15 @@ function procesarUno(txt,nombre){
     const dupInterno=cfdi.uuid&&pendientes.some(p=>p.cfdi&&p.cfdi.uuid===cfdi.uuid);
     const dupExistente=cfdi.uuid&&conceptos.some(c=>c.tipo==="cfdi"&&c.cfdi.uuid===cfdi.uuid);
     const entry={id:++_pendId,nombre,cfdi,error:null,dupInterno,dupExistente};
+    // Avisos fiscales: cosas que no invalidan la factura pero que la persona debe revisar
+    try{
+      const d=impDet(cfdi);
+      const avisos=[];
+      if(cfdi.convertida)avisos.push("Factura en "+esc(cfdi.moneda)+": convertida a pesos con el tipo de cambio del XML ("+mxn(cfdi.tipoCambio)+").");
+      if(d.tasasRaras&&d.tasasRaras.length)avisos.push("Trae IVA al "+esc([...new Set(d.tasasRaras)].join(", "))+". Esa base se muestra junto a la de IVA exento; revísala.");
+      if(d.descuadre)avisos.push("Los impuestos del XML no cuadran con su total por "+mxn(Math.abs(d.descuadre))+". Revisa esta factura.");
+      if(avisos.length)entry.avisos=avisos;
+    }catch(e){}
     pendientes.push(entry);
     // Verificación antifraude en SharePoint (no bloquea, solo avisa en la tarjeta)
     if(spDisponible()&&cfdi.uuid){
@@ -812,6 +880,7 @@ function renderPendientes(){
     if(p.dupInterno)msg='<div class="pendiente-msg dup">⚠ Repetida dentro de estos mismos archivos.</div>';
     else if(p.dupExistente)msg='<div class="pendiente-msg dup">⚠ Ya está agregada en este vale.</div>';
     else if(p.spDup)msg='<div class="pendiente-msg err">🚨 Ya cobrada: registrada el '+esc(p.spDup.fecha)+' por '+esc(p.spDup.quien)+' (vale '+esc(p.spDup.vale)+').</div>';
+    if(p.avisos)msg+=p.avisos.map(a=>'<div class="pendiente-msg dup">⚠ '+a+'</div>').join("");
     const clase=(p.dupInterno||p.dupExistente||p.spDup)?"pendiente-item dup":"pendiente-item";
     return '<div class="'+clase+'"><div class="pendiente-top">'+
       '<div><div class="pendiente-nombre">'+esc(p.cfdi.emisor.nombre)+'</div>'+
@@ -1121,7 +1190,7 @@ function generarVale(){
   const dets=conceptos.map(c=>{
     if(c.tipo==="cfdi"){
       const d=impDet(c.cfdi);
-      d._total=d.subtotal+d.ivaAcred+d.ieps+d.hosp+d.otrosVarios-d.retIVA-d.retISR;
+      d._total=d.subtotal+d.ivaAcred+d.ieps+d.hosp+d.tua+d.aero+d.locales+d.otrosVarios-d.retIVA-d.retISR-(d.retLocales||0);
       d._sinComp=0;d._invoice=0;d._subtotalMostrado=d.subtotal;
       return d;
     } else if(c.tipo==="invoice"){
@@ -1135,7 +1204,7 @@ function generarVale(){
   const sInvoice=dets.reduce((a,d)=>a+d._invoice,0);
   const sSub=dets.reduce((a,d)=>a+d._subtotalMostrado,0),sB0=dets.reduce((a,d)=>a+d.base0+d.baseOtra,0),sB16=sum("base16"),sIVA=sum("ivaAcred");
   const sIEPS=sum("ieps"),sHosp=sum("hosp"),sTUA=sum("tua"),sAero=sum("aero"),sLoc=sum("locales"),sOtrV=sum("otrosVarios");
-  const sRetIVA=sum("retIVA"),sRetISR=sum("retISR"),sTotal=dets.reduce((a,d)=>a+d._total,0);
+  const sRetIVA=sum("retIVA"),sRetISR=sum("retISR"),sRetLoc=sum("retLocales"),sTotal=dets.reduce((a,d)=>a+d._total,0);
 
   // ── 2. Columnas dinámicas de impuestos/retenciones (calculadas sobre TODO el vale,
   //      para que todas las hojas tengan exactamente las mismas columnas) ──
@@ -1150,6 +1219,7 @@ function generarVale(){
   const colsRet=[
     {key:"retIVA", suma:sRetIVA, nombre:"I.V.A"},
     {key:"retISR", suma:sRetISR, nombre:"I.S.R"},
+    {key:"retLocales", suma:sRetLoc, nombre:"Locales"},
   ].filter(c=>Math.abs(c.suma)>0.001);
   const showSin=sSin>0.001;
   const showInvoice=sInvoice>0.001;
