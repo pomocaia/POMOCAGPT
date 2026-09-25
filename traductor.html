@@ -797,25 +797,43 @@ function initSelects(){
 // ══ LISTA DE CONCEPTOS (Paso 1) ══
 // ══ MATERIAL DE OBRA: desarrollo → etapa → contrato ══
 const MATERIAL_OBRA={
-  desarrollos:["Bicentenario Infonavit"],
-  etapas:["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V"],
-  contratos:{"Bicentenario Infonavit":["25 BIC INF DIAM A", "25 BIC INF DIAM B", "25 BIC INF DIAM C", "25 BIC INF DIAM D", "25 BIC INF DIAM E", "25 BIC INF DIAM F", "25 BIC INF DIAM G", "25 BIC INF DIAM O", "25 BIC INF DIAM H", "25 BIC INF DIAM I", "25 BIC INF DIAM K", "26 BIC INF DIAM O", "26 BIC INF DIAM P", "26 BIC INF DIAM Q", "26 BIC INF DIAM J", "26 BIC INF DIAM R", "26 BIC INF DIAM L", "26 BIC INF DIAM M", "26 BIC INF DIAM N", "26 BIC INF DIAM S", "26 BIC INF DIAM T", "26 BIC INF DIAM U", "26 BIC INF DIAM V", "25 BIC INF MANT", "25 BIC INF MEJ A", "25 BIC INF SEG A", "25 BIC INF MAQ A", "25 BIC INF MEJ B", "25 BIC INF MEJ C", "25 BIC INF MEJ D", "25 BIC INF MEJ E", "25 BIC INF MEJ F", "25 BIC INF PLUVIAL", "25 BIC INF GALERA", "25 BIC INF MAQ B", "25 BIC INF MAQ C", "25 BIC INF MAQ D", "25 BIC INF EQ Y HERR", "25 BIC INF SEG B", "25 BIC INF SEG C", "25 BIC INF SEG D", "25 BIC INF SEG E", "25 BIC INF SEG F", "25 BIC INF URB A", "25 BIC INF CALIDAD A", "25 BIC INF CALIDAD B", "25 BIC INF CALIDAD C", "25 BIC INF CALIDAD D", "25 BIC INF CALIDAD F", "25 BIC INF MEJ G", "25 BIC INF MEJ H", "25 BIC INF URB C", "25 BIC INF SUBESTACION", "25 BIC INF URB B", "25 BIC INF MEJ O", "25 BIC INF MEJ K", "25 BIC INF CALIDAD E", "25 BIC INF MAQ E", "25 BIC INF MAQ F", "25 BIC INF MAQ G", "25 BIC INF CALIDAD O", "25 BIC INF CALIDAD G", "25 BIC INF ELEC A", "25 BIC INF ELEC C", "25 BIC INF ELEC E", "25 BIC INF ELEC F", "25 BIC INF ELEC G", "25 BIC INF CALIDAD H", "25 BIC INF CALIDAD I", "25 BIC INF CALIDAD K", "25 BIC INF CALIDAD M", "25 BIC INF CALIDAD N", "25 BIC INF CALIDAD J", "25 BIC INF CALIDAD L", "25 BIC INF MAQ H", "25 BIC INF MAQ K", "25 BIC INF MAQ I", "25 BIC INF MAQ J", "25 BIC INF MAQ M", "25 BIC INF MAQ N", "25 BIC INF MAQ O", "25 BIC INF MAQ L", "25 BIC INF URB D", "25 BIC INF INFRA", "25 BIC INF ADQ MOLDE", "25 BIC INF MEJ I", "25 BIC INF ELEC D", "25 BIC INF MEJ P", "25 BIC INF PAV A", "25 BIC INF URB E", "25 BIC INF CALIDAD P", "25 BIC INF ELEC B", "25 BIC INF PAV D", "25 BIC INF PAV B", "25 BIC INF PAV C", "25 BIC INF MEJ Q", "25 BIC INF POSTVENTA", "25 BIC INF MEJ R", "25 BIC INF MEJ J", "25 BIC INF CALIDAD Q", "26 BIC INF URB F", "25 BIC INF PAV E", "26 BIC INF URB G", "26 BIC INF URB H", "26 BIC INF URB I", "26 BIC INF URB O", "26 BIC INF PLUVIAL", "25 BIC INF PAV F", "25 BIC INF PAV G", "26 BIC INF ELEC H", "26 BIC INF ELEC I", "26 BIC INF URB K", "26 BIC INF ELEC O", "26 BIC INF MAQ Q", "26 BIC INF MEJ N", "26 BIC INF MEJ L", "26 BIC INF MEJ M", "26 BIC INF MAQ P", "26 BIC INF MAQ R", "26 BIC INF MAQ S", "26 BIC INF MAQ T", "26 BIC INF MAQ U", "26 BIC INF MAQ V", "26 BIC INF SEG G", "26 BIC INF SEG H", "26 BIC INF SEG I", "26 BIC INF SEG J", "26 BIC INF SEG K", "26 BIC INF MEJ U", "26 BIC INF MEJ S", "26 BIC INF MEJ T", "26 BIC INF MEJ V", "26 BIC INF SEG L", "26 BIC INF SEG M", "26 BIC INF SEG N", "26 BIC INF SEG O", "26 BIC INF SEG P", "26 BIC INF SEG Q", "26 BIC INF CALIDAD R", "26 BIC INF ELEC K", "26 BIC INF SEG R", "26 BIC INF SEG S", "26 BIC INF SEG T", "26 BIC INF SEG U", "26 BIC INF SEG V", "26 BIC INF ELEC P", "26 BIC INF PAV O", "26 BIC INF URB P", "26 BIC INF ELEC J", "26 BIC INF ELEC Q", "26 BIC INF ELEC R", "26 BIC INF PAV H", "26 BIC INF PAV K", "26 BIC INF URB J", "26 BIC INF URB Q", "26 BIC INF URB R", "26 BIC INF URB T", "26 BIC INF PAV P", "26 BIC INF PAV I", "26 BIC INF CALIDAD T", "26 BIC INF CALIDAD S"]}
+  desarrollos:["Bicentenario Infonavit","UHB"],
+  // UHB no maneja etapas reales: siempre es "ÚNICA" y queda fija, sin poder cambiarla.
+  etapasPorDesarrollo:{
+    "Bicentenario Infonavit":["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V"],
+    "UHB":["ÚNICA"]
+  },
+  contratos:{
+    "Bicentenario Infonavit":["25 BIC INF DIAM A", "25 BIC INF DIAM B", "25 BIC INF DIAM C", "25 BIC INF DIAM D", "25 BIC INF DIAM E", "25 BIC INF DIAM F", "25 BIC INF DIAM G", "25 BIC INF DIAM O", "25 BIC INF DIAM H", "25 BIC INF DIAM I", "25 BIC INF DIAM K", "26 BIC INF DIAM O", "26 BIC INF DIAM P", "26 BIC INF DIAM Q", "26 BIC INF DIAM J", "26 BIC INF DIAM R", "26 BIC INF DIAM L", "26 BIC INF DIAM M", "26 BIC INF DIAM N", "26 BIC INF DIAM S", "26 BIC INF DIAM T", "26 BIC INF DIAM U", "26 BIC INF DIAM V", "25 BIC INF MANT", "25 BIC INF MEJ A", "25 BIC INF SEG A", "25 BIC INF MAQ A", "25 BIC INF MEJ B", "25 BIC INF MEJ C", "25 BIC INF MEJ D", "25 BIC INF MEJ E", "25 BIC INF MEJ F", "25 BIC INF PLUVIAL", "25 BIC INF GALERA", "25 BIC INF MAQ B", "25 BIC INF MAQ C", "25 BIC INF MAQ D", "25 BIC INF EQ Y HERR", "25 BIC INF SEG B", "25 BIC INF SEG C", "25 BIC INF SEG D", "25 BIC INF SEG E", "25 BIC INF SEG F", "25 BIC INF URB A", "25 BIC INF CALIDAD A", "25 BIC INF CALIDAD B", "25 BIC INF CALIDAD C", "25 BIC INF CALIDAD D", "25 BIC INF CALIDAD F", "25 BIC INF MEJ G", "25 BIC INF MEJ H", "25 BIC INF URB C", "25 BIC INF SUBESTACION", "25 BIC INF URB B", "25 BIC INF MEJ O", "25 BIC INF MEJ K", "25 BIC INF CALIDAD E", "25 BIC INF MAQ E", "25 BIC INF MAQ F", "25 BIC INF MAQ G", "25 BIC INF CALIDAD O", "25 BIC INF CALIDAD G", "25 BIC INF ELEC A", "25 BIC INF ELEC C", "25 BIC INF ELEC E", "25 BIC INF ELEC F", "25 BIC INF ELEC G", "25 BIC INF CALIDAD H", "25 BIC INF CALIDAD I", "25 BIC INF CALIDAD K", "25 BIC INF CALIDAD M", "25 BIC INF CALIDAD N", "25 BIC INF CALIDAD J", "25 BIC INF CALIDAD L", "25 BIC INF MAQ H", "25 BIC INF MAQ K", "25 BIC INF MAQ I", "25 BIC INF MAQ J", "25 BIC INF MAQ M", "25 BIC INF MAQ N", "25 BIC INF MAQ O", "25 BIC INF MAQ L", "25 BIC INF URB D", "25 BIC INF INFRA", "25 BIC INF ADQ MOLDE", "25 BIC INF MEJ I", "25 BIC INF ELEC D", "25 BIC INF MEJ P", "25 BIC INF PAV A", "25 BIC INF URB E", "25 BIC INF CALIDAD P", "25 BIC INF ELEC B", "25 BIC INF PAV D", "25 BIC INF PAV B", "25 BIC INF PAV C", "25 BIC INF MEJ Q", "25 BIC INF POSTVENTA", "25 BIC INF MEJ R", "25 BIC INF MEJ J", "25 BIC INF CALIDAD Q", "26 BIC INF URB F", "25 BIC INF PAV E", "26 BIC INF URB G", "26 BIC INF URB H", "26 BIC INF URB I", "26 BIC INF URB O", "26 BIC INF PLUVIAL", "25 BIC INF PAV F", "25 BIC INF PAV G", "26 BIC INF ELEC H", "26 BIC INF ELEC I", "26 BIC INF URB K", "26 BIC INF ELEC O", "26 BIC INF MAQ Q", "26 BIC INF MEJ N", "26 BIC INF MEJ L", "26 BIC INF MEJ M", "26 BIC INF MAQ P", "26 BIC INF MAQ R", "26 BIC INF MAQ S", "26 BIC INF MAQ T", "26 BIC INF MAQ U", "26 BIC INF MAQ V", "26 BIC INF SEG G", "26 BIC INF SEG H", "26 BIC INF SEG I", "26 BIC INF SEG J", "26 BIC INF SEG K", "26 BIC INF MEJ U", "26 BIC INF MEJ S", "26 BIC INF MEJ T", "26 BIC INF MEJ V", "26 BIC INF SEG L", "26 BIC INF SEG M", "26 BIC INF SEG N", "26 BIC INF SEG O", "26 BIC INF SEG P", "26 BIC INF SEG Q", "26 BIC INF CALIDAD R", "26 BIC INF ELEC K", "26 BIC INF SEG R", "26 BIC INF SEG S", "26 BIC INF SEG T", "26 BIC INF SEG U", "26 BIC INF SEG V", "26 BIC INF ELEC P", "26 BIC INF PAV O", "26 BIC INF URB P", "26 BIC INF ELEC J", "26 BIC INF ELEC Q", "26 BIC INF ELEC R", "26 BIC INF PAV H", "26 BIC INF PAV K", "26 BIC INF URB J", "26 BIC INF URB Q", "26 BIC INF URB R", "26 BIC INF URB T", "26 BIC INF PAV P", "26 BIC INF PAV I", "26 BIC INF CALIDAD T", "26 BIC INF CALIDAD S"],
+    "UHB":["24 UHB MZ 16 EDIFICIO", "24 UHB MZ 1 EDIFICIO", "24 UHB MZ 2 EDIFICIO", "25 UHB MZ 3 EDIFICIO", "24 UHB MZ 16 PL", "24 UHB MZ 1 PL", "24 UHB ALMACEN", "24 UHB URB ETP A", "24 UHB MZ 2 PL", "24UHB INF OBRA", "24 UHB SEGURIDAD", "24 UHB MAQUINARIA", "24 UHB MZ 3 PL", "24 UHB MZ 4 PL", "24 UHB MANT CIMBR ETP A", "24 UHB MZ 4 PIL", "24 UHB MZ 5 PIL", "24 UHB INFRA ETP A", "24 UHB URB ETP B", "25 UHB MAQUINARIA", "25 UHB SEGURIDAD", "25 UHB RELLENO", "25 UHB ALMACEN GEN", "26 UHB MZ 15 PIL", "26 UHB MZ 15 PIL C", "26 UHB MZ 5 PIL", "26 UHB CISTERNA", "26 UHB PROMOC ETP A", "26 UHB MZ 4 PIL", "26 UHB CISTERNA CC", "26 UHB MZ 5 PIL CC"]
+  }
 };
 const TIPO_MATERIAL="Material de obra";
 // La etapa se reconoce por la letra final del contrato ("25 BIC INF DIAM A" -> etapa A).
 // Los que no traen letra (MANT, PLUVIAL, GALERA, etc.) son generales y salen en toda etapa.
-function etapaDeContrato(c){const m=String(c||"").match(/\s([A-V])$/);return m?m[1]:null;}
+// El patrón de "letra final = etapa" SOLO aplica a Bicentenario Infonavit. UHB no tiene
+// etapas reales (siempre es "ÚNICA"), así que nunca pasa por esta detección — evita que un
+// contrato de UHB que termine en una sola letra (ej. "26 UHB MZ 15 PIL C") se confunda con
+// una etapa que no le corresponde.
+function etapaDeContrato(desarrollo,c){
+  if(desarrollo!=="Bicentenario Infonavit")return null;
+  const m=String(c||"").match(/\s([A-V])$/);return m?m[1]:null;
+}
 function contratosDe(desarrollo,etapa){
   const lista=MATERIAL_OBRA.contratos[desarrollo]||[];
+  if(desarrollo==="UHB")return{propios:lista,generales:[]}; // única etapa: todos los contratos, sin filtrar
   if(!etapa)return{propios:[],generales:[]};
-  return{propios:lista.filter(c=>etapaDeContrato(c)===etapa),
-         generales:lista.filter(c=>etapaDeContrato(c)===null)};
+  return{propios:lista.filter(c=>etapaDeContrato(desarrollo,c)===etapa),
+         generales:lista.filter(c=>etapaDeContrato(desarrollo,c)===null)};
 }
 function opcionesContrato(desarrollo,etapa,valor){
   if(!desarrollo)return '<option value="">Elige el desarrollo primero</option>';
-  if(!etapa)return '<option value="">Elige la etapa primero</option>';
+  if(desarrollo!=="UHB"&&!etapa)return '<option value="">Elige la etapa primero</option>';
   const {propios,generales}=contratosDe(desarrollo,etapa);
   let o='<option value="">— Selecciona —</option>';
+  if(desarrollo==="UHB"){
+    return o+propios.map(c=>'<option value="'+esc(c)+'"'+(valor===c?" selected":"")+'>'+esc(c)+'</option>').join("");
+  }
   if(propios.length)o+='<optgroup label="Etapa '+esc(etapa)+'">'+propios.map(c=>'<option value="'+esc(c)+'"'+(valor===c?" selected":"")+'>'+esc(c)+'</option>').join("")+'</optgroup>';
   if(generales.length)o+='<optgroup label="Generales (toda etapa)">'+generales.map(c=>'<option value="'+esc(c)+'"'+(valor===c?" selected":"")+'>'+esc(c)+'</option>').join("")+'</optgroup>';
   return o;
@@ -1026,10 +1044,16 @@ function llenarSelectsMaterial(){
 function refrescarEtapasMaterial(){
   const des=document.getElementById("mat_desarrollo").value;
   const se=document.getElementById("mat_etapa");
-  se.innerHTML=des
-    ? '<option value="">— Selecciona —</option>'+MATERIAL_OBRA.etapas.map(e=>'<option value="'+esc(e)+'">Etapa '+esc(e)+'</option>').join("")
-    : '<option value="">Elige el desarrollo primero</option>';
-  se.disabled=!des;
+  if(des==="UHB"){
+    se.innerHTML='<option value="ÚNICA" selected>ÚNICA</option>';
+    se.disabled=true;
+  } else if(des){
+    se.innerHTML='<option value="">— Selecciona —</option>'+MATERIAL_OBRA.etapasPorDesarrollo["Bicentenario Infonavit"].map(e=>'<option value="'+esc(e)+'">Etapa '+esc(e)+'</option>').join("");
+    se.disabled=false;
+  } else {
+    se.innerHTML='<option value="">Elige el desarrollo primero</option>';
+    se.disabled=true;
+  }
   refrescarContratosMaterial();
 }
 function refrescarContratosMaterial(){
@@ -1122,10 +1146,13 @@ function leerMaterialXML(fileList){
 
 // Cambios de desarrollo/etapa desde el Paso 2: al cambiar, el contrato deja de ser válido
 function cambiarDesarrolloConcepto(i,v){
-  conceptos[i].desarrollo=v;conceptos[i].etapa="";conceptos[i].partida="";
+  conceptos[i].desarrollo=v;
+  conceptos[i].etapa=(v==="UHB")?"ÚNICA":""; // UHB no tiene etapas: queda fija sola
+  conceptos[i].partida="";
   renderFilasGastos();
 }
 function cambiarEtapaConcepto(i,v){
+  if(conceptos[i].desarrollo==="UHB")return; // fija en ÚNICA, no se puede cambiar
   conceptos[i].etapa=v;conceptos[i].partida="";
   const sc=document.getElementById("fg_partida_"+i);
   if(sc)sc.innerHTML=opcionesContrato(conceptos[i].desarrollo,v,"");
@@ -1320,8 +1347,10 @@ function renderFilasGastos(){
         '<div class="campo"><label>Justificación <span class="req">*</span></label><input type="text" id="fg_just_'+i+'" maxlength="150" value="'+esc(c.justificacion||"")+'" placeholder="Ej: Compra de varilla…" oninput="conceptos['+i+'].justificacion=this.value;document.getElementById(\'fg_cnt_'+i+'\').textContent=this.value.length"><span class="contador-chars" id="fg_cnt_'+i+'">'+String((c.justificacion||"").length)+'</span>/150</div>'+
         '<div class="campo"><label>Desarrollo <span class="req">*</span></label><select id="fg_des_'+i+'" onchange="cambiarDesarrolloConcepto('+i+',this.value)">'+
           MATERIAL_OBRA.desarrollos.map(d=>'<option value="'+esc(d)+'"'+(c.desarrollo===d?" selected":"")+'>'+esc(d)+'</option>').join("")+'</select></div>'+
-        '<div class="campo"><label>Etapa <span class="req">*</span></label><select id="fg_eta_'+i+'" onchange="cambiarEtapaConcepto('+i+',this.value)">'+
-          '<option value="">— Selecciona —</option>'+MATERIAL_OBRA.etapas.map(e=>'<option value="'+esc(e)+'"'+(c.etapa===e?" selected":"")+'>Etapa '+esc(e)+'</option>').join("")+'</select></div>'+
+        '<div class="campo"><label>Etapa <span class="req">*</span></label><select id="fg_eta_'+i+'" '+(c.desarrollo==="UHB"?"disabled":"")+' onchange="cambiarEtapaConcepto('+i+',this.value)">'+
+          (c.desarrollo==="UHB"
+            ? '<option value="ÚNICA" selected>ÚNICA</option>'
+            : '<option value="">— Selecciona —</option>'+MATERIAL_OBRA.etapasPorDesarrollo["Bicentenario Infonavit"].map(e=>'<option value="'+esc(e)+'"'+(c.etapa===e?" selected":"")+'>Etapa '+esc(e)+'</option>').join(""))+'</select></div>'+
         '<div class="campo" style="grid-column:1/-1"><label>Contrato <span class="req">*</span></label><select id="fg_partida_'+i+'" onchange="conceptos['+i+'].partida=this.value">'+
           opcionesContrato(c.desarrollo,c.etapa,c.partida)+'</select></div>'+
         '</div></div>';
