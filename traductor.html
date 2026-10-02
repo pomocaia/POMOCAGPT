@@ -253,6 +253,13 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
 .vfirma-nombre{font-size:7pt;font-weight:700}
 .vfirma-cargo{font-size:6pt}
 
+/* Aviso temporal (toast) */
+#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);
+  background:#1c1917;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;
+  box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:9999;opacity:0;pointer-events:none;
+  transition:opacity .25s ease,transform .25s ease;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
 /* Material de obra */
 .material-ask{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border:1px solid var(--borde);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#44403c}
 .material-ask-btns{display:flex;gap:6px}
@@ -349,11 +356,11 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
     <div class="tarjeta" id="resumenConceptos2"></div>
     <div class="tarjeta">
       <h2>Datos del responsable y empresa</h2>
+      <div class="campo" style="margin-bottom:14px"><label>Tipo de documento <span class="req">*</span></label><select id="f_tipodoc"></select></div>
       <div class="grid2">
         <div class="campo"><label>Responsable (quien elabora) <span class="req">*</span></label>
-          <input type="text" id="f_responsable" placeholder="Tu nombre completo"></div>
+          <div id="f_responsable_wrap"><input type="text" id="f_responsable" placeholder="Tu nombre completo"></div></div>
         <div class="campo"><label>Empresa <span class="req">*</span></label><select id="f_empresa"></select></div>
-        <div class="campo"><label>Tipo de documento <span class="req">*</span></label><select id="f_tipodoc"></select></div>
         <div class="campo"><label>Área <span class="req">*</span></label><select id="f_area"></select></div>
         <div class="campo"><label>Oficinas <span class="req">*</span></label><select id="f_oficina"></select></div>
         <div class="campo"><label>Gerente que autoriza <span class="req">*</span></label><select id="f_gerente"></select></div>
@@ -412,6 +419,8 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
     </div>
   </div>
 </div>
+
+<div id="toast"></div>
 
 <!-- Modal Material de obra -->
 <div class="modal-bg" id="modal-material">
@@ -815,6 +824,38 @@ const MATERIAL_OBRA={
 };
 const TIPO_MATERIAL="Material de obra";
 const TIPOS_MATERIAL=["Material de obra","Servicio en obra"]; // elegibles cuando el concepto es de material de obra
+
+// ══ Fondo Revolvente: solo estas personas pueden ser responsables (caja chica) ══
+const RESPONSABLES_FONDO_REVOLVENTE=["CARMEN GUADALUPE DE TILA RUIZ DOMINGUEZ","HANNY EDUI MARQUEZ PAVON",
+  "LUIS FERNANDO LAZO TAPIA","MAKARENKO LEON DE LA O","MARIA DEL ROSARIO FALCON CURI",
+  "MINERVA DE LOS SANTOS CALCANEO SANCHEZ","SANDRA MORALES GUZMAN"];
+
+// ══ Aviso temporal (toast) ══
+let _toastTimer=null;
+function toast(msg,ms=4000){
+  const el=document.getElementById("toast");
+  el.textContent=msg;
+  el.classList.add("show");
+  clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(()=>el.classList.remove("show"),ms);
+}
+
+// Redibuja el campo Responsable: lista cerrada si es Fondo Revolvente, texto libre en los demás casos
+function renderResponsableField(){
+  const wrap=document.getElementById("f_responsable_wrap");
+  if(!wrap)return;
+  const esFondo=document.getElementById("f_tipodoc").value==="FONDO REVOLVENTE";
+  const actual=(wrap.querySelector("#f_responsable")?.value||"").trim();
+  if(esFondo){
+    const coincide=RESPONSABLES_FONDO_REVOLVENTE.find(n=>n===actual.toUpperCase());
+    wrap.innerHTML='<select id="f_responsable">'+
+      '<option value="">— Selecciona —</option>'+
+      RESPONSABLES_FONDO_REVOLVENTE.map(n=>'<option value="'+esc(n)+'"'+(coincide===n?" selected":"")+'>'+esc(n)+'</option>').join("")+
+      '</select>';
+  } else {
+    wrap.innerHTML='<input type="text" id="f_responsable" placeholder="Tu nombre completo" value="'+esc(actual)+'">';
+  }
+}
 // Un desarrollo es de "etapa única" cuando su lista de etapas es exactamente ["ÚNICA"]
 // (UHB, Bosques Infonavit, Residencial los bosques...). Así, agregar un desarrollo nuevo de
 // este tipo solo requiere declararlo arriba — no hace falta tocar nada más del código.
@@ -1346,6 +1387,7 @@ function irPaso2(){
   const total=conceptos.reduce((s,c)=>s+montoConcepto(c),0);
   document.getElementById("resumenConceptos2").innerHTML='<h2>'+conceptos.length+' concepto'+(conceptos.length>1?"s":"")+' · Total: '+mxn(total)+'</h2>'+
     conceptos.map((c,i)=>'<div style="font-size:12px;color:#57534e;padding:3px 0">#'+(i+1)+' '+(c.esMaterial?"🧱":c.tipo==="cfdi"?"📄":c.tipo==="invoice"?"🌐":"✏️")+' <strong>'+esc(nombreConcepto(c))+'</strong> · '+mxn(montoConcepto(c))+'</div>').join("");
+  renderResponsableField();
   renderFilasGastos();
   setStep(2);
 }
@@ -1837,6 +1879,11 @@ document.addEventListener("DOMContentLoaded",()=>{
   document.getElementById("modal-sincfdi").addEventListener("click",e=>{if(e.target.id==="modal-sincfdi")cerrarModalSinCFDI()});
 
   // Al cambiar de empresa, el catálogo de Tipo de Gasto cambia — refrescar y limpiar valores que ya no apliquen
+  document.getElementById("f_tipodoc").addEventListener("change",e=>{
+    if(e.target.value==="FONDO REVOLVENTE")toast("Fondo revolvente solo aplica cuando tienes caja chica");
+    renderResponsableField();
+  });
+
   document.getElementById("f_empresa").addEventListener("change",e=>{
     const nuevaEmpresa=e.target.value;
     const listaValida=tiposGastoDe(nuevaEmpresa);
