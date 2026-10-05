@@ -683,7 +683,22 @@ function parseCFDI(txt){
   for(const r of _byL(comp,"RetencionesLocales")){
     retencionesLocales.push({nombre:(_a(r,"ImpLocRetenido")||"").trim(),tasa:_a(r,"TasadeRetencion"),importe:cv(_n(_a(r,"Importe")))});
   }
+  // Complemento Aerolíneas (boletos de avión): el TUA va en el atributo TUA, y los demás
+  // cargos (YQ, YR, etc.) en OtrosCargos. Viajan fuera de Impuestos, por eso se leen aparte.
+  let tuaAerolinea=0,otrosCargosAerolinea=0;
+  const aer=_f(comp,"Aerolineas");
+  if(aer){
+    tuaAerolinea=cv(_n(_a(aer,"TUA")));
+    const oc=_f(aer,"OtrosCargos");
+    if(oc){
+      const cargos=_byL(oc,"Cargo");
+      otrosCargosAerolinea=cargos.length
+        ? cv(cargos.reduce((s,x)=>s+_n(_a(x,"Importe")),0))
+        : cv(_n(_a(oc,"TotalCargos")));
+    }
+  }
   return{serie:_a(comp,"Serie"),folio:_a(comp,"Folio"),fecha:_a(comp,"Fecha"),
+    tuaAerolinea,otrosCargosAerolinea,
     subtotal:cv(_n(_a(comp,"SubTotal"))),descuento:cv(descuento),
     total:cv(_n(_a(comp,"Total"))),moneda,tipoCambio,convertida:factor!==1,metodoPago,
     emisor:{rfc:_a(em,"Rfc"),nombre:_a(em,"Nombre")},receptor:{rfc:_a(re,"Rfc"),nombre:_a(re,"Nombre")},
@@ -728,7 +743,19 @@ function impDet(cfdi){
     else locales+=t.importe;
   }
   for(const r of (cfdi.retencionesLocales||[]))retLocales+=r.importe;
-  const subtotal=Math.round((cfdi.subtotal-(cfdi.descuento||0))*100)/100; // la columna es "Base - descuentos"
+
+  let subtotal=Math.round((cfdi.subtotal-(cfdi.descuento||0))*100)/100; // la columna es "Base - descuentos"
+  // Aerolíneas: el complemento informa TUA y otros cargos, pero hay DOS formatos reales:
+  //  (a) ya vienen DENTRO del SubTotal (un concepto "cargos aeroportuarios"): el Total del XML cuadra sin sumarlos
+  //  (b) vienen POR FUERA del SubTotal: el Total solo cuadra si se suman.
+  // El Total del XML es el árbitro: nunca se cuenta dos veces.
+  const tuaA=cfdi.tuaAerolinea||0, aeroA=cfdi.otrosCargosAerolinea||0;
+  if(tuaA+aeroA>0.001){
+    const sinAero=subtotal+ivaAcred+ieps+hosp+locales+otrosVarios-retIVA-retISR-retLocales;
+    const yaIncluidos=cfdi.total>0&&Math.abs(sinAero-cfdi.total)<=0.011&&(subtotal-(tuaA+aeroA))>=-0.011;
+    if(yaIncluidos)subtotal=Math.round((subtotal-(tuaA+aeroA))*100)/100; // se separan del subtotal a su propia columna
+    tua+=tuaA; aero+=aeroA;
+  }
   // Si el XML no trajo desglose de IVA (ej. todo exento o sin nodo), cuadrar base
   if(base0+base16+baseOtra===0){ base0=subtotal; }
   // Reconciliación contra el Total del CFDI, que es el dato autoritativo.
@@ -822,6 +849,17 @@ const MATERIAL_OBRA={
     "Residencial los bosques": ["26 BSQ ZAF M3 L3", "26 BSQ ZAF M3 L3 CC", "26 BSQ ZAF M3 L3 ETP 2", "26 BSQ BARDA M3 L3", "26 BSQ PLAZA ETP 2", "26 BSQ MURO CONT M8 L4", "26 BSQ REHABIL CIMB M3 L2", "26 BSQ PLAZA", "26 BSQ CONT RESIDUOS", "26 BSQ DESFOGUE DREN", "26 BSQ URB M3 L3 ETP 2", "26 BSQ HIPOTECA M4 L1", "26 BSQ HIPOTECA M4 L2", "26 BSQ HIPOTECA M4 L3", "26 BSQ HIPOTECA M4 L4", "26 BSQ PALAPA M1 L3 CC", "26 BSQ PALAPA M1 L3", "26 BSQ POLIMEROS", "26 BSQ PAV M3 L2", "26 BSQ MAQ TEC", "25 BSQ HIP GENERAL", "25 BSQ URB MZ 3 L 2", "25 BSQ PLUVIAL GEN", "26 BSQ PROMOC M3 L2 PINT", "26 BSQ PROMOC M3 L2 PISOS", "26 BSQ URB M3 L3"]
   }
 };
+// ══ Presupuesto por concepto: INDIRECTOS si no es material de obra; si lo es, depende del desarrollo ══
+const PRESUPUESTO_POR_DESARROLLO={
+  "Bicentenario Infonavit":"BIC INF",
+  "Bosques Infonavit":"BSQ INF",
+  "Residencial los bosques":"BSQ",
+  "UHB":"UHB"
+};
+function presupuestoDe(c){
+  if(c.esMaterial)return PRESUPUESTO_POR_DESARROLLO[c.desarrollo]||"INDIRECTOS";
+  return "INDIRECTOS";
+}
 const TIPO_MATERIAL="Material de obra";
 const TIPOS_MATERIAL=["Material de obra","Servicio en obra"]; // elegibles cuando el concepto es de material de obra
 
@@ -1448,7 +1486,7 @@ function renderFilasGastos(){
 function getFD(){return{
   responsable:document.getElementById("f_responsable").value.trim(),
   empresa:document.getElementById("f_empresa").value,area:document.getElementById("f_area").value,
-  oficina:document.getElementById("f_oficina").value,presupuesto:"INDIRECTOS",
+  oficina:document.getElementById("f_oficina").value,
   beneficiario:document.getElementById("f_beneficiario").value,gerente:document.getElementById("f_gerente").value,
   folio:document.getElementById("f_folio").value.trim()||"001",
   folioviaticos:document.getElementById("f_folioviaticos").value.trim(),
@@ -1521,7 +1559,7 @@ function generarVale(){
   const showInvoice=sInvoice>0.001;
 
   // ── 3. Anchos de columnas ──
-  const fijas=[{w:2.2},{w:4},{w:4.2},{w:4.5},{w:9.5},{w:9}];
+  const fijas=[{w:2.2},{w:4},{w:4.2},{w:4.5},{w:9.5},{w:9},{w:4.5}];
   if(showSin) fijas.push({w:4.5});
   if(showInvoice) fijas.push({w:6});
   const subCols=[{w:5},{w:4},{w:4},{w:5}];
@@ -1535,7 +1573,7 @@ function generarVale(){
 
   const MMPX=96/25.4;              // px por milímetro a 96dpi
   const altoFilaPx=5.6*MMPX;       // alto mínimo de una fila vacía
-  const nColsFijas=6+(showSin?1:0)+(showInvoice?1:0);
+  const nColsFijas=7+(showSin?1:0)+(showInvoice?1:0);
   const nColsTotal=nColsFijas+4+colsImp.length+colsRet.length+2;
 
   // ── 4. Encabezado de tabla (igual en todas las hojas) ──
@@ -1543,7 +1581,7 @@ function generarVale(){
   const nImpGroup=1+nImp;
   let thead='<thead><tr>'+
     '<th rowspan="4">No.</th><th rowspan="4">FECHA DE FACTURA</th><th rowspan="4">FOLIO FACTURA</th><th rowspan="4">TIPO DE GASTOS</th>'+
-    '<th rowspan="4">JUSTIFICACION</th><th rowspan="4">PARTIDA PRESUPUESTADA</th>'+
+    '<th rowspan="4">JUSTIFICACION</th><th rowspan="4">PARTIDA PRESUPUESTADA</th><th rowspan="4">PRESUPUESTO</th>'+
     (showSin?'<th rowspan="4">SIN COMP. FISCAL</th>':'')+
     (showInvoice?'<th rowspan="4">INVOICE (DÓLARES)</th>':'')+
     '<th class="th-big gc" colspan="3">SUBTOTAL</th>'+
@@ -1582,7 +1620,8 @@ function generarVale(){
       '<td class="fol">'+esc(folio)+'</td>'+
       '<td class="izq">'+esc(c.tipoGasto)+'</td>'+
       '<td class="izq txt">'+cortable(c.justificacion)+'</td>'+
-      '<td class="txt">'+cortable(c.partida)+'</td>';
+      '<td class="txt">'+cortable(c.partida)+'</td>'+
+      '<td class="txt">'+esc(presupuestoDe(c))+'</td>';
     if(showSin) celdas+='<td class="der">'+(c.tipo==="manual"?mxn(c.monto):"-")+'</td>';
     if(showInvoice) celdas+='<td class="der">'+(c.tipo==="invoice"&&c.montoOriginal?mxn(c.montoOriginal):"-")+'</td>';
     celdas+='<td class="der">'+(c.tipo==="invoice"?mxn(d._subtotalMostrado):(esManual?"":mxn(d.subtotal)))+'</td>'+
@@ -1602,7 +1641,7 @@ function generarVale(){
   }
 
   // ── 6. Fila de SUMA (solo en la última hoja) ──
-  let sumaRow='<tr class="vtotal"><td colspan="6" style="text-align:right;font-size:8.5pt;font-weight:700">SUMA:</td>';
+  let sumaRow='<tr class="vtotal"><td colspan="7" style="text-align:right;font-size:8.5pt;font-weight:700">SUMA:</td>';
   if(showSin) sumaRow+='<td class="der">'+dash(sSin)+'</td>';
   if(showInvoice) sumaRow+='<td class="der"></td>';
   sumaRow+='<td class="der">'+mxn(sSub)+'</td>'+
@@ -1621,9 +1660,8 @@ function generarVale(){
     return '<div class="vh"><div class="vh-logo">'+logoImg+'</div>'+
       '<div class="vh-centro"><div class="vh-empresa">'+esc(fd.empresa)+'</div><div class="vh-tipo">'+esc(fd.tipodoc)+'</div></div>'+
       '<div class="vh-logo">'+logoImg+'</div></div>'+
-      '<div style="display:grid;grid-template-columns:auto 1fr auto auto auto auto;gap:0 3mm;align-items:end;margin-bottom:1.5mm;font-size:8pt">'+
+      '<div style="display:grid;grid-template-columns:auto 1fr auto auto;gap:0 3mm;align-items:end;margin-bottom:1.5mm;font-size:8pt">'+
       '<span style="font-weight:700">RESPONSABLE:</span><span style="border-bottom:1px solid #161616;font-weight:700;padding-bottom:.5mm">'+esc(fd.responsable)+'</span>'+
-      '<span style="font-weight:700;padding-left:4mm">PRESUPUESTO:</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:0 2mm .5mm;min-width:22mm;text-align:center">'+esc(fd.presupuesto)+'</span>'+
       '<span style="font-weight:700;padding-left:4mm">FOLIO VIATICOS:</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:0 2mm .5mm;min-width:14mm;text-align:center">'+esc(fd.folioviaticos||"")+'</span></div>'+
       '<div style="display:grid;grid-template-columns:auto 1fr;gap:0 3mm;align-items:end;margin-bottom:1.5mm;font-size:8pt">'+
       '<span style="font-weight:700">AREA:</span><span style="border-bottom:1px solid #161616;font-weight:700;padding:.5mm 1mm">'+esc(fd.area)+'</span></div>'+
@@ -1821,13 +1859,24 @@ function descargarPDF(){
     margin:2,
     filename:nombreArchivo(),
     image:{type:"jpeg",quality:0.98},
-    html2canvas:{scale:2,windowWidth:1056,useCORS:true},
+    html2canvas:{scale:2,useCORS:true,scrollX:0,scrollY:0},
     jsPDF:{unit:"mm",format:"letter",orientation:"landscape"},
     pagebreak:{mode:["css","legacy"],before:".salto-hoja-antes",after:".salto-hoja"}
   };
+  // El vale en pantalla ocupa el 100% del ancho de su contenedor y va centrado, o sea que su tamaño y posición
+  // cambian con la ventana del navegador. Para el PDF necesita medir EXACTAMENTE 1056px (carta horizontal, el
+  // mismo ancho que usa el cálculo de hojas) y estar pegado a la izquierda. Antes se forzaba un "ancho virtual"
+  // de 1056 en la captura, y eso solo coincidía con la realidad en ciertas ventanas: en pantallas más anchas el
+  // PDF salía corrido y recortado (encabezado partido, firmas cortadas). Ahora el PDF sale idéntico sin importar
+  // el tamaño de la ventana. Los estilos del vale se restauran al terminar.
+  const estiloOriginal=el.getAttribute("style");
+  el.style.width="1056px";el.style.maxWidth="1056px";el.style.margin="0";
+  const restaurar=()=>{ if(estiloOriginal===null)el.removeAttribute("style"); else el.setAttribute("style",estiloOriginal); };
   html2pdf().set(opciones).from(el).save().then(()=>{
+    restaurar();
     btn.disabled=false;btn.innerHTML=textoOriginal;
   }).catch(err=>{
+    restaurar();
     console.error("Error generando PDF:",err);
     btn.disabled=false;btn.innerHTML=textoOriginal;
     alert("No se pudo generar el PDF automáticamente. Usa el botón Imprimir como alternativa.");
