@@ -1856,21 +1856,22 @@ function descargarPDF(){
   const textoOriginal=btn.innerHTML;
   btn.disabled=true;btn.innerHTML="⏳ Generando PDF…";
   const opciones={
-    margin:2,
+    margin:5,   // mm: igual que @page de impresión; el área útil queda 269.4 x 205.9 mm, la que usa el cálculo de hojas
     filename:nombreArchivo(),
     image:{type:"jpeg",quality:0.98},
     html2canvas:{scale:2,useCORS:true,scrollX:0,scrollY:0},
     jsPDF:{unit:"mm",format:"letter",orientation:"landscape"},
     pagebreak:{mode:["css","legacy"],before:".salto-hoja-antes",after:".salto-hoja"}
   };
-  // El vale en pantalla ocupa el 100% del ancho de su contenedor y va centrado, o sea que su tamaño y posición
-  // cambian con la ventana del navegador. Para el PDF necesita medir EXACTAMENTE 1056px (carta horizontal, el
-  // mismo ancho que usa el cálculo de hojas) y estar pegado a la izquierda. Antes se forzaba un "ancho virtual"
-  // de 1056 en la captura, y eso solo coincidía con la realidad en ciertas ventanas: en pantallas más anchas el
-  // PDF salía corrido y recortado (encabezado partido, firmas cortadas). Ahora el PDF sale idéntico sin importar
-  // el tamaño de la ventana. Los estilos del vale se restauran al terminar.
+  // CAUSA DE LOS VALES CORTADOS: el vale en pantalla ocupa el 100% del ancho de su contenedor y va centrado, o sea
+  // que su tamaño y posición cambian con la ventana del navegador. Antes se forzaba un "ancho virtual" de 1056 en
+  // la captura, y eso solo coincidía con la realidad en ventanas de ~1100px: con laptops/monitores maximizados
+  // (1366, 1536, 1920px) el PDF salía corrido y recortado (columnas y firmas cortadas), y además con márgenes de
+  // 1.8 mm que la impresora recorta. Ahora el vale se fija EXACTAMENTE al ancho de impresión (269.4 mm) y el PDF usa
+  // márgenes de 5 mm, igual que el botón Imprimir: mismo vale en cualquier ventana. Los estilos se restauran al terminar.
   const estiloOriginal=el.getAttribute("style");
-  el.style.width="1056px";el.style.maxWidth="1056px";el.style.margin="0";
+  const anchoPx=(269.4*96/25.4)+"px";   // 269.4 mm = carta horizontal (279.4) menos 2 x 5 mm: el MISMO ancho con el que se miden las hojas y se imprime
+  el.style.width=anchoPx;el.style.maxWidth=anchoPx;el.style.margin="0";
   const restaurar=()=>{ if(estiloOriginal===null)el.removeAttribute("style"); else el.setAttribute("style",estiloOriginal); };
   html2pdf().set(opciones).from(el).save().then(()=>{
     restaurar();
