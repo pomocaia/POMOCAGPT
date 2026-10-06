@@ -150,6 +150,7 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
 .campo{display:flex;flex-direction:column;gap:3px}
 .campo label{font-size:11px;font-weight:700;color:#57534e;text-transform:uppercase;letter-spacing:.05em}
 .campo label .req{color:var(--rojo)}
+.campo input[type=text].bloqueado{background:#f5f5f4;color:#57534e;cursor:not-allowed;border-style:dashed}
 .campo select,.campo input[type=text],.campo input[type=date]{
   border:1px solid #d6d3d1;border-radius:7px;padding:8px 10px;font-size:13px;
   background:#fff;color:#1c1917;width:100%;font-family:Arial,sans-serif;
@@ -864,9 +865,9 @@ const TIPO_MATERIAL="Material de obra";
 const TIPOS_MATERIAL=["Material de obra","Servicio en obra"]; // elegibles cuando el concepto es de material de obra
 
 // ══ Fondo Revolvente: solo estas personas pueden ser responsables (caja chica) ══
-const RESPONSABLES_FONDO_REVOLVENTE=["CARMEN GUADALUPE DE TILA RUIZ DOMINGUEZ","HANNY EDUI MARQUEZ PAVON",
-  "LUIS FERNANDO LAZO TAPIA","MAKARENKO LEON DE LA O","MARIA DEL ROSARIO FALCON CURI",
-  "MINERVA DE LOS SANTOS CALCANEO SANCHEZ","SANDRA MORALES GUZMAN"];
+const RESPONSABLES_FONDO_REVOLVENTE=["CARMEN GUADALUPE DE TILA RUIZ DOMINGUEZ","EDGARDO DIAZ LASTRA","HANNY EDUI MARQUEZ PAVON",
+  "JORGE ARTURO CRUZ GARCIA","LUIS FERNANDO LAZO TAPIA","MAKARENKO LEON DE LA O","MARIA DEL ROSARIO FALCON CURI",
+  "MINERVA DE LOS SANTOS CALCANEO SANCHEZ","ROGER PALACIO ZURITA","SANDRA MORALES GUZMAN"];
 
 // ══ Aviso temporal (toast) ══
 let _toastTimer=null;
@@ -892,6 +893,23 @@ function renderResponsableField(){
       '</select>';
   } else {
     wrap.innerHTML='<input type="text" id="f_responsable" placeholder="Tu nombre completo" value="'+esc(actual)+'">';
+  }
+  sincronizarBeneficiario();
+}
+// CANDADO: en FONDO REVOLVENTE la persona que elabora (responsable) es la misma que recibe el cheque, así que el
+// beneficiario se llena solo con el responsable y no se puede editar. En los demás tipos de documento es libre.
+function sincronizarBeneficiario(){
+  const b=document.getElementById("f_beneficiario"),r=document.getElementById("f_responsable");
+  if(!b)return;
+  const esFondo=document.getElementById("f_tipodoc").value==="FONDO REVOLVENTE";
+  if(esFondo){
+    b.value=r?r.value.trim():"";
+    b.readOnly=true;b.classList.add("bloqueado");
+    b.placeholder="Es el mismo que el responsable";
+    b.title="En Fondo revolvente el beneficiario del cheque es siempre el responsable";
+  } else {
+    b.readOnly=false;b.classList.remove("bloqueado");
+    b.placeholder="Escribe el nombre completo";b.title="";
   }
 }
 // Un desarrollo es de "etapa única" cuando su lista de etapas es exactamente ["ÚNICA"]
@@ -1487,7 +1505,9 @@ function getFD(){return{
   responsable:document.getElementById("f_responsable").value.trim(),
   empresa:document.getElementById("f_empresa").value,area:document.getElementById("f_area").value,
   oficina:document.getElementById("f_oficina").value,
-  beneficiario:document.getElementById("f_beneficiario").value,gerente:document.getElementById("f_gerente").value,
+  beneficiario:(document.getElementById("f_tipodoc").value==="FONDO REVOLVENTE"
+    ?document.getElementById("f_responsable").value.trim()
+    :document.getElementById("f_beneficiario").value),gerente:document.getElementById("f_gerente").value,
   folio:document.getElementById("f_folio").value.trim()||"001",
   folioviaticos:document.getElementById("f_folioviaticos").value.trim(),
   tipodoc:document.getElementById("f_tipodoc").value||"COMPROBACION DE GASTOS"};}
@@ -1894,6 +1914,7 @@ function setStep(n){
   document.querySelectorAll(".seccion").forEach((s,i)=>s.classList.toggle("visible",i===n-1));
   document.querySelectorAll(".step").forEach((s,i)=>{s.classList.remove("activo","hecho");if(i+1<n)s.classList.add("hecho");else if(i+1===n)s.classList.add("activo")});
   if(n<3)document.getElementById("vale-container").style.display="none";
+  if(n===2)sincronizarBeneficiario();   // al entrar al Paso 2 por cualquier camino, el candado del beneficiario queda al día
   window.scrollTo({top:0,behavior:"smooth"});
 }
 function resetTodo(){
@@ -1910,6 +1931,8 @@ function resetTodo(){
 // ══ INIT ══
 document.addEventListener("DOMContentLoaded",()=>{
   initSelects();
+  const _wrapResp=document.getElementById("f_responsable_wrap");
+  ["change","input"].forEach(ev=>_wrapResp.addEventListener(ev,()=>sincronizarBeneficiario()));
   // Badge de estado SharePoint
   const badge=document.getElementById("sp-badge");
   if(badge) badge.innerHTML=spDisponible()
