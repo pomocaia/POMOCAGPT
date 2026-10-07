@@ -277,11 +277,39 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
 .menu-extra.open{display:block}
 .menu-extra-item{display:block;width:100%;text-align:left;background:none;border:none;padding:10px 12px;border-radius:7px;font-size:13px;color:#44403c;cursor:pointer;font-family:Arial,sans-serif}
 .menu-extra-item:hover{background:var(--verde-claro);color:var(--verde-osc)}
+
+/* ═══ HISTORIAL DE VALES ═══ */
+.btn-hist{position:absolute;top:0;right:42px;height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--verde);background:#fff;color:var(--verde-osc);font-size:13px;font-weight:600;cursor:pointer;font-family:Arial,sans-serif;display:flex;align-items:center;gap:6px}
+.btn-hist:hover{background:var(--verde-claro)}
+@media(max-width:560px){.app-header{padding-top:42px}}
+.hist-panel{max-width:860px!important}
+.hist-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.hist-x{background:none;border:1px solid var(--borde);border-radius:8px;width:32px;height:32px;cursor:pointer;color:#78716c;font-size:15px;flex:none}
+.hist-x:hover{background:#f5f5f4}
+.hist-buscar{width:100%;border:1px solid #d6d3d1;border-radius:8px;padding:10px 12px;font-size:14px;margin-bottom:12px;font-family:Arial,sans-serif}
+#hist-lista{max-height:56vh;overflow-y:auto;padding-right:2px}
+.hist-item{border:1px solid var(--borde);border-radius:10px;padding:12px 14px;margin-bottom:8px;background:#fff}
+.hist-item:hover{border-color:#a7f3d0;background:#fcfffd}
+.hist-fila1{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.hist-folio{font-size:15px;font-weight:700;color:#1c1917}
+.hist-total{font-size:15px;font-weight:700;color:var(--verde-osc);white-space:nowrap}
+.hist-meta{font-size:12px;color:#57534e;margin-top:3px}
+.hist-meta.chico{font-size:11px;color:#a8a29e}
+.hist-tag{display:inline-block;background:var(--ambar-claro);color:var(--ambar);border:1px solid #fcd34d;border-radius:20px;padding:0 7px;font-size:10px;font-weight:700;margin-left:6px}
+.hist-acc{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.hist-acc .btn{padding:6px 11px;font-size:12px}
+.hist-borrar{color:var(--rojo)!important;margin-left:auto}
+.hist-pie{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--borde)}
+.hist-pie .btn{padding:7px 12px;font-size:12px}
+.hist-nota{font-size:11px;color:#a8a29e;margin-top:8px;line-height:1.5}
+.hist-vacio{text-align:center;color:#78716c;font-size:13px;padding:34px 12px;border:1px dashed #d6d3d1;border-radius:10px}
+@media print{#modal-historial{display:none!important}}
 </style>
 </head>
 <body>
 <div class="app">
   <div class="app-header" style="position:relative">
+    <button id="btnHistorial" class="btn-hist" title="Ver, editar y volver a descargar los vales que ya generaste">📂 Historial <span id="histCount"></span></button>
     <button id="btnMenuExtra" class="btn-menu-extra" title="Más opciones" aria-label="Más opciones">⋮</button>
     <div id="menuExtra" class="menu-extra">
       <button id="op-invoice" class="menu-extra-item">📄 Invoice / factura extranjera (PDF)</button>
@@ -354,6 +382,7 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
 
   <!-- ══ PASO 2 ══ -->
   <div class="seccion" id="sec2">
+    <div id="bannerEdicion" class="alerta alerta-ok" style="display:none"></div>
     <div class="tarjeta" id="resumenConceptos2"></div>
     <div class="tarjeta">
       <h2>Datos del responsable y empresa</h2>
@@ -396,6 +425,25 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
   </div>
 
   <p style="text-align:center;font-size:11px;color:#a8a29e;margin-top:8px">Los archivos se procesan en tu computadora. Nada se sube a ningún servidor.</p>
+</div>
+
+<!-- Modal Historial de vales -->
+<div class="modal-bg" id="modal-historial">
+  <div class="modal hist-panel">
+    <div class="hist-top">
+      <div><h3>📂 Mi historial de vales</h3><p class="modal-sub" id="hist-sub"></p></div>
+      <button class="hist-x" id="hist-cerrar" aria-label="Cerrar">✕</button>
+    </div>
+    <div id="hist-aviso-mem" class="alerta alerta-error" style="display:none">⚠ Este navegador no permite guardar el historial (ventana privada o datos bloqueados). Los vales solo duran mientras no cierres esta página. Usa <strong>Exportar respaldo</strong> para no perderlos.</div>
+    <input type="text" id="hist-buscar" class="hist-buscar" placeholder="Buscar por folio, responsable, empresa, proveedor, UUID, monto…" autocomplete="off">
+    <div id="hist-lista"></div>
+    <div class="hist-pie">
+      <button class="btn btn-s" id="hist-exportar">⬇ Exportar respaldo</button>
+      <button class="btn btn-s" id="hist-importar">⬆ Importar respaldo</button>
+      <input type="file" id="hist-archivo" accept=".json,application/json" style="display:none">
+    </div>
+    <p class="hist-nota" id="hist-nota">Tu historial se guarda solo en este navegador de esta computadora; nada se sube a ningún servidor. Si borras los datos del navegador se pierde: exporta un respaldo de vez en cuando.</p>
+  </div>
 </div>
 
 <!-- Modal gasto sin comprobante -->
@@ -1045,7 +1093,7 @@ function leerArchivos(fileList){
 
 function procesarUno(txt,nombre){
   try{
-    const cfdi=parseCFDI(txt);
+    const cfdi=parseCFDI(txt);cfdi._xml=txt; // se conserva el XML original para poder recalcular el vale si se reabre desde el historial
     const dupInterno=cfdi.uuid&&pendientes.some(p=>p.cfdi&&p.cfdi.uuid===cfdi.uuid);
     const dupExistente=cfdi.uuid&&conceptos.some(c=>c.tipo==="cfdi"&&c.cfdi.uuid===cfdi.uuid);
     const entry={id:++_pendId,nombre,cfdi,error:null,dupInterno,dupExistente};
@@ -1198,7 +1246,7 @@ async function guardarMaterial(){
     for(const a of _matArchivos){
       if(conceptos.length>=MAX_CONCEPTOS){errores.push("Se alcanzó el máximo de "+MAX_CONCEPTOS+" conceptos.");break;}
       let cfdi;
-      try{cfdi=parseCFDI(a.texto);}catch(e){errores.push(esc(a.nombre)+": "+esc(e.message));continue;}
+      try{cfdi=parseCFDI(a.texto);cfdi._xml=a.texto;}catch(e){errores.push(esc(a.nombre)+": "+esc(e.message));continue;}
       if(cfdi.uuid&&conceptos.some(c=>c.cfdi&&c.cfdi.uuid===cfdi.uuid)){errores.push(esc(a.nombre)+": ya está en el vale.");continue;}
       if(cfdi.uuid&&agregados.includes(cfdi.uuid)){errores.push(esc(a.nombre)+": repetida en esta carga.");continue;}
       // Misma revisión antifraude que las facturas normales (si SharePoint está activo)
@@ -1531,10 +1579,11 @@ function validarPaso2(){
 // ══ GENERAR VALE ══
 const MAX_POR_HOJA=15;
 function generarVale(){
-  if(!validarPaso2())return;
+  if(!validarPaso2()){_soloVer=false;return;}
+  const soloVer=_soloVer;_soloVer=false;   // true solo al abrir un vale del historial para verlo/descargarlo sin cambios
   const fd=getFD();
   ultimoFD=fd;
-  const hoy=new Date();
+  const hoy=fechaValeFija?new Date(fechaValeFija):new Date();   // al editar un vale guardado se conserva su fecha original
   const fechaFmt=hoy.toLocaleDateString("es-MX",{day:"numeric",month:"short",year:"2-digit"}).replace(",","");
 
   const logoB64=LOGOS[fd.empresa]||LOGO_DEFAULT;
@@ -1847,13 +1896,38 @@ function generarVale(){
   const cnt=conceptos.length;
   document.getElementById("alerta-paso3").innerHTML='✓ <strong>Vale generado.</strong> '+cnt+' concepto'+(cnt>1?"s":"")+
     (totalHojas>1?' en '+totalHojas+' hojas':'')+' · Total: <strong>'+mxn(sTotal)+'</strong>. Revisa abajo y descárgalo.';
-  const cfdis=conceptos.filter(c=>c.tipo==="cfdi");
+  // Solo se registran en el sistema antifraude las facturas que ese vale todavía no había registrado
+  const cfdis=soloVer?[]:conceptos.filter(c=>c.tipo==="cfdi"&&!_uuidsRegistrados.has(c.cfdi.uuid));
   if(spDisponible()&&cfdis.length){
     document.getElementById("alerta-paso3").innerHTML+=' <span id="sp-status" style="font-size:11px;color:#78716c">⏳ Registrando en sistema…</span>';
     spRegistrarVale(fd,cfdis).then(r=>{
+      if(r.ok&&r.registrados===cfdis.length){cfdis.forEach(c=>_uuidsRegistrados.add(c.cfdi.uuid));histMarcarRegistrados();}
       const el=document.getElementById("sp-status");
       if(el) el.innerHTML=r.ok?('✓ '+r.registrados+' factura'+(r.registrados>1?"s":"")+' registrada'+(r.registrados>1?"s":"")+' en el sistema antifraude.'):('⚠ No se pudo registrar: '+esc(r.motivo));
     });
+  }
+  // ── Historial: se guarda solo al generar (o se deja intacto si solo se está viendo) ──
+  const _alertaH=document.getElementById("alerta-paso3");
+  if(soloVer){
+    _histUltimoGuardado=Promise.resolve(null);
+    _alertaH.innerHTML+=' <span style="font-size:11px;color:#78716c">📂 Abierto desde tu historial, sin cambios.</span>';
+  } else {
+    _histUltimoGuardado=guardarEnHistorial(fd,sTotal,hoy).then(info=>{
+      const el=document.getElementById("alerta-paso3");
+      el.innerHTML+=' <span style="font-size:11px;color:#78716c">💾 '+(info.reemplazo?'Actualizado':'Guardado')+' en tu historial.</span>';
+      if(info.duplicado){
+        const d=info.duplicado;
+        el.innerHTML+='<div class="alerta alerta-ojo" style="margin:8px 0 0">⚠ Ya tienes en tu historial otro vale con el folio <strong>'+esc(d.fd.folio)+'</strong> de esta empresa ('+esc(fmtFechaHist(d.fechaVale))+(d.fd.responsable?' · '+esc(d.fd.responsable):'')+'). Si no es a propósito, corrige el folio con "Volver y corregir".</div>';
+      }
+      return info;
+    }).catch(e=>{
+      document.getElementById("alerta-paso3").innerHTML+='<div class="alerta alerta-error" style="margin:8px 0 0">⚠ El vale se generó, pero <strong>no se pudo guardar en el historial</strong>: '+esc(String(e&&e.message||e))+'. Descarga el PDF ahora.</div>';
+      return null;
+    });
+  }
+  if(_avisosCarga.length){
+    _alertaH.innerHTML+='<div class="alerta alerta-ojo" style="margin:8px 0 0">'+_avisosCarga.map(esc).join("<br>")+'</div>';
+    _avisosCarga=[];
   }
   setStep(3);
   setTimeout(()=>document.getElementById("vale-container").scrollIntoView({behavior:"smooth"}),100);
@@ -1919,6 +1993,8 @@ function setStep(n){
 }
 function resetTodo(){
   conceptos=[];
+  editandoId=null;fechaValeFija=null;_uuidsRegistrados=new Set();_soloVer=false;_avisosCarga=[];_copiaDe=null;_folioHist="";_origenBorrado=false;
+  refrescarBanner();
   const btnNo=document.getElementById("mat-no"),btnSi=document.getElementById("mat-si"),card=document.getElementById("op-material");
   if(btnNo){btnNo.classList.add("activo");btnSi.classList.remove("activo");card.style.display="none";document.getElementById("btnAgregarMaterialP2").style.display="none";}
   document.getElementById("conceptos-lista").innerHTML="";
@@ -1928,9 +2004,314 @@ function resetTodo(){
   setStep(1);
 }
 
+// ══ HISTORIAL LOCAL DE VALES ══
+// Cada vale que se genera se guarda solo en ESTE navegador (IndexedDB). Nada se sube a ningún servidor.
+// Se guardan los datos del formulario, los conceptos y el XML original de cada factura, para poder reabrir,
+// editar y volver a descargar el vale; si algún día se corrige el motor fiscal, el vale reabierto se recalcula.
+const HIST_DB_NOMBRE="vale-reembolso-historial",HIST_STORE="vales";
+let _histDb=null,_histAbriendo=null,_histMem=[],_histEnMemoria=false;
+let editandoId=null;          // id del vale del historial que se está editando (null = vale nuevo)
+let fechaValeFija=null;       // fecha original del vale al editarlo; null = la de hoy
+let _uuidsRegistrados=new Set(); // facturas de este vale que ya se registraron en el sistema antifraude
+let _soloVer=false;           // abrir del historial solo para ver/descargar: no se vuelve a guardar ni a registrar
+let _avisosCarga=[];
+let _copiaDe=null,_folioHist="",_origenBorrado=false,_histSeq=0;
+let _histUltimoGuardado=Promise.resolve(null);
+const clonar=o=>typeof structuredClone==="function"?structuredClone(o):JSON.parse(JSON.stringify(o));
+const normBusq=s=>String(s==null?"":s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+const nuevoIdHist=()=>"v"+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+
+function histAbrir(){
+  if(_histDb)return Promise.resolve(_histDb);
+  if(_histAbriendo)return _histAbriendo;
+  _histAbriendo=new Promise(res=>{
+    try{
+      if(typeof indexedDB==="undefined"||!indexedDB){_histEnMemoria=true;return res(null)}
+      const rq=indexedDB.open(HIST_DB_NOMBRE,1);
+      rq.onupgradeneeded=()=>{if(!rq.result.objectStoreNames.contains(HIST_STORE))rq.result.createObjectStore(HIST_STORE,{keyPath:"id"})};
+      rq.onsuccess=()=>{
+        _histDb=rq.result;
+        // Si otra pestaña actualiza o borra la base, se suelta la conexión para no dejarla trabada
+        _histDb.onversionchange=()=>{try{_histDb.close()}catch(e){}_histDb=null;_histAbriendo=null};
+        res(_histDb);
+      };
+      rq.onerror=rq.onblocked=()=>{_histEnMemoria=true;res(null)};
+    }catch(e){_histEnMemoria=true;res(null)}
+  });
+  return _histAbriendo;
+}
+function histReq(modo,fnMem,fnDb){
+  return histAbrir().then(db=>{
+    if(!db)return fnMem();
+    return new Promise((res,rej)=>{
+      const tx=db.transaction(HIST_STORE,modo);
+      const rq=fnDb(tx.objectStore(HIST_STORE));
+      tx.oncomplete=()=>res(rq?rq.result:undefined);
+      tx.onerror=tx.onabort=()=>rej(tx.error||new Error("No se pudo escribir en el almacenamiento del navegador"));
+    });
+  });
+}
+const histTodos=()=>histReq("readonly",()=>_histMem.map(clonar),st=>st.getAll());
+const histGet=id=>histReq("readonly",()=>clonar(_histMem.find(r=>r.id===id)||null),st=>st.get(id)).then(r=>r||null);
+const histPut=rec=>histReq("readwrite",()=>{const i=_histMem.findIndex(r=>r.id===rec.id),c=clonar(rec);if(i>=0)_histMem[i]=c;else _histMem.push(c)},st=>st.put(rec));
+const histDel=id=>histReq("readwrite",()=>{_histMem=_histMem.filter(r=>r.id!==id)},st=>st.delete(id));
+
+function fmtFechaHist(iso){
+  const d=new Date(iso);
+  return isNaN(d)?"":d.toLocaleDateString("es-MX",{day:"numeric",month:"short",year:"2-digit"}).replace(",","");
+}
+function fmtFechaHoraHist(iso){
+  const d=new Date(iso);
+  return isNaN(d)?"":d.toLocaleDateString("es-MX",{day:"numeric",month:"short",year:"2-digit"}).replace(",","")+" "+d.toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"});
+}
+function histTextoBusqueda(rec){
+  const f=rec.fd||{};
+  const p=[f.folio,f.empresa,f.responsable,f.beneficiario,f.area,f.oficina,f.tipodoc,f.gerente,rec.total!=null?Number(rec.total).toFixed(2):""];
+  (rec.conceptos||[]).forEach(c=>{
+    if(c.cfdi)p.push(c.cfdi.emisor&&c.cfdi.emisor.nombre,c.cfdi.emisor&&c.cfdi.emisor.rfc,c.cfdi.uuid,c.cfdi.folio,c.cfdi.serie);
+    p.push(c.proveedor,c.referencia,c.justificacion,c.partida,c.tipoGasto);
+  });
+  return p.filter(Boolean).join(" ");
+}
+
+async function guardarEnHistorial(fd,total,fechaVale){
+  const idPrevio=editandoId;   // se toma antes de cualquier espera
+  const todos=await histTodos();
+  const ahora=new Date().toISOString();
+  const previo=idPrevio?todos.find(r=>r.id===idPrevio):null;
+  const folioCampo=document.getElementById("f_folio").value.trim();
+  let duplicado=null;
+  if(folioCampo){
+    const k=folioCampo.toUpperCase();
+    duplicado=todos.find(r=>r.id!==(previo&&previo.id)&&String(r.fd.folio||"").toUpperCase()===k&&r.fd.empresa===fd.empresa)||null;
+  }
+  const rec={
+    id:previo?previo.id:nuevoIdHist(),v:1,
+    creado:previo?previo.creado:ahora,
+    editado:previo?ahora:null,
+    fechaVale:fechaVale.toISOString(),
+    folioCampo,
+    fd:{responsable:fd.responsable,empresa:fd.empresa,area:fd.area,oficina:fd.oficina,beneficiario:fd.beneficiario,gerente:fd.gerente,folio:fd.folio,folioviaticos:fd.folioviaticos,tipodoc:fd.tipodoc},
+    conceptos:clonar(conceptos),
+    uuidsRegistrados:[..._uuidsRegistrados],
+    total,nConceptos:conceptos.length
+  };
+  rec.buscar=normBusq(histTextoBusqueda(rec));
+  await histPut(rec);
+  editandoId=rec.id;_folioHist=fd.folio;_copiaDe=null;_origenBorrado=false;
+  refrescarBanner();actualizarContadorHistorial();
+  return {id:rec.id,reemplazo:!!previo,duplicado};
+}
+function histMarcarRegistrados(){
+  _histUltimoGuardado.then(info=>{
+    if(!info)return;
+    return histGet(info.id).then(rec=>{if(!rec)return;rec.uuidsRegistrados=[..._uuidsRegistrados];return histPut(rec)});
+  }).catch(()=>{});
+}
+function actualizarContadorHistorial(){
+  histTodos().then(l=>{const el=document.getElementById("histCount");if(el)el.textContent=l.length?"("+l.length+")":""}).catch(()=>{});
+}
+function refrescarBanner(){
+  const b=document.getElementById("bannerEdicion");if(!b)return;
+  let html="",clase="alerta alerta-ok";
+  if(editandoId){
+    html='<strong>💾 Este vale está en tu historial</strong>'+(_folioHist?' (folio '+esc(_folioHist)+')':'')+'. Al generarlo de nuevo se <strong>actualiza este mismo vale</strong>; no se crea otro.';
+  } else if(_origenBorrado){
+    clase="alerta alerta-ojo";
+    html='<strong>🗑 El vale que estabas editando se borró del historial.</strong> Si lo generas de nuevo se guardará como un <strong>vale nuevo</strong>.';
+  } else if(_copiaDe){
+    clase="alerta alerta-ojo";
+    html='<strong>📋 Copia del vale '+esc(_copiaDe)+'</strong>. Se guardará como un <strong>vale nuevo</strong>; escribe su folio antes de generarlo.';
+  }
+  if(html&&_avisosCarga.length)html+='<br>'+_avisosCarga.map(esc).join("<br>");
+  if(html)html+='<div style="margin-top:8px"><button type="button" class="btn btn-s" id="btnSalirEdicion" style="padding:5px 12px;font-size:12px">✕ Salir sin guardar y empezar un vale nuevo</button></div>';
+  b.className=clase;b.style.display=html?"":"none";b.innerHTML=html;
+}
+
+// Reabre un vale del historial. modo: "ver" (abre el vale ya listo para descargar), "editar" o "duplicar" (copia nueva)
+async function abrirDeHistorial(id,modo){
+  let rec;
+  try{rec=await histGet(id)}catch(e){toast("No se pudo leer el vale del historial.");return}
+  if(!rec){toast("No se encontró ese vale en el historial.");return}
+  cerrarHistorial();
+  resetTodo();
+  const avisos=[];
+  const HUELLA=["subtotal","ivaAcred","ieps","hosp","tua","aero","locales","otrosVarios","retIVA","retISR","retLocales","base0","base16","baseOtra"];
+  const huella=d=>HUELLA.map(k=>Math.round(((d&&d[k])||0)*100)).join("|");
+  conceptos=clonar(rec.conceptos).map((c,i)=>{
+    // Si se guardó el XML original, se vuelve a leer con la versión actual del motor fiscal
+    if(c.tipo==="cfdi"&&c.cfdi&&c.cfdi._xml){
+      try{
+        const nuevo=parseCFDI(c.cfdi._xml);nuevo._xml=c.cfdi._xml;
+        if(huella(impDet(nuevo))!==huella(impDet(c.cfdi)))avisos.push("Concepto #"+(i+1)+" ("+(c.cfdi.emisor&&c.cfdi.emisor.nombre||"factura")+"): sus columnas de impuestos se recalcularon con la versión actual de la herramienta y cambiaron respecto al vale guardado. Revísalo.");
+        c.cfdi=nuevo;
+      }catch(e){}
+    }
+    return c;
+  });
+  _avisosCarga=avisos;
+  const duplicar=modo==="duplicar";
+  editandoId=duplicar?null:rec.id;
+  fechaValeFija=duplicar?null:rec.fechaVale;
+  _uuidsRegistrados=duplicar?new Set():new Set(rec.uuidsRegistrados||[]);
+  _folioHist=rec.fd.folio||"";
+  _copiaDe=duplicar?(rec.fd.folio||"sin folio"):null;
+  if(conceptos.some(c=>c.esMaterial)){const b=document.getElementById("mat-si");if(b)b.click()}
+  renderListaConceptos();
+  irPaso2();
+  const $=x=>document.getElementById(x),fd=rec.fd;
+  $("f_tipodoc").value=fd.tipodoc||"";
+  renderResponsableField();
+  $("f_responsable").value=fd.responsable||"";
+  $("f_empresa").value=fd.empresa||"";
+  renderFilasGastos();   // vuelve a dibujar los tipos de gasto según la empresa
+  $("f_area").value=fd.area||"";$("f_oficina").value=fd.oficina||"";$("f_gerente").value=fd.gerente||"";
+  $("f_beneficiario").value=fd.beneficiario||"";
+  $("f_folio").value=duplicar?"":(rec.folioCampo!=null?rec.folioCampo:(fd.folio||""));
+  $("f_folioviaticos").value=duplicar?"":(fd.folioviaticos||"");
+  sincronizarBeneficiario();
+  refrescarBanner();
+  if(modo==="ver"){_soloVer=true;generarVale();}
+}
+
+// ── Ventana del historial ──
+function abrirHistorial(){
+  document.getElementById("modal-historial").classList.add("open");
+  document.getElementById("hist-buscar").value="";
+  histAbrir().then(()=>{document.getElementById("hist-aviso-mem").style.display=_histEnMemoria?"":"none"});
+  renderHistorial();
+  setTimeout(()=>document.getElementById("hist-buscar").focus(),50);
+}
+function cerrarHistorial(){document.getElementById("modal-historial").classList.remove("open")}
+async function renderHistorial(){
+  const cont=document.getElementById("hist-lista"),sub=document.getElementById("hist-sub");
+  const miTurno=++_histSeq;   // si el usuario sigue escribiendo, solo cuenta la búsqueda más reciente
+  let todos;
+  try{todos=await histTodos();if(miTurno!==_histSeq)return}
+  catch(e){cont.innerHTML='<div class="alerta alerta-error">No se pudo leer el historial: '+esc(String(e&&e.message||e))+'</div>';return}
+  todos.sort((a,b)=>String(b.editado||b.creado).localeCompare(String(a.editado||a.creado)));
+  const terms=normBusq(document.getElementById("hist-buscar").value.trim()).split(/\s+/).filter(Boolean);
+  const lista=terms.length?todos.filter(r=>{const t=r.buscar||normBusq(histTextoBusqueda(r));return terms.every(x=>t.includes(x))}):todos;
+  sub.textContent=todos.length?(todos.length+" vale"+(todos.length>1?"s":"")+" guardado"+(todos.length>1?"s":"")+(terms.length?" · "+lista.length+" coinciden con tu búsqueda":"")):"Aún no hay vales guardados";
+  if(!todos.length){cont.innerHTML='<div class="hist-vacio">Aquí aparecerán los vales que generes.<br>Se guardan solos al generarlos y podrás reabrirlos, editarlos y volver a descargar el PDF.</div>';return}
+  if(!lista.length){cont.innerHTML='<div class="hist-vacio">Ningún vale coincide con tu búsqueda.</div>';return}
+  cont.innerHTML=lista.map(r=>{
+    const f=r.fd||{},n=r.nConceptos||(r.conceptos||[]).length;
+    return '<div class="hist-item" data-id="'+esc(r.id)+'">'+
+      '<div class="hist-fila1"><span class="hist-folio">Folio '+esc(f.folio||"—")+(r.editado?'<span class="hist-tag">editado</span>':'')+'</span><span class="hist-total">$'+mxn(r.total||0)+'</span></div>'+
+      '<div class="hist-meta"><strong>'+esc(fmtFechaHist(r.fechaVale))+'</strong> · '+esc(f.tipodoc||"")+' · '+esc(f.empresa||"")+'</div>'+
+      '<div class="hist-meta">Responsable: '+esc(f.responsable||"—")+(f.area?' · '+esc(f.area):'')+' · '+n+' concepto'+(n>1?'s':'')+'</div>'+
+      '<div class="hist-meta chico">Guardado '+esc(fmtFechaHoraHist(r.creado))+(r.editado?' · Editado '+esc(fmtFechaHoraHist(r.editado)):'')+'</div>'+
+      '<div class="hist-acc">'+
+        '<button class="btn btn-p" data-acc="ver">📄 Ver / PDF</button>'+
+        '<button class="btn btn-s" data-acc="editar">✏️ Editar</button>'+
+        '<button class="btn btn-s" data-acc="dup">📋 Duplicar</button>'+
+        '<button class="btn btn-s hist-borrar" data-acc="borrar">🗑 Borrar</button>'+
+      '</div></div>';
+  }).join("");
+}
+async function borrarDeHistorial(id){
+  let rec;try{rec=await histGet(id)}catch(e){rec=null}
+  const folio=rec&&rec.fd?rec.fd.folio:"";
+  if(!confirm("¿Borrar el vale"+(folio?" con folio "+folio:"")+" de tu historial?\n\nEsto no se puede deshacer. Si no tienes un respaldo ni el PDF, se pierde."))return;
+  try{await histDel(id)}catch(e){toast("No se pudo borrar: "+(e&&e.message||e));return}
+  if(editandoId===id){editandoId=null;_origenBorrado=true;refrescarBanner();}
+  renderHistorial();actualizarContadorHistorial();
+  toast("Vale borrado del historial.");
+}
+
+// ── Respaldo: exportar / importar ──
+async function exportarHistorial(){
+  let todos;try{todos=await histTodos()}catch(e){toast("No se pudo leer el historial.");return}
+  if(!todos.length){toast("Todavía no hay vales guardados para respaldar.");return}
+  const datos={app:"vale-reembolso-pomoca",version:1,exportado:new Date().toISOString(),vales:todos};
+  const blob=new Blob([JSON.stringify(datos)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="respaldo-vales-"+new Date().toISOString().slice(0,10)+".json";
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+  toast("Respaldo descargado: "+todos.length+" vale"+(todos.length>1?"s":"")+".",5000);
+}
+function limpiarRegistroImportado(r){
+  try{
+    if(!r||typeof r!=="object"||typeof r.id!=="string"||!r.id||r.id.length>80)return null;
+    if(!Array.isArray(r.conceptos)||!r.conceptos.length||r.conceptos.length>MAX_CONCEPTOS)return null;
+    if(!r.fd||typeof r.fd!=="object")return null;
+    for(const c of r.conceptos){
+      if(!c||typeof c!=="object")return null;
+      if(c.tipo==="cfdi"){if(!c.cfdi||typeof c.cfdi!=="object"||!c.cfdi.emisor||typeof c.cfdi.total!=="number")return null}
+      else if(c.tipo==="invoice"||c.tipo==="manual"){if(typeof c.monto!=="number")return null}
+      else return null;
+    }
+    const s=v=>typeof v==="string"?v.slice(0,300):"";
+    const fd={};
+    ["responsable","empresa","area","oficina","beneficiario","gerente","folio","folioviaticos","tipodoc"].forEach(k=>fd[k]=s(r.fd[k]));
+    const ahora=new Date().toISOString();
+    const rec={
+      id:r.id,v:1,creado:s(r.creado)||ahora,editado:r.editado?s(r.editado):null,
+      fechaVale:s(r.fechaVale)||s(r.creado)||ahora,folioCampo:s(r.folioCampo),fd,
+      conceptos:clonar(r.conceptos),
+      uuidsRegistrados:Array.isArray(r.uuidsRegistrados)?r.uuidsRegistrados.filter(x=>typeof x==="string").slice(0,MAX_CONCEPTOS):[],
+      total:Number.isFinite(r.total)?r.total:r.conceptos.reduce((a,c)=>a+montoConcepto(c),0),
+      nConceptos:r.conceptos.length
+    };
+    rec.buscar=normBusq(histTextoBusqueda(rec));
+    return rec;
+  }catch(e){return null}
+}
+async function importarHistorial(file){
+  if(!file)return;
+  let datos;
+  try{datos=JSON.parse(await file.text())}catch(e){alert("Ese archivo no es un respaldo válido.");return}
+  const arr=datos&&datos.app==="vale-reembolso-pomoca"&&Array.isArray(datos.vales)?datos.vales:null;
+  if(!arr){alert("Ese archivo no parece un respaldo del historial de vales.");return}
+  let existentes;try{existentes=new Map((await histTodos()).map(r=>[r.id,r]))}catch(e){toast("No se pudo leer el historial.");return}
+  let nuevos=0,actualizados=0,iguales=0,invalidos=0;
+  for(const raw of arr){
+    const rec=limpiarRegistroImportado(raw);
+    if(!rec){invalidos++;continue}
+    const ya=existentes.get(rec.id);
+    try{
+      if(!ya){await histPut(rec);nuevos++}
+      else if(String(rec.editado||rec.creado)>String(ya.editado||ya.creado)){await histPut(rec);actualizados++}
+      else iguales++;
+    }catch(e){toast("No se pudo guardar un vale: "+(e&&e.message||e));return}
+  }
+  renderHistorial();actualizarContadorHistorial();
+  const partes=[nuevos+" nuevo"+(nuevos===1?"":"s")];
+  if(actualizados)partes.push(actualizados+" actualizado"+(actualizados===1?"":"s"));
+  if(iguales)partes.push(iguales+" ya estaba"+(iguales===1?"":"n"));
+  if(invalidos)partes.push(invalidos+" no válido"+(invalidos===1?"":"s")+" (omitido"+(invalidos===1?"":"s")+")");
+  toast("Respaldo importado: "+partes.join(" · ")+".",7000);
+}
+
 // ══ INIT ══
 document.addEventListener("DOMContentLoaded",()=>{
   initSelects();
+  // Historial
+  document.getElementById("btnHistorial").addEventListener("click",abrirHistorial);
+  document.getElementById("bannerEdicion").addEventListener("click",e=>{
+    if(e.target&&e.target.id==="btnSalirEdicion"&&confirm("¿Salir sin guardar los cambios de esta pantalla?\n\nEl vale del historial se queda como estaba."))resetTodo();
+  });
+  document.getElementById("hist-cerrar").addEventListener("click",cerrarHistorial);
+  document.getElementById("modal-historial").addEventListener("click",e=>{if(e.target.id==="modal-historial")cerrarHistorial()});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape")cerrarHistorial()});
+  document.getElementById("hist-buscar").addEventListener("input",()=>renderHistorial());
+  document.getElementById("hist-lista").addEventListener("click",e=>{
+    const b=e.target.closest("button[data-acc]");if(!b)return;
+    const id=b.closest(".hist-item").dataset.id,acc=b.dataset.acc;
+    if(acc==="ver")abrirDeHistorial(id,"ver");
+    else if(acc==="editar")abrirDeHistorial(id,"editar");
+    else if(acc==="dup")abrirDeHistorial(id,"duplicar");
+    else if(acc==="borrar")borrarDeHistorial(id);
+  });
+  document.getElementById("hist-exportar").addEventListener("click",exportarHistorial);
+  document.getElementById("hist-importar").addEventListener("click",()=>document.getElementById("hist-archivo").click());
+  document.getElementById("hist-archivo").addEventListener("change",e=>{importarHistorial(e.target.files[0]);e.target.value=""});
+  actualizarContadorHistorial();
+  // Pide al navegador que no borre el historial por falta de espacio (puede ignorarlo)
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
   const _wrapResp=document.getElementById("f_responsable_wrap");
   ["change","input"].forEach(ev=>_wrapResp.addEventListener(ev,()=>sincronizarBeneficiario()));
   // Badge de estado SharePoint
