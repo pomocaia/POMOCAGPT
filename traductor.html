@@ -233,6 +233,7 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
 .vtable thead th[rowspan="4"]{height:23mm}
 .vtable td.der{text-align:center}
 .vtable td.izq{text-align:left}
+.vtable td.tg{font-size:6pt;line-height:1.15;word-break:break-word;overflow-wrap:anywhere}
 .vtable td.col-s{background:#BFBFBF;font-weight:700;text-align:right}
 .vtable td.col-t{background:#D9D9D9}
 .vtable tr.vtotal td{background:#e8e8e8;font-weight:700}
@@ -1701,7 +1702,7 @@ function generarVale(){
     let celdas='<td>'+(i+1)+'</td>'+
       '<td>'+fechaF+'</td>'+
       '<td class="fol">'+esc(folio)+(ppd?'<br><span class="ppd-tag">PPD</span>':'')+'</td>'+
-      '<td class="izq">'+esc(c.tipoGasto)+'</td>'+
+      '<td class="izq tg">'+esc(c.tipoGasto)+'</td>'+
       '<td class="izq txt">'+cortable(c.justificacion)+'</td>'+
       '<td class="txt">'+cortable(c.partida)+'</td>'+
       '<td class="txt">'+esc(presupuestoDe(c))+'</td>';
