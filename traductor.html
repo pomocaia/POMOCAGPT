@@ -237,6 +237,14 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
 .vtable td.col-t{background:#D9D9D9}
 .vtable tr.vtotal td{background:#e8e8e8;font-weight:700}
 .vtable tr.vtotal td.col-s{background:#aaaaaa}
+/* Factura PPD: renglón un poco más oscuro y etiqueta "PPD" junto al folio */
+.vtable tr.fila-ppd td{background:#d6d6d6}
+.vtable tr.fila-ppd td.col-s{background:#a3a3a3}
+.vtable tr.fila-ppd td.col-t{background:#c2c2c2}
+.vtable .ppd-tag{display:inline-block;border:0.6px solid #161616;color:#161616;font-weight:700;font-size:5.6pt;line-height:1;padding:0.2mm 0.7mm;margin-top:0.3mm;letter-spacing:.2px}
+/* Que los grises del vale (y el marcado PPD) salgan siempre al imprimir, aunque el navegador tenga desactivados los gráficos de fondo */
+.vale,.vale *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.tag-ppd{display:inline-block;background:#e5e5e5;color:#161616;border:1px solid #737373;border-radius:20px;padding:0 7px;font-size:10px;font-weight:700;vertical-align:middle}
 
 .vcheque{display:grid;grid-template-columns:34mm 1fr auto;gap:0;border:2px solid #161616;margin-top:1mm}
 .vcheque-label{padding:1mm;font-size:7pt;font-weight:700;text-align:center;border-right:2px solid #161616;display:flex;align-items:center;justify-content:center;line-height:1.25}
@@ -645,7 +653,7 @@ const CAT={"empresas": ["VIVE POMOCA, S.A. DE C.V.", "CONSTRUVIVIENDA ACELERADA,
 const TIPOS_GASTO_POR_EMPRESA={
   "VIVE POMOCA, S.A. DE C.V.": ["Gastos de viaje", "Viáticos", "Peajes", "Combustible y Lubricantes", "Servicio de Agua Potable", "Mantto de Equipo de Vigilancia y Seguridad", "Licencias y software", "Consumo de alimentos", "Capacitaciones", "Papelería y Art. Oficina", "Impresiones y Copias", "Celulares", "Teléfonos e Internet", "Energía eléctrica", "Art de limpieza", "Agua", "Café", "Prediales", "Equipamiento de plaza", "Mantto eq de transp", "Mantto eq de comp", "Mantto de climas", "Mantto de oficina", "Mantto plaza comercial", "Mantto de software", "Espectacular", "Televisión", "Radio", "Periódico", "Impresión de lonas", "Volantes y trípticos", "Souvenirs", "Stand", "Sección amarilla", "Perifoneo", "Material para decoración", "Otros medios", "Renta de Espacios para Modulo", "Señalizador Viales", "Diseño de Casa Muestra", "Maquetas", "Call Center Nuxiba", "Producción Edición de Videos", "Activaciones", "PUBLICIDAD DIGITAL", "Contrato y medidores de agua", "Gastos de feria", "Seguros y fianzas", "Tenencia", "Diversos", "Hospedaje", "Renta de Maquinaria", "Mtto de Maquinaria y Equipo", "Cuota de Verificación de obra", "Alineamiento y # Oficial", "Constancia de No Adeudo", "Constancia de Traslado de Dominio", "Valores Catastrales", "Libertad de Gravamen", "Lic de Construcción", "Impuestos y Derechos", "Estudios Varios", "RENTA DE OFIC", "Posada (Fin de Año)", "Avalúo", "Gastos de Evento de Viviendas", "Uniformes", "Servicio Aduanal", "Renta de vehículo", "Agua CEAS", "Servicio de Paquetería y Envió", "Gastos de planeación ejecutivos", "Planeación estratégica (gastos varios)", "Fumigación", "Integración (Gastos Varios)", "Mantto de Eq de oficina", "Equipo de Seguridad Industrial", "Donativos", "Cuota y Suscripciones", "Mantenimiento de Equipo menor", "Promoción de Rentas de Locales", "Gastos de Ejecución", "Enseres y Equipos Menores", "Equipo de cómputo"],
   "CORPORATIVO DE CONSTRUCCION DE VIVIENDA SUSTENTABLE DEL BOSQUE S.A. DE C.V.": ["Servicios de Comercialización", "Mantto de Equipo de Vigilancia y Seguridad", "Licencias y software", "Papeleria y Art. Oficina", "Telefonos e Internet", "Mtto de Maquinaria y Equipo", "Impuestos y Derechos", "Mantenimiento de Equipo menor"],
-  "CONSTRUVIVIENDA TECNOLOGICAS, S.A. DE C.V.": ["Gastos de viaje", "Viaticos", "Peajes", "Combustible y Lubricantes", "Servicios de Comercialización", "Mantto de Equipo de Vigilancia y Seguridad", "Licencias y software", "Consumo de alimentos", "Capacitaciones", "Papeleria y Art. Oficina", "Impresiones y Copias", "Celulares", "Telefonos e Internet", "Energia electrica", "Art de limpieza", "Agua", "Café", "Prediales", "Mantto eq de transp", "Mantto eq de comp", "Mantto de climas", "Mantto de oficina", "Mantto plaza comercial", "Mantto de software", "Radio", "Periodico", "Impresion de lonas", "Volantes y tripticos", "Souvenirs", "Stand", "Seccion amarilla", "Perifoneo", "Material para decoracion", "Otros medios", "Renta de Espacios para Modulo", "Señalizador Vialez", "Porudccion Edicion de Videos", "Activaciones", "Publicidad digital", "Gastos de feria", "Seguros y fianzas", "Tenencia", "Diversos", "Hospedaje", "Mtto de Maquinaria y Equipo", "Cuota de Verificacion de obra", "Alineamiento y # Oficial", "Constanacia de No Adeudo", "Constancia de Translado de Dominio", "Valores Catrastales", "Libertad de Gravamen", "Lic de Construccion", "Impuestos y Derechos", "Estudios Varios", "RENTA DE OFIC", "Posada (Fin de Año)", "Avaluo", "Gastos de Evento de Viviendas", "Uniformes", "Servicio Aduanal", "Renta de vehiculo", "Agua CEAS", "Servicio de Paqueteria y Envio", "Gastos de planeacion ejecutivos", "Planeacion estrategica (gastos varios)", "Fumigacion", "Intregracion (Gastos Varios)", "Mantto de Eq de oficina", "Equipo de Seguridad Industrial", "Donativos", "Cuota y Suscripciones", "Mantenimiento de Equipo menor", "Arrendamiento Casa H", "Enseres y Equipos Menores", "Renta de equipos de comunicación"],
+  "CONSTRUVIVIENDA TECNOLOGICAS, S.A. DE C.V.": ["Gastos de viaje", "Viaticos", "Peajes", "Combustible y Lubricantes", "Servicios de Comercialización", "Mantto de Equipo de Vigilancia y Seguridad", "Licencias y software", "Consumo de alimentos", "Capacitaciones", "Papeleria y Art. Oficina", "Impresiones y Copias", "Celulares", "Telefonos e Internet", "Energia electrica", "Art de limpieza", "Agua", "Café", "Prediales", "Mantto eq de transp", "Mantto eq de comp", "Mantto de climas", "Mantto de oficina", "Mantto plaza comercial", "Mantto de software", "Radio", "Periodico", "Impresion de lonas", "Volantes y tripticos", "Souvenirs", "Stand", "Seccion amarilla", "Perifoneo", "Material para decoracion", "Otros medios", "Renta de Espacios para Modulo", "Señalizador Vialez", "Porudccion Edicion de Videos", "Activaciones", "Publicidad digital", "Gastos de feria", "Seguros y fianzas", "Tenencia", "Diversos", "Hospedaje", "Mtto de Maquinaria y Equipo", "Cuota de Verificacion de obra", "Alineamiento y # Oficial", "Constanacia de No Adeudo", "Constancia de Translado de Dominio", "Valores Catrastales", "Libertad de Gravamen", "Lic de Construccion", "Impuestos y Derechos", "Estudios Varios", "RENTA DE OFIC", "Posada (Fin de Año)", "Avaluo", "Gastos de Evento de Viviendas", "Uniformes", "Servicio Aduanal", "Renta de vehiculo", "Agua CEAS", "Servicio de Paqueteria y Envio", "Gastos de planeacion ejecutivos", "Planeacion estrategica (gastos varios)", "Fumigacion", "Intregracion (Gastos Varios)", "Mantto de Eq de oficina", "Equipo de Seguridad Industrial", "Donativos", "Cuota y Suscripciones", "Mantenimiento de Equipo menor", "Arrendamiento Casa H", "Enseres y Equipos Menores", "Renta de equipos de comunicación", "Flete"],
   "VALLE REAL CONSTRUCCIONES, S.A. DE C.V.": ["Mantto de Equipo de Vigilancia y Seguridad", "Servicios de consultoria", "Energia electrica", "Diversos"],
   "CONSTRUCCIONES ESMERALDA, S.A. DE C.V.": ["Mantto de Equipo de Vigilancia y Seguridad", "Mantto de viviendas", "Papeleria y Art. Oficina", "Telefonos e Internet", "Energia electrica", "Art de limpieza", "Mantto de oficina", "Diversos", "Mantenimiento de Equipo menor"],
   "CONSTRUVIVIENDA ACELERADA, S.A. DE C.V.": ["Mantto de Equipo de Vigilancia y Seguridad", "Telefonos e Internet", "Energia electrica"]
@@ -721,7 +729,7 @@ function parseCFDI(txt){
     .sort((a,b)=>a.impuesto.localeCompare(b.impuesto)||_n(b.tasa)-_n(a.tasa));
   const retencionesFinal=[...rm.values()].map(r=>({...r,importe:cv(r.importe)}));
   const metodoPago=_a(comp,"MetodoPago");
-  if(metodoPago==="PPD")throw new Error("Esta factura es PPD (pago en parcialidades o diferido). Solo se aceptan facturas PUE (pago en una sola exhibición).");
+  // Las facturas PPD (pago diferido / en parcialidades) YA NO se bloquean: se aceptan, se avisa al cargarlas y el vale las marca.
   // Impuestos locales (complemento implocal): ISH de hoteles, TUA, y otros impuestos estatales.
   // Viajan fuera del nodo global de Impuestos, por eso se leen aparte.
   const trasladosLocales=[];
@@ -1015,6 +1023,8 @@ function nombreConcepto(c){
   if(c.tipo==="invoice")return c.proveedor||"Invoice";
   return "Gasto sin comprobante";
 }
+const esPPD=cfdi=>!!cfdi&&cfdi.metodoPago==="PPD";
+const etiquetaPPD=cfdi=>esPPD(cfdi)?' · <span class="tag-ppd">PPD</span>':'';
 function montoConcepto(c){
   if(c.tipo==="cfdi")return c.cfdi.total;
   return c.monto||0;
@@ -1028,7 +1038,7 @@ function renderListaConceptos(){
       const folio=folioMostrado(c.cfdi);
       return '<div class="factura-item" style="background:#fffbeb;border-color:#fcd34d"><span class="factura-num" style="background:#fef3c7;color:#92400e">#'+(i+1)+'</span>'+
         '<div class="factura-info"><div class="factura-nombre">'+esc(c.cfdi.emisor.nombre)+'</div>'+
-        '<div class="factura-detalle">🧱 '+esc(c.tipoGasto||TIPO_MATERIAL)+' · Folio '+esc(folio)+' · '+esc(c.partida||"sin contrato")+'</div></div>'+
+        '<div class="factura-detalle">🧱 '+esc(c.tipoGasto||TIPO_MATERIAL)+' · Folio '+esc(folio)+' · '+esc(c.partida||"sin contrato")+etiquetaPPD(c.cfdi)+'</div></div>'+
         '<span class="factura-monto">'+mxn(c.cfdi.total)+'</span>'+
         '<button class="btn-del" onclick="eliminarConcepto('+i+')">✕</button></div>';
     }
@@ -1036,7 +1046,7 @@ function renderListaConceptos(){
       const folio=folioMostrado(c.cfdi);
       return '<div class="factura-item"><span class="factura-num">#'+(i+1)+'</span>'+
         '<div class="factura-info"><div class="factura-nombre">'+esc(c.cfdi.emisor.nombre)+'</div>'+
-        '<div class="factura-detalle">📄 Factura · Folio '+esc(folio)+'</div></div>'+
+        '<div class="factura-detalle">📄 Factura · Folio '+esc(folio)+etiquetaPPD(c.cfdi)+'</div></div>'+
         '<span class="factura-monto">'+mxn(c.cfdi.total)+'</span>'+
         '<button class="btn-del" onclick="eliminarConcepto('+i+')">✕</button></div>';
     } else if(c.tipo==="invoice"){
@@ -1097,10 +1107,12 @@ function procesarUno(txt,nombre){
     const dupInterno=cfdi.uuid&&pendientes.some(p=>p.cfdi&&p.cfdi.uuid===cfdi.uuid);
     const dupExistente=cfdi.uuid&&conceptos.some(c=>c.tipo==="cfdi"&&c.cfdi.uuid===cfdi.uuid);
     const entry={id:++_pendId,nombre,cfdi,error:null,dupInterno,dupExistente};
+    if(esPPD(cfdi))entry.avisos=["Esta factura es <strong>PPD</strong> (pago diferido o en parcialidades). Se agrega normal, pero en el vale saldrá <strong>marcada como PPD</strong>."];
     // Avisos fiscales: cosas que no invalidan la factura pero que la persona debe revisar
     try{
       const d=impDet(cfdi);
       const avisos=[];
+      if(esPPD(cfdi))avisos.push("Esta factura es <strong>PPD</strong> (pago diferido o en parcialidades). Se agrega normal, pero en el vale saldrá <strong>marcada como PPD</strong>.");
       if(cfdi.convertida)avisos.push("Factura en "+esc(cfdi.moneda)+": convertida a pesos con el tipo de cambio del XML ("+mxn(cfdi.tipoCambio)+").");
       if(d.tasasRaras&&d.tasasRaras.length)avisos.push("Trae IVA al "+esc([...new Set(d.tasasRaras)].join(", "))+". Esa base se muestra junto a la de IVA exento; revísala.");
       if(d.descuadre)avisos.push("Los impuestos del XML no cuadran con su total por "+mxn(Math.abs(d.descuadre))+". Revisa esta factura.");
@@ -1143,7 +1155,7 @@ function renderPendientes(){
     const clase=(p.dupInterno||p.dupExistente||p.spDup)?"pendiente-item dup":"pendiente-item";
     return '<div class="'+clase+'"><div class="pendiente-top">'+
       '<div><div class="pendiente-nombre">'+esc(p.cfdi.emisor.nombre)+'</div>'+
-      '<div class="pendiente-detalle">Folio '+esc(folio)+' · '+esc((p.cfdi.fecha||"").slice(0,10))+'</div>'+msg+'</div>'+
+      '<div class="pendiente-detalle">Folio '+esc(folio)+' · '+esc((p.cfdi.fecha||"").slice(0,10))+etiquetaPPD(p.cfdi)+'</div>'+msg+'</div>'+
       '<div style="display:flex;align-items:center;gap:8px"><span class="pendiente-monto">'+mxn(p.cfdi.total)+'</span>'+
       '<button class="btn-del" onclick="eliminarPendiente('+p.id+')">✕</button></div></div></div>';
   }).join("");
@@ -1259,6 +1271,7 @@ async function guardarMaterial(){
       // Mismos avisos fiscales que las facturas normales
       try{
         const d=impDet(cfdi);
+        if(esPPD(cfdi))avisos.push(esc(a.nombre)+": es PPD (pago diferido o en parcialidades); en el vale saldrá marcada como PPD.");
         if(cfdi.convertida)avisos.push(esc(a.nombre)+": en "+esc(cfdi.moneda)+", convertida a pesos con el tipo de cambio del XML ("+mxn(cfdi.tipoCambio)+").");
         if(d.tasasRaras&&d.tasasRaras.length)avisos.push(esc(a.nombre)+": trae IVA al "+esc([...new Set(d.tasasRaras)].join(", "))+"; revísala.");
         if(d.descuadre)avisos.push(esc(a.nombre)+": sus impuestos no cuadran con su total por "+mxn(Math.abs(d.descuadre))+"; revísala.");
@@ -1500,7 +1513,7 @@ function renderFilasGastos(){
   cont.innerHTML=conceptos.map((c,i)=>{
     if(c.esMaterial){
       const folio=folioMostrado(c.cfdi);
-      return '<div class="fila-gasto material" id="fila-'+i+'"><div class="fila-gasto-header"><span class="fila-gasto-titulo">#'+(i+1)+' 🧱 '+esc(c.cfdi.emisor.nombre)+' · Folio '+esc(folio)+' · '+mxn(c.cfdi.total)+'</span></div>'+
+      return '<div class="fila-gasto material" id="fila-'+i+'"><div class="fila-gasto-header"><span class="fila-gasto-titulo">#'+(i+1)+' 🧱 '+esc(c.cfdi.emisor.nombre)+' · Folio '+esc(folio)+' · '+mxn(c.cfdi.total)+etiquetaPPD(c.cfdi)+'</span></div>'+
         '<div class="grid2">'+
         '<div class="campo"><label>Tipo de gasto <span class="req">*</span></label><select id="fg_tipo_'+i+'" onchange="conceptos['+i+'].tipoGasto=this.value">'+TIPOS_MATERIAL.map(t=>'<option value="'+esc(t)+'"'+(c.tipoGasto===t?" selected":"")+'>'+esc(t)+'</option>').join("")+'</select></div>'+
         '<div class="campo"><label>Justificación <span class="req">*</span></label><input type="text" id="fg_just_'+i+'" maxlength="150" value="'+esc(c.justificacion||"")+'" placeholder="Ej: Compra de varilla…" oninput="conceptos['+i+'].justificacion=this.value;document.getElementById(\'fg_cnt_'+i+'\').textContent=this.value.length"><span class="contador-chars" id="fg_cnt_'+i+'">'+String((c.justificacion||"").length)+'</span>/150</div>'+
@@ -1519,7 +1532,7 @@ function renderFilasGastos(){
       const _empresaActual=document.getElementById("f_empresa")?document.getElementById("f_empresa").value:"";
       const tipos=opcionesTipoGasto(_empresaActual,c.tipoGasto);
       const _tipoDisabled=_empresaActual?"":"disabled";
-      return '<div class="fila-gasto" id="fila-'+i+'"><div class="fila-gasto-header"><span class="fila-gasto-titulo">#'+(i+1)+' 📄 '+esc(c.cfdi.emisor.nombre)+' · Folio '+esc(folio)+' · '+mxn(c.cfdi.total)+'</span></div>'+
+      return '<div class="fila-gasto" id="fila-'+i+'"><div class="fila-gasto-header"><span class="fila-gasto-titulo">#'+(i+1)+' 📄 '+esc(c.cfdi.emisor.nombre)+' · Folio '+esc(folio)+' · '+mxn(c.cfdi.total)+etiquetaPPD(c.cfdi)+'</span></div>'+
         '<div class="grid2">'+
         '<div class="campo"><label>Tipo de gasto <span class="req">*</span></label><select id="fg_tipo_'+i+'" '+_tipoDisabled+' onchange="conceptos['+i+'].tipoGasto=this.value">'+tipos+'</select></div>'+
         '<div class="campo"><label>Justificación <span class="req">*</span></label><input type="text" id="fg_just_'+i+'" maxlength="150" value="'+esc(c.justificacion||"")+'" placeholder="Ej: Consumo de alimentos…" oninput="conceptos['+i+'].justificacion=this.value;document.getElementById(\'fg_cnt_'+i+'\').textContent=this.value.length"><span class="contador-chars" id="fg_cnt_'+i+'">'+String((c.justificacion||"").length)+'</span>/150</div>'+
@@ -1673,6 +1686,7 @@ function generarVale(){
   function filaDatos(i){
     const c=conceptos[i], d=dets[i];
     const esManual=c.tipo!=="cfdi";
+    const ppd=c.tipo==="cfdi"&&esPPD(c.cfdi);
     let folio, fechaF;
     if(c.tipo==="cfdi"){
       folio=folioMostrado(c.cfdi);
@@ -1686,7 +1700,7 @@ function generarVale(){
     }
     let celdas='<td>'+(i+1)+'</td>'+
       '<td>'+fechaF+'</td>'+
-      '<td class="fol">'+esc(folio)+'</td>'+
+      '<td class="fol">'+esc(folio)+(ppd?'<br><span class="ppd-tag">PPD</span>':'')+'</td>'+
       '<td class="izq">'+esc(c.tipoGasto)+'</td>'+
       '<td class="izq txt">'+cortable(c.justificacion)+'</td>'+
       '<td class="txt">'+cortable(c.partida)+'</td>'+
@@ -1700,7 +1714,7 @@ function generarVale(){
     for(const col of colsImp) celdas+='<td class="der">'+(esManual?"":dash(d[col.key]))+'</td>';
     for(const col of colsRet) celdas+='<td class="der">'+(esManual?"":dash(d[col.key]))+'</td>';
     celdas+='<td class="col-s">'+mxn(d._total)+'</td>'+'<td class="col-t"></td>';
-    return '<tr data-fila="'+i+'">'+celdas+'</tr>';
+    return '<tr data-fila="'+i+'"'+(ppd?' class="fila-ppd"':'')+'>'+celdas+'</tr>';
   }
   function filaVacia(numero,alturaPx){
     let vac='<td>'+numero+'</td>';
@@ -1925,6 +1939,8 @@ function generarVale(){
       return null;
     });
   }
+  const nPPD=conceptos.filter(c=>c.tipo==="cfdi"&&esPPD(c.cfdi)).length;
+  if(nPPD)_alertaH.innerHTML+='<div class="alerta alerta-ojo" style="margin:8px 0 0">⚠ Este vale incluye <strong>'+nPPD+' factura'+(nPPD>1?'s':'')+' PPD</strong> (pago diferido o en parcialidades). '+(nPPD>1?'Están marcadas':'Está marcada')+' en el vale con el renglón más oscuro y la etiqueta <strong>PPD</strong> junto al folio.</div>';
   if(_avisosCarga.length){
     _alertaH.innerHTML+='<div class="alerta alerta-ojo" style="margin:8px 0 0">'+_avisosCarga.map(esc).join("<br>")+'</div>';
     _avisosCarga=[];
@@ -2068,6 +2084,7 @@ function histTextoBusqueda(rec){
   const f=rec.fd||{};
   const p=[f.folio,f.empresa,f.responsable,f.beneficiario,f.area,f.oficina,f.tipodoc,f.gerente,rec.total!=null?Number(rec.total).toFixed(2):""];
   (rec.conceptos||[]).forEach(c=>{
+    if(c.cfdi&&c.cfdi.metodoPago==="PPD")p.push("PPD");
     if(c.cfdi)p.push(c.cfdi.emisor&&c.cfdi.emisor.nombre,c.cfdi.emisor&&c.cfdi.emisor.rfc,c.cfdi.uuid,c.cfdi.folio,c.cfdi.serie);
     p.push(c.proveedor,c.referencia,c.justificacion,c.partida,c.tipoGasto);
   });
@@ -2198,7 +2215,7 @@ async function renderHistorial(){
   cont.innerHTML=lista.map(r=>{
     const f=r.fd||{},n=r.nConceptos||(r.conceptos||[]).length;
     return '<div class="hist-item" data-id="'+esc(r.id)+'">'+
-      '<div class="hist-fila1"><span class="hist-folio">Folio '+esc(f.folio||"—")+(r.editado?'<span class="hist-tag">editado</span>':'')+'</span><span class="hist-total">$'+mxn(r.total||0)+'</span></div>'+
+      '<div class="hist-fila1"><span class="hist-folio">Folio '+esc(f.folio||"—")+(r.editado?'<span class="hist-tag">editado</span>':'')+((r.conceptos||[]).some(c=>c.cfdi&&esPPD(c.cfdi))?'<span class="hist-tag" style="background:#e5e5e5;color:#161616;border-color:#737373">PPD</span>':'')+'</span><span class="hist-total">$'+mxn(r.total||0)+'</span></div>'+
       '<div class="hist-meta"><strong>'+esc(fmtFechaHist(r.fechaVale))+'</strong> · '+esc(f.tipodoc||"")+' · '+esc(f.empresa||"")+'</div>'+
       '<div class="hist-meta">Responsable: '+esc(f.responsable||"—")+(f.area?' · '+esc(f.area):'')+' · '+n+' concepto'+(n>1?'s':'')+'</div>'+
       '<div class="hist-meta chico">Guardado '+esc(fmtFechaHoraHist(r.creado))+(r.editado?' · Editado '+esc(fmtFechaHoraHist(r.editado)):'')+'</div>'+
