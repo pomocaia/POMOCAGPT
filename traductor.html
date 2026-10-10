@@ -165,6 +165,26 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
 .campo select:focus,.campo input:focus{outline:none;border-color:var(--verde);box-shadow:0 0 0 3px rgba(4,120,87,.1)}
 .contador-chars{font-size:10px;color:var(--gris);margin-top:2px;align-self:flex-end}
 
+
+/* Tipo de gasto con guía "?" (descripción de cuándo usar cada insumo) */
+.tg-native{display:none!important}
+.tg-sel{position:relative}
+.tg-btn{width:100%;text-align:left;border:1px solid #d6d3d1;border-radius:7px;padding:8px 30px 8px 10px;font-size:13px;background:#fff;color:#1c1917;font-family:Arial,sans-serif;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a8a29e' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;min-height:35px}
+.tg-btn:disabled{background-color:#f5f5f4;color:#a8a29e;cursor:not-allowed}
+.tg-btn:focus{outline:none;border-color:var(--verde);box-shadow:0 0 0 3px rgba(4,120,87,.1)}
+.tg-lista{position:absolute;top:100%;left:0;right:0;max-height:300px;overflow-y:auto;background:#fff;border:1px solid var(--verde);border-radius:0 0 7px 7px;z-index:250;display:none;margin:0;padding:0;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.tg-sel.open .tg-lista{display:block}
+.tg-lista li{list-style:none;padding:7px 10px;font-size:13px;cursor:pointer;border-bottom:1px solid #f5f5f4}
+.tg-lista li:hover,.tg-lista li.sel{background:var(--verde-claro);color:var(--verde-osc)}
+.tg-fila{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.tg-q{flex:none;width:20px;height:20px;border-radius:50%;border:1px solid #a8a29e;background:#fff;color:#57534e;font-size:12px;font-weight:700;line-height:1;cursor:pointer;padding:0}
+.tg-q:hover,.tg-q.on{background:var(--verde);border-color:var(--verde);color:#fff}
+.tg-desc{display:none;margin-top:5px;font-size:12px;line-height:1.35;color:#44403c;background:#fffbeb;border-left:3px solid #f59e0b;padding:6px 8px;border-radius:4px;cursor:default;font-weight:400}
+.tg-desc.on{display:block}
+.tg-desc small{display:block;margin-top:3px;color:#78716c}
+.tg-nota{font-size:11.5px;color:#57534e;line-height:1.35;margin-top:3px}
+
 .sw{position:relative}
 .sw .dd{position:absolute;top:100%;left:0;right:0;max-height:200px;overflow-y:auto;
   background:#fff;border:1px solid var(--verde);border-top:none;border-radius:0 0 7px 7px;
@@ -468,7 +488,7 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
         <div class="sw"><input type="text" id="m_partida_txt" placeholder="Buscar…" autocomplete="off">
         <input type="hidden" id="m_partida"><ul class="dd" id="m_dd_partida"></ul></div></div>
       <div class="campo" style="grid-column:1/-1"><label>Justificación <span class="req">*</span></label>
-        <input type="text" id="m_justificacion" maxlength="150" placeholder="Ej: Propina, estacionamiento sin recibo…" oninput="document.getElementById('m_cnt').textContent=this.value.length"><span class="contador-chars" id="m_cnt">0</span>/150</div>
+        <input type="text" id="m_justificacion" maxlength="150" placeholder="Ej: Propina, estacionamiento sin recibo…" oninput="document.getElementById('m_cnt').textContent=this.value.length+\'/150\'"><span class="contador-chars" id="m_cnt">0</span>/150</div>
     </div>
     <div id="modal-error"></div>
     <div class="modal-acciones">
@@ -531,7 +551,7 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
         <div class="sw"><input type="text" id="i_partida_txt" placeholder="Buscar…" autocomplete="off">
         <input type="hidden" id="i_partida"><ul class="dd" id="i_dd_partida"></ul></div></div>
       <div class="campo" style="grid-column:1/-1"><label>Justificación <span class="req">*</span></label>
-        <input type="text" id="i_justificacion" maxlength="150" placeholder="Ej: Publicidad digital en redes…" oninput="document.getElementById('i_cnt').textContent=this.value.length"><span class="contador-chars" id="i_cnt">0</span>/150</div>
+        <input type="text" id="i_justificacion" maxlength="150" placeholder="Ej: Publicidad digital en redes…" oninput="document.getElementById('i_cnt').textContent=this.value.length+\'/150\'"><span class="contador-chars" id="i_cnt">0</span>/150</div>
     </div>
     <div id="modal-invoice-error"></div>
     <div class="modal-acciones">
@@ -652,12 +672,273 @@ const CAT={"empresas": ["VIVE POMOCA, S.A. DE C.V.", "CONSTRUVIVIENDA ACELERADA,
 // Mapa de cargo por gerente (para la firma dinámica junto a ELABORÓ)
 // Tipo de gasto: depende de la empresa elegida. Se irán agregando más empresas.
 const TIPOS_GASTO_POR_EMPRESA={
-  "VIVE POMOCA, S.A. DE C.V.": ["Gastos de viaje", "Viáticos", "Peajes", "Combustible y Lubricantes", "Servicio de Agua Potable", "Mantto de Equipo de Vigilancia y Seguridad", "Licencias y software", "Consumo de alimentos", "Capacitaciones", "Papelería y Art. Oficina", "Impresiones y Copias", "Celulares", "Teléfonos e Internet", "Energía eléctrica", "Art de limpieza", "Agua", "Café", "Prediales", "Equipamiento de plaza", "Mantto eq de transp", "Mantto eq de comp", "Mantto de climas", "Mantto de oficina", "Mantto plaza comercial", "Mantto de software", "Espectacular", "Televisión", "Radio", "Periódico", "Impresión de lonas", "Volantes y trípticos", "Souvenirs", "Stand", "Sección amarilla", "Perifoneo", "Material para decoración", "Otros medios", "Renta de Espacios para Modulo", "Señalizador Viales", "Diseño de Casa Muestra", "Maquetas", "Call Center Nuxiba", "Producción Edición de Videos", "Activaciones", "PUBLICIDAD DIGITAL", "Contrato y medidores de agua", "Gastos de feria", "Seguros y fianzas", "Tenencia", "Diversos", "Hospedaje", "Renta de Maquinaria", "Mtto de Maquinaria y Equipo", "Cuota de Verificación de obra", "Alineamiento y # Oficial", "Constancia de No Adeudo", "Constancia de Traslado de Dominio", "Valores Catastrales", "Libertad de Gravamen", "Lic de Construcción", "Impuestos y Derechos", "Estudios Varios", "RENTA DE OFIC", "Posada (Fin de Año)", "Avalúo", "Gastos de Evento de Viviendas", "Uniformes", "Servicio Aduanal", "Renta de vehículo", "Agua CEAS", "Servicio de Paquetería y Envió", "Gastos de planeación ejecutivos", "Planeación estratégica (gastos varios)", "Fumigación", "Integración (Gastos Varios)", "Mantto de Eq de oficina", "Equipo de Seguridad Industrial", "Donativos", "Cuota y Suscripciones", "Mantenimiento de Equipo menor", "Promoción de Rentas de Locales", "Gastos de Ejecución", "Enseres y Equipos Menores", "Equipo de cómputo"],
-  "CORPORATIVO DE CONSTRUCCION DE VIVIENDA SUSTENTABLE DEL BOSQUE S.A. DE C.V.": ["Servicios de Comercialización", "Mantto de Equipo de Vigilancia y Seguridad", "Licencias y software", "Papeleria y Art. Oficina", "Telefonos e Internet", "Mtto de Maquinaria y Equipo", "Impuestos y Derechos", "Mantenimiento de Equipo menor"],
-  "CONSTRUVIVIENDA TECNOLOGICAS, S.A. DE C.V.": ["Gastos de viaje", "Viaticos", "Peajes", "Combustible y Lubricantes", "Servicios de Comercialización", "Mantto de Equipo de Vigilancia y Seguridad", "Licencias y software", "Consumo de alimentos", "Capacitaciones", "Papeleria y Art. Oficina", "Impresiones y Copias", "Celulares", "Telefonos e Internet", "Energia electrica", "Art de limpieza", "Agua", "Café", "Prediales", "Mantto eq de transp", "Mantto eq de comp", "Mantto de climas", "Mantto de oficina", "Mantto plaza comercial", "Mantto de software", "Radio", "Periodico", "Impresion de lonas", "Volantes y tripticos", "Souvenirs", "Stand", "Seccion amarilla", "Perifoneo", "Material para decoracion", "Otros medios", "Renta de Espacios para Modulo", "Señalizador Vialez", "Porudccion Edicion de Videos", "Activaciones", "Publicidad digital", "Gastos de feria", "Seguros y fianzas", "Tenencia", "Diversos", "Hospedaje", "Mtto de Maquinaria y Equipo", "Cuota de Verificacion de obra", "Alineamiento y # Oficial", "Constanacia de No Adeudo", "Constancia de Translado de Dominio", "Valores Catrastales", "Libertad de Gravamen", "Lic de Construccion", "Impuestos y Derechos", "Estudios Varios", "RENTA DE OFIC", "Posada (Fin de Año)", "Avaluo", "Gastos de Evento de Viviendas", "Uniformes", "Servicio Aduanal", "Renta de vehiculo", "Agua CEAS", "Servicio de Paqueteria y Envio", "Gastos de planeacion ejecutivos", "Planeacion estrategica (gastos varios)", "Fumigacion", "Intregracion (Gastos Varios)", "Mantto de Eq de oficina", "Equipo de Seguridad Industrial", "Donativos", "Cuota y Suscripciones", "Mantenimiento de Equipo menor", "Arrendamiento Casa H", "Enseres y Equipos Menores", "Renta de equipos de comunicación", "Flete"],
-  "VALLE REAL CONSTRUCCIONES, S.A. DE C.V.": ["Mantto de Equipo de Vigilancia y Seguridad", "Servicios de consultoria", "Energia electrica", "Diversos"],
-  "CONSTRUCCIONES ESMERALDA, S.A. DE C.V.": ["Mantto de Equipo de Vigilancia y Seguridad", "Mantto de viviendas", "Papeleria y Art. Oficina", "Telefonos e Internet", "Energia electrica", "Art de limpieza", "Mantto de oficina", "Diversos", "Mantenimiento de Equipo menor"],
-  "CONSTRUVIVIENDA ACELERADA, S.A. DE C.V.": ["Mantto de Equipo de Vigilancia y Seguridad", "Telefonos e Internet", "Energia electrica"]
+ "VIVE POMOCA, S.A. DE C.V.": [
+  "Gastos de viaje",
+  "Viáticos",
+  "Peajes",
+  "Combustible y Lubricantes",
+  "Servicio de Agua Potable",
+  "Mantto de Equipo de Vigilancia y Seguridad",
+  "Licencias y software",
+  "Consumo de alimentos",
+  "Capacitaciones",
+  "Papelería y Art. Oficina",
+  "Impresiones y Copias",
+  "Celulares",
+  "Teléfonos e Internet",
+  "Energía eléctrica",
+  "Art de limpieza",
+  "Agua",
+  "Café",
+  "Prediales",
+  "Equipamiento de plaza",
+  "Mantto eq de transp",
+  "Mantto eq de comp",
+  "Mantto de climas",
+  "Mantto de oficina",
+  "Mantto plaza comercial",
+  "Mantto de software",
+  "Espectacular",
+  "Televisión",
+  "Radio",
+  "Periódico",
+  "Impresión de lonas",
+  "Volantes y trípticos",
+  "Souvenirs",
+  "Stand",
+  "Sección amarilla",
+  "Perifoneo",
+  "Material para decoración",
+  "Otros medios",
+  "Renta de Espacios para Modulo",
+  "Señalizador Viales",
+  "Diseño de Casa Muestra",
+  "Maquetas",
+  "Call Center Nuxiba",
+  "Producción Edición de Videos",
+  "Activaciones",
+  "PUBLICIDAD DIGITAL",
+  "Contrato y medidores de agua",
+  "Gastos de feria",
+  "Seguros y fianzas",
+  "Tenencia",
+  "Diversos",
+  "Hospedaje",
+  "Renta de Maquinaria",
+  "Mtto de Maquinaria y Equipo",
+  "Cuota de Verificación de obra",
+  "Alineamiento y # Oficial",
+  "Constancia de No Adeudo",
+  "Constancia de Traslado de Dominio",
+  "Valores Catastrales",
+  "Libertad de Gravamen",
+  "Lic de Construcción",
+  "Impuestos y Derechos",
+  "Estudios Varios",
+  "RENTA DE OFIC",
+  "Posada (Fin de Año)",
+  "Avalúo",
+  "Gastos de Evento de Viviendas",
+  "Uniformes",
+  "Servicio Aduanal",
+  "Renta de vehículo",
+  "Agua CEAS",
+  "Servicio de Paquetería y Envió",
+  "Gastos de planeación ejecutivos",
+  "Planeación estratégica (gastos varios)",
+  "Fumigación",
+  "Integración (Gastos Varios)",
+  "Mantto de Eq de oficina",
+  "Equipo de Seguridad Industrial",
+  "Donativos",
+  "Cuota y Suscripciones",
+  "Mantenimiento de Equipo menor",
+  "Promoción de Rentas de Locales",
+  "Gastos de Ejecución",
+  "Enseres y Equipos Menores",
+  "Equipo de cómputo",
+  "MOBILIARIO Y EQUIPO DE OFICINA",
+  "EQUIPO DE COMUNICACIÓN",
+  "EQUIPO DE TRANSPORTE",
+  "EQUIPO FOTOGRAFICO",
+  "Fletes",
+  "Mantenimiento de maquinaria y Equipo",
+  "Mantenimiento equipo de transporte",
+  "Mantto de equipo de computo",
+  "Manttto de equipo de aire acondicionado",
+  "Mantenimiento a plaza comercial"
+ ],
+ "CORPORATIVO DE CONSTRUCCION DE VIVIENDA SUSTENTABLE DEL BOSQUE S.A. DE C.V.": [
+  "Servicios de Comercialización",
+  "Mantto de Equipo de Vigilancia y Seguridad",
+  "Licencias y software",
+  "Papeleria y Art. Oficina",
+  "Telefonos e Internet",
+  "Mtto de Maquinaria y Equipo",
+  "Impuestos y Derechos",
+  "Mantenimiento de Equipo menor",
+  "MOBILIARIO Y EQUIPO DE OFICINA",
+  "EQUIPO DE COMPUTO",
+  "EQUIPO DE COMUNICACIÓN",
+  "EQUIPO DE TRANSPORTE",
+  "EQUIPO FOTOGRAFICO",
+  "Fletes",
+  "Estudios Varios",
+  "Trabajos Topograficos",
+  "Libertad de Gravamen",
+  "Pago de Catastro",
+  "Cuotas de verificacion de vivienda",
+  "Trabajos en Fraccionamiento",
+  "Seguros y Fianzas",
+  "Mantenimiento de maquinaria y Equipo",
+  "Mantenimiento equipo de transporte",
+  "Mantto de equipo de computo",
+  "Manttto de equipo de aire acondicionado",
+  "Mantenimiento de Cimbra",
+  "Papelería y artículos de oficina",
+  "Energía eléctrica",
+  "Servicio de celulares",
+  "Servicio de teléfono e internet",
+  "Seguro de fletes",
+  "Uniformes",
+  "Gastos de viaje",
+  "Viaticos",
+  "Impresiones y Copias",
+  "Celulares",
+  "Art de limpieza",
+  "Agua",
+  "Café",
+  "Mantto eq de transp",
+  "Mantto eq de comp",
+  "Mantto de climas",
+  "Mantto de oficina",
+  "Mantto plaza comercial",
+  "Mantto de software",
+  "Hospedaje",
+  "Mantto de Eq de oficina",
+  "Enseres y Equipos Menores"
+ ],
+ "CONSTRUVIVIENDA TECNOLOGICAS, S.A. DE C.V.": [
+  "Gastos de viaje",
+  "Viaticos",
+  "Peajes",
+  "Combustible y Lubricantes",
+  "Servicios de Comercialización",
+  "Mantto de Equipo de Vigilancia y Seguridad",
+  "Licencias y software",
+  "Consumo de alimentos",
+  "Capacitaciones",
+  "Papeleria y Art. Oficina",
+  "Impresiones y Copias",
+  "Celulares",
+  "Telefonos e Internet",
+  "Energia electrica",
+  "Art de limpieza",
+  "Agua",
+  "Café",
+  "Prediales",
+  "Mantto eq de transp",
+  "Mantto eq de comp",
+  "Mantto de climas",
+  "Mantto de oficina",
+  "Mantto plaza comercial",
+  "Mantto de software",
+  "Radio",
+  "Periodico",
+  "Impresion de lonas",
+  "Volantes y tripticos",
+  "Souvenirs",
+  "Stand",
+  "Seccion amarilla",
+  "Perifoneo",
+  "Material para decoracion",
+  "Otros medios",
+  "Renta de Espacios para Modulo",
+  "Señalizador Vialez",
+  "Porudccion Edicion de Videos",
+  "Activaciones",
+  "Publicidad digital",
+  "Gastos de feria",
+  "Seguros y fianzas",
+  "Tenencia",
+  "Diversos",
+  "Hospedaje",
+  "Mtto de Maquinaria y Equipo",
+  "Cuota de Verificacion de obra",
+  "Alineamiento y # Oficial",
+  "Constanacia de No Adeudo",
+  "Constancia de Translado de Dominio",
+  "Valores Catrastales",
+  "Libertad de Gravamen",
+  "Lic de Construccion",
+  "Impuestos y Derechos",
+  "Estudios Varios",
+  "RENTA DE OFIC",
+  "Posada (Fin de Año)",
+  "Avaluo",
+  "Gastos de Evento de Viviendas",
+  "Uniformes",
+  "Servicio Aduanal",
+  "Renta de vehiculo",
+  "Agua CEAS",
+  "Servicio de Paqueteria y Envio",
+  "Gastos de planeacion ejecutivos",
+  "Planeacion estrategica (gastos varios)",
+  "Fumigacion",
+  "Intregracion (Gastos Varios)",
+  "Mantto de Eq de oficina",
+  "Equipo de Seguridad Industrial",
+  "Donativos",
+  "Cuota y Suscripciones",
+  "Mantenimiento de Equipo menor",
+  "Arrendamiento Casa H",
+  "Enseres y Equipos Menores",
+  "Renta de equipos de comunicación",
+  "Flete",
+  "MOBILIARIO Y EQUIPO DE OFICINA",
+  "EQUIPO DE COMPUTO",
+  "EQUIPO DE COMUNICACIÓN",
+  "EQUIPO DE TRANSPORTE",
+  "EQUIPO FOTOGRAFICO",
+  "Mantenimiento equipo de transporte",
+  "Mantto de equipo de computo",
+  "Manttto de equipo de aire acondicionado",
+  "Papeleria en general",
+  "Telefonos"
+ ],
+ "VALLE REAL CONSTRUCCIONES, S.A. DE C.V.": [
+  "Mantto de Equipo de Vigilancia y Seguridad",
+  "Servicios de consultoria",
+  "Energia electrica",
+  "Diversos",
+  "MAQUINARIA Y EQUIPO",
+  "MOBILIARIO Y EQUIPO DE OFICINA",
+  "EQUIPO DE COMPUTO",
+  "Fletes",
+  "Mantto de oficina"
+ ],
+ "CONSTRUCCIONES ESMERALDA, S.A. DE C.V.": [
+  "Mantto de Equipo de Vigilancia y Seguridad",
+  "Mantto de viviendas",
+  "Papeleria y Art. Oficina",
+  "Telefonos e Internet",
+  "Energia electrica",
+  "Art de limpieza",
+  "Mantto de oficina",
+  "Diversos",
+  "Mantenimiento de Equipo menor",
+  "MAQUINARIA Y EQUIPO",
+  "MOBILIARIO Y EQUIPO DE OFICINA",
+  "EQUIPO DE COMPUTO",
+  "Materiales",
+  "Trabajos en Fraccionamiento",
+  "Comisiones bancarias"
+ ],
+ "CONSTRUVIVIENDA ACELERADA, S.A. DE C.V.": [
+  "Mantto de Equipo de Vigilancia y Seguridad",
+  "Telefonos e Internet",
+  "Energia electrica"
+ ]
 };
 // Catálogo genérico temporal para empresas que aún no tienen su lista propia
 const TIPOS_GASTO_DEFAULT=["Viáticos","Compras","Servicios","Mantenimiento","Materiales","Combustible","Hospedaje","Transporte","Publicidad","Accesorio equipos","Licencias y software","Otros"];
@@ -665,6 +946,42 @@ function tiposGastoDe(empresa){
   if(!empresa)return null; // null = "elige compañía primero"
   return TIPOS_GASTO_POR_EMPRESA[empresa]||TIPOS_GASTO_DEFAULT;
 }
+
+// ══ Guía de insumos: descripción de cuándo usar cada tipo de gasto (viene del catálogo de insumos por empresa) ══
+const DESC_INSUMOS={"VIVE POMOCA, S.A. DE C.V.": {"gastos de viaje": ["Usar para gastos de viaje DISTINTOS a alimentos, hospedaje y transporte."], "viaticos": ["Usar para alimentos y transporte en viaje de trabajo fuera de 50 km (respetar los límites diarios permitidos y requisitos fiscales)."], "peajes": ["Usar para casetas de peaje del uso cotidiano de vehículos."], "combustible y lubricantes": ["Usar para combustible de maquinaria que opera directo en una vivienda/manzana específica."], "servicio de agua potable": ["Usar para el servicio de agua potable del desarrollo."], "mantto de equipo de vigilancia y seguridad": ["Usar para mantenimiento de cámaras, alarmas o casetas de vigilancia."], "licencias y software": ["Usar para compra/renovación de licencias de software administrativo."], "consumo de alimentos": ["Usar para consumos en restaurantes; (no viáticos) pagar con medios electrónicos (solo 8.5% es deducible)."], "capacitaciones": ["Usar para cursos y capacitación al personal."], "papeleria y art. oficina": ["Usar para papelería y articulos menores de oficina."], "impresiones y copias": ["Usar para el servicio de impresión/copiado."], "celulares": ["Usar para celulares del personal de OBRA."], "telefonos e internet": ["Usar para servicios de telefonía e internet de oficina y obra."], "energia electrica": ["Usar para el consumo eléctrico del proyecto"], "art de limpieza": ["Usar para artículos de limpieza de oficina."], "agua": ["Usar para agua embotellada/garrafón de oficina."], "cafe": ["Usar para café/consumibles del personal en oficina; si es atención a clientes o proveedores, es gasto de representación (revisar con contabilidad antes de usar este tipo de gasto)."], "prediales": ["Usar para el predial de OFICINAS u otro inmueble administrativo."], "equipamiento de plaza": ["Usar para equipar una plaza comercial (mobiliario, señalética); si aumenta la vida útil del inmueble, evaluar si debe capitalizarse como activo en lugar de un gasto."], "mantto eq de transp": ["Usar para mantenimiento de vehículos ADMINISTRATIVOS."], "mantto eq de comp": ["Usar para mantenimiento de equipo de cómputo ADMINISTRATIVO."], "mantto de climas": ["Usar para mantenimiento de climas de oficina CENTRAL."], "mantto de oficina": ["Usar para reparaciones menores de oficina; si la obra aumenta la vida útil del inmueble, se capitaliza como activo, no aquí."], "mantto plaza comercial": ["Usar para el mantenimiento recurrente de una plaza comercial ya en operación."], "mantto de software": ["Usar para soporte/actualización recurrente de software administrativo."], "espectacular": ["Usar específicamente para publicidad en espectaculares."], "television": ["Usar específicamente para publicidad en televisión."], "radio": ["Usar específicamente para publicidad en radio."], "periodico": ["Usar específicamente para publicidad en periódico."], "impresion de lonas": ["Usar específicamente para impresión de lonas publicitarias."], "volantes y tripticos": ["Usar específicamente para volantes y trípticos impresos."], "souvenirs": ["Usar para souvenirs promocionales; solo son deducibles como obsequio general a clientes, no de lujo. Mediante un plan expuesto de publicidad."], "stand": ["Usar específicamente para renta/armado de stand en eventos."], "seccion amarilla": ["Usar específicamente para publicidad en sección amarilla/directorios."], "perifoneo": ["Usar específicamente para perifoneo publicitario."], "material para decoracion": ["Usar específicamente para material de decoración de puntos de venta/eventos."], "otros medios": ["Usar cuando el medio publicitario no tiene una opción propia en la lista."], "renta de espacios para modulo": ["Usar específicamente para renta de espacio de un módulo de venta."], "diseno de casa muestra": ["Usar específicamente para el diseño de la casa muestra (si se remodela como inmueble, evaluar capitalizar)."], "maquetas": ["Usar específicamente para maquetas de venta."], "call center nuxiba": ["Usar específicamente para el servicio de call center de ventas (Nuxiba)."], "activaciones": ["Usar específicamente para activaciones de marca en punto de venta."], "publicidad digital": ["Usar específicamente para publicidad digital."], "contrato y medidores de agua": ["Usar para trámite/contratación de medidores de agua del desarrollo."], "gastos de feria": ["Usar para participación en ferias o expos inmobiliarias."], "seguros y fianzas": ["Usar para pólizas/fianzas de CUMPLIMIENTO DE OBRA."], "tenencia": ["Usar para el pago anual de tenencia vehicular."], "diversos": ["Usar SOLO cuando el gasto no encaja en ningún otro insumo de la lista."], "hospedaje": ["Usar para hotel en viaje de trabajo fuera de 50 km (sin límite pero con CFDI)."], "renta de maquinaria": ["Usar para renta de maquinaria de uso ADMINISTRATIVO/general."], "mtto de maquinaria y equipo": ["Usar para mantenimiento de maquinaria cuando se clasifica en gastos generales; verificar el criterio de la empresa para no duplicar."], "alineamiento y # oficial": ["Usar al pagar el trámite municipal de alineamiento y número oficial de un predio."], "constancia de no adeudo": ["Usar al tramitar la constancia de no adeudo predial de un inmueble."], "constancia de traslado de dominio": ["Usar al tramitar la constancia de traslado de dominio en una venta."], "libertad de gravamen": ["Usar al pagar el certificado de libertad de gravamen del predio en desarrollo."], "lic de construccion": ["Usar para la licencia de construcción cuando se clasifica en gastos generales."], "impuestos y derechos": ["Usar para derechos/trámites pagados a una autoridad por la obra en general."], "estudios varios": ["Usar para estudios técnicos previos de UNA obra específica (mecánica de suelos, factibilidad)."], "renta de ofic": ["Usar para la renta mensual de oficinas administrativas."], "posada (fin de ano)": ["Usar para el evento anual de fin de año del personal."], "avaluo": ["Usar al pagar un avalúo de inmueble (venta, garantía de crédito, etc.)."], "uniformes": ["Usar para uniformes de personal."], "servicio aduanal": ["Usar al importar bienes/equipo del extranjero."], "renta de vehiculo": ["Usar para renta de autos ADMINISTRATIVOS (recordar el tope deducible de $200/día por unidad)."], "agua ceas": ["Usar para el derecho de agua ante el organismo operador estatal (CEAS) del desarrollo."], "servicio de paqueteria y envio": ["Usar para envíos de paquetería de OFICINA."], "gastos de planeacion ejecutivos": ["Usar solo para reuniones/gastos formales de planeación ejecutiva; documentar bien para que no se lea como gasto de representación (no deducible)."], "planeacion estrategica (gastos varios)": ["Usar para gastos varios de sesiones de planeación estratégica."], "fumigacion": ["Usar para el servicio de control de plagas de oficina o desarrollo."], "mantto de eq de oficina": ["Usar para mantenimiento de mobiliario/equipo de oficina que no sea cómputo, clima ni transporte (esos tienen su propio tipo de gasto)."], "equipo de seguridad industrial": ["Usar para equipo de protección personal del personal."], "donativos": ["Usar SOLO si el donatario tiene autorización del SAT como donataria autorizada; si no, no usar este tipo de gasto."], "cuota y suscripciones": ["Usar para cuotas a cámaras/asociaciones (CANADEVI, etc.); NO usar para membresías de clubes deportivos o sociales."], "mantenimiento de equipo menor": ["Usar para mantenimiento de herramientas o equipo menor sin tipo de gasto propio."], "promocion de rentas de locales": ["Usar para promoción específica de RENTA de locales comerciales."], "gastos de ejecucion": ["Usar solo para gastos de un procedimiento administrativo de ejecución (embargo, PAE); confirmar con el asesor fiscal antes de usar este tipo de gasto."], "enseres y equipos menores": ["Usar para bienes de bajo costo que NO se capitalizan como activo fijo (herramientas menores, extensiones, etc.)."], "equipo de computo": ["Usar al COMPRAR computadoras, laptops, impresoras, tabletas, nobreak, discos de almacenamiento o servidores."], "mobiliario y equipo de oficina": ["Usar al COMPRAR muebles o equipo de oficina (escritorios, sillas, muebles de almacenamiento, mesas, entre otros accesorios fijos considerados inversión)."], "equipo de comunicacion": ["Usar al COMPRAR radios, conmutadores o equipo de comunicación."], "equipo de transporte": ["Usar al COMPRAR un vehículo , para uso del traslado de personal, materiales o supervisión de obra (la renta de vehículo va en gastos, no aquí)."], "equipo fotografico": ["Usar al COMPRAR cámaras o equipo fotográfico/de video (p. ej. para avance de obra)."], "fletes": ["Usar para fletes directamente asignables a una vivienda/manzana."], "mantenimiento de maquinaria y equipo": ["Usar para mantenimiento de maquinaria de uso GENERAL del proyecto"], "mantenimiento equipo de transporte": ["Usar para mantenimiento de vehículos DE OBRA."], "mantto de equipo de computo": ["Usar para mantenimiento de equipo de cómputo asignado a la obra/campo."], "manttto de equipo de aire acondicionado": ["Usar para mantenimiento de clima en campamento de obra."], "mantenimiento a plaza comercial": ["Usar para el mantenimiento de la plaza comercial propiedad de VPO."]}, "CONSTRUVIVIENDA TECNOLOGICAS, S.A. DE C.V.": {"gastos de viaje": ["Usar para gastos de viaje DISTINTOS a alimentos, hospedaje y transporte."], "viaticos": ["Usar para alimentos y transporte en viaje de trabajo fuera de 50 km (respetar los límites diarios permitidos y requisitos fiscales)."], "peajes": ["Usar para casetas de peaje del uso cotidiano de vehículos."], "combustible y lubricantes": ["Usar para combustible de maquinaria que opera directo en una vivienda/manzana específica."], "servicios de comercializacion": ["Usar para actividades de ventas y promoción de negocios."], "mantto de equipo de vigilancia y seguridad": ["Usar para mantenimiento de cámaras, alarmas o casetas de vigilancia."], "licencias y software": ["Usar para compra/renovación de licencias de software administrativo."], "consumo de alimentos": ["Usar para consumos en restaurantes; pagar con medios electrónicos (solo 8.5% es deducible)."], "capacitaciones": ["Usar para cursos y capacitación al personal."], "papeleria y art. oficina": ["Usar para papelería de oficina CENTRAL."], "impresiones y copias": ["Usar para el servicio de impresión/copiado."], "celulares": ["Usar para servicios de celulares del personal de OBRA."], "telefonos e internet": ["Usar para servicios de telefonía e internet de oficina."], "energia electrica": ["Usar para el consumo eléctrico de obra."], "art de limpieza": ["Usar para artículos de limpieza de oficina."], "agua": ["Usar para agua embotellada/garrafón de oficina."], "cafe": ["Usar para café/consumibles del personal en oficina; si es atención a clientes o proveedores, es gasto de representación (revisar con contabilidad antes de usar este tipo de gasto)."], "prediales": ["Usar para el predial de OFICINAS u otro inmueble administrativo."], "mantto eq de transp": ["Usar para mantenimiento de vehículos ADMINISTRATIVOS."], "mantto eq de comp": ["Usar para mantenimiento de equipo de cómputo ADMINISTRATIVO."], "mantto de climas": ["Usar para mantenimiento de climas de oficina CENTRAL."], "mantto de oficina": ["Usar para reparaciones menores de oficina; si la obra aumenta la vida útil del inmueble, se capitaliza como activo, no aquí."], "mantto plaza comercial": ["Usar para el mantenimiento recurrente de una plaza comercial ya en operación."], "mantto de software": ["Usar para soporte/actualización recurrente de software administrativo."], "radio": ["Usar específicamente para publicidad en radio."], "periodico": ["Usar específicamente para publicidad en periódico."], "impresion de lonas": ["Usar específicamente para impresión de lonas publicitarias."], "volantes y tripticos": ["Usar específicamente para volantes y trípticos impresos."], "souvenirs": ["Usar para souvenirs promocionales; solo son deducibles como obsequio general a clientes, no de lujo."], "stand": ["Usar específicamente para renta/armado de stand en eventos."], "seccion amarilla": ["Usar específicamente para publicidad en sección amarilla/directorios."], "perifoneo": ["Usar específicamente para perifoneo publicitario."], "material para decoracion": ["Usar específicamente para material de decoración de puntos de venta/eventos."], "otros medios": ["Usar cuando el medio publicitario no tiene una opción propia en la lista."], "renta de espacios para modulo": ["Usar específicamente para renta de espacio de un módulo de venta."], "senalizador vialez": ["Usar específicamente para señalización vial promocional."], "porudccion edicion de videos": ["Usar específicamente para producción y edición de video promocional."], "activaciones": ["Usar específicamente para activaciones de marca en punto de venta."], "publicidad digital": ["Usar específicamente para publicidad digital."], "gastos de feria": ["Usar para participación en ferias o expos inmobiliarias."], "seguros y fianzas": ["Usar para pólizas/fianzas de CUMPLIMIENTO DE OBRA."], "tenencia": ["Usar para el pago anual de tenencia vehicular."], "diversos": ["Usar SOLO cuando el gasto no encaja en ningún otro insumo de la lista."], "hospedaje": ["Usar para hotel en viaje de trabajo fuera de 50 km (sin límite pero con CFDI)."], "mtto de maquinaria y equipo": ["Usar para mantenimiento de maquinaria cuando se clasifica en gastos generales; verificar el criterio de la empresa para no duplicar."], "cuota de verificacion de obra": ["Usar para la cuota de verificación de obra cuando se clasifica en gastos generales."], "alineamiento y # oficial": ["Usar al pagar el trámite municipal de alineamiento y número oficial de un predio."], "constanacia de no adeudo": ["Usar al tramitar la constancia de no adeudo predial de un inmueble."], "constancia de translado de dominio": ["Usar al tramitar la constancia de traslado de dominio en una venta."], "valores catrastales": ["Usar para el trámite/actualización del valor catastral de un inmueble."], "libertad de gravamen": ["Usar al pagar el certificado de libertad de gravamen del predio en desarrollo."], "lic de construccion": ["Usar para la licencia de construcción cuando se clasifica en gastos generales."], "impuestos y derechos": ["Usar para derechos/trámites pagados a una autoridad por la obra en general."], "estudios varios": ["Usar para estudios técnicos generales del desarrollo (sin dueño de una vivienda en particular)."], "renta de ofic": ["Usar para la renta mensual de oficinas administrativas."], "posada (fin de ano)": ["Usar para el evento anual de fin de año del personal."], "avaluo": ["Usar al pagar un avalúo de inmueble (venta, garantía de crédito, etc.)."], "uniformes": ["Usar para uniformes del personal de OBRA."], "renta de vehiculo": ["Usar para renta de autos ADMINISTRATIVOS (recordar el tope deducible de $200/día por unidad)."], "agua ceas": ["Usar para el derecho de agua ante el organismo operador estatal (CEAS) del desarrollo."], "servicio de paqueteria y envio": ["Usar para envíos de paquetería de OFICINA."], "gastos de planeacion ejecutivos": ["Usar solo para reuniones/gastos formales de planeación ejecutiva; documentar bien para que no se lea como gasto de representación (no deducible)."], "planeacion estrategica (gastos varios)": ["Usar para gastos varios de sesiones de planeación estratégica."], "fumigacion": ["Usar para el servicio de control de plagas de oficina o desarrollo."], "intregracion (gastos varios)": ["Usar para eventos de integración de personal DISTINTOS a la posada de fin de año."], "mantto de eq de oficina": ["Usar para mantenimiento de mobiliario/equipo de oficina que no sea cómputo, clima ni transporte (esos tienen su propio tipo de gasto)."], "equipo de seguridad industrial": ["Usar para equipo de protección personal del personal administrativo/de plaza."], "donativos": ["Usar SOLO si el donatario tiene autorización del SAT como donataria autorizada; si no, no usar este tipo de gasto."], "cuota y suscripciones": ["Usar para cuotas a cámaras/asociaciones (CANADEVI, etc.); NO usar para membresías de clubes deportivos o sociales."], "mantenimiento de equipo menor": ["Usar para mantenimiento de herramientas o equipo menor sin tipo de gasto propio."], "arrendamiento casa h": ["Usar para la renta de una casa habitación proporcionada por la empresa (p. ej. a un directivo)."], "enseres y equipos menores": ["Usar para bienes de bajo costo que NO se capitalizan como activo fijo (herramientas menores, extensiones, etc.)."], "renta de equipos de comunicacion": ["Usar para la renta de radios/equipos de comunicación."], "flete": ["Usar para fletes directamente asignables a una vivienda/manzana."], "mobiliario y equipo de oficina": ["Usar al COMPRAR muebles o equipo de oficina (escritorios, sillas, muebles de almacenamiento, mesas, entre otros accesorios fijos considerados inversión)."], "equipo de computo": ["Usar al COMPRAR computadoras, laptops, impresoras, tabletas, nobreak, discos de almacenamiento o servidores."], "equipo de comunicacion": ["Usar al COMPRAR radios, conmutadores o equipo de comunicación."], "equipo de transporte": ["Usar al COMPRAR un vehículo , para uso del traslado de personal, materiales o supervisión de obra (la renta de vehículo va en gastos, no aquí)."], "equipo fotografico": ["Usar al COMPRAR cámaras o equipo fotográfico/de video (p. ej. para avance de obra)."], "mantenimiento equipo de transporte": ["Usar para mantenimiento de vehículos DE OBRA."], "mantto de equipo de computo": ["Usar para mantenimiento de equipo de cómputo asignado a la obra."], "manttto de equipo de aire acondicionado": ["Usar para mantenimiento de clima de obra."], "papeleria en general": ["Usar para papelería consumida en obra."], "telefonos": ["Usar para servicios de telefonía de obra."]}, "CORPORATIVO DE CONSTRUCCION DE VIVIENDA SUSTENTABLE DEL BOSQUE S.A. DE C.V.": {"servicios de comercializacion": ["Usar para actividades de ventas y promoción de negocios."], "mantto de equipo de vigilancia y seguridad": ["Usar para mantenimiento de cámaras, alarmas o casetas de vigilancia."], "licencias y software": ["Usar para compra/renovación de licencias de software administrativo."], "papeleria y art. oficina": ["Usar para papelería de oficina CENTRAL."], "telefonos e internet": ["Usar para telefonía e internet de oficina CENTRAL."], "mtto de maquinaria y equipo": ["Usar para mantenimiento de maquinaria cuando se clasifica en gastos generales; verificar el criterio de la empresa para no duplicar."], "impuestos y derechos": ["Usar para derechos/trámites pagados a una autoridad por la obra en general."], "mantenimiento de equipo menor": ["Usar para mantenimiento de herramientas o equipo menor sin tipo de gasto propio."], "mobiliario y equipo de oficina": ["Usar al COMPRAR muebles o equipo de oficina (escritorios, sillas, muebles de almacenamiento, mesas, entre otros accesorios fijos considerados inversión)."], "equipo de computo": ["Usar al COMPRAR computadoras, laptops, impresoras, tabletas, nobreak, discos de almacenamiento o servidores."], "equipo de comunicacion": ["Usar al COMPRAR radios, conmutadores o equipo de comunicación."], "equipo de transporte": ["Usar al COMPRAR un vehículo , para uso del traslado de personal, materiales o supervisión de obra (la renta de vehículo va en gastos, no aquí)."], "equipo fotografico": ["Usar al COMPRAR cámaras o equipo fotográfico/de video (p. ej. para avance de obra)."], "fletes": ["Usar para fletes generales del proyecto no asignables a una vivienda específica."], "estudios varios": ["Usar para estudios técnicos generales del desarrollo (sin dueño de una vivienda en particular)."], "trabajos topograficos": ["Usar para levantamientos topográficos del terreno/desarrollo."], "libertad de gravamen": ["Usar al pagar el certificado de libertad de gravamen del predio en desarrollo."], "pago de catastro": ["Usar al pagar trámites catastrales del predio en desarrollo."], "cuotas de verificacion de vivienda": ["Usar al pagar verificaciones técnicas/NOM de la vivienda ante autoridad."], "trabajos en fraccionamiento": ["Usar para obras dentro del fraccionamiento no asignables a una vivienda específica."], "seguros y fianzas": ["Usar para pólizas/fianzas de CUMPLIMIENTO DE OBRA."], "mantenimiento de maquinaria y equipo": ["Usar para mantenimiento de maquinaria de uso GENERAL del proyecto."], "mantenimiento equipo de transporte": ["Usar para mantenimiento de vehículos DE OBRA."], "mantto de equipo de computo": ["Usar para mantenimiento de equipo de cómputo asignado a la obra."], "manttto de equipo de aire acondicionado": ["Usar para mantenimiento de clima de obra."], "mantenimiento de cimbra": ["Usar para mantenimiento de cimbra de uso general del proyecto."], "papeleria y articulos de oficina": ["Usar para papelería consumida en obra."], "energia electrica": ["Usar para el consumo eléctrico de obra."], "servicio de celulares": ["Usar para servicios de celulares del personal de OBRA."], "servicio de telefono e internet": ["Usar para servicios de telefonía de obra."], "seguro de fletes": ["Usar para el seguro que cubre específicamente el transporte de materiales."], "uniformes": ["Usar para uniformes del personal de OBRA."], "gastos de viaje": ["Usar para gastos de viaje DISTINTOS a alimentos, hospedaje y transporte."], "viaticos": ["Usar para alimentos y transporte en viaje de trabajo fuera de 50 km (respetar los límites diarios permitidos y requisitos fiscales)."], "impresiones y copias": ["Usar para el servicio de impresión/copiado."], "celulares": ["Usar para servicios de celulares de personal ADMINISTRATIVO."], "art de limpieza": ["Usar para artículos de limpieza de oficina."], "agua": ["Usar para agua embotellada/garrafón de oficina."], "cafe": ["Usar para café/consumibles del personal en oficina; si es atención a clientes o proveedores, es gasto de representación (revisar con contabilidad antes de usar este tipo de gasto)."], "mantto eq de transp": ["Usar para mantenimiento de vehículos ADMINISTRATIVOS."], "mantto eq de comp": ["Usar para mantenimiento de equipo de cómputo ADMINISTRATIVO."], "mantto de climas": ["Usar para mantenimiento de climas de oficina CENTRAL."], "mantto de oficina": ["Usar para reparaciones menores de oficina; si la obra aumenta la vida útil del inmueble, se capitaliza como activo, no aquí."], "mantto plaza comercial": ["Usar para el mantenimiento recurrente de una plaza comercial ya en operación."], "mantto de software": ["Usar para soporte/actualización recurrente de software administrativo."], "hospedaje": ["Usar para hotel en viaje de trabajo fuera de 50 km (sin límite pero con CFDI)."], "mantto de eq de oficina": ["Usar para mantenimiento de mobiliario/equipo de oficina que no sea cómputo, clima ni transporte (esos tienen su propio tipo de gasto)."], "enseres y equipos menores": ["Usar para bienes de bajo costo que NO se capitalizan como activo fijo (herramientas menores, extensiones, etc.)."]}, "VALLE REAL CONSTRUCCIONES, S.A. DE C.V.": {"mantto de equipo de vigilancia y seguridad": ["Usar para mantenimiento de cámaras, alarmas o casetas de vigilancia."], "servicios de consultoria": ["Usar para consultorías generales DISTINTAS a las fiscal-jurídicas o de auditoría."], "energia electrica": ["Usar para el consumo eléctrico de oficina."], "diversos": ["Usar SOLO cuando el gasto no encaja en ningún otro insumo de la lista."], "maquinaria y equipo": ["Usar al COMPRAR maquinaria o equipo pesado de obra (no para renta ni mantenimiento)."], "mobiliario y equipo de oficina": ["Usar al COMPRAR muebles o equipo de oficina (escritorios, sillas, muebles de almacenamiento, mesas, entre otros accesorios fijos considerados inversión)."], "equipo de computo": ["Usar al COMPRAR computadoras, laptops, impresoras, tabletas, nobreak, discos de almacenamiento o servidores."], "fletes": ["Usar para fletes generales del proyecto no asignables a una vivienda específica."], "mantto de oficina": ["Usar para reparaciones menores de oficina; si la obra aumenta la vida útil del inmueble, se capitaliza como activo, no aquí."]}, "CONSTRUCCIONES ESMERALDA, S.A. DE C.V.": {"mantto de equipo de vigilancia y seguridad": ["Usar para mantenimiento de cámaras, alarmas o casetas de vigilancia."], "papeleria y art. oficina": ["Usar para papelería de oficina."], "telefonos e internet": ["Usar para telefonía e internet de oficina."], "energia electrica": ["Usar para el consumo eléctrico de oficina."], "art de limpieza": ["Usar para artículos de limpieza de oficina."], "mantto de oficina": ["Usar para reparaciones menores de oficina; si la obra aumenta la vida útil del inmueble, se capitaliza como activo, no aquí."], "diversos": ["Usar SOLO cuando el gasto no encaja en ningún otro insumo de la lista."], "mantenimiento de equipo menor": ["Usar para mantenimiento de herramientas o equipo menor sin tipo de gasto propio."], "maquinaria y equipo": ["Usar al COMPRAR maquinaria o equipo pesado de obra (no para renta ni mantenimiento)."], "mobiliario y equipo de oficina": ["Usar al COMPRAR muebles o equipo de oficina (escritorios, sillas, muebles de almacenamiento, mesas, entre otros accesorios fijos considerados inversión)."], "equipo de computo": ["Usar al COMPRAR computadoras, laptops, impresoras, tabletas, nobreak, discos de almacenamiento o servidores."], "materiales": ["Usar para materiales de uso general del proyecto que no se pueden asignar a una vivienda específica."], "trabajos en fraccionamiento": ["Usar para obras dentro del fraccionamiento no asignables a una vivienda específica."], "comisiones bancarias": ["Usar para comisiones de manejo de cuenta/tarjeta de uso general."]}, "CONSTRUVIVIENDA ACELERADA, S.A. DE C.V.": {"mantto de equipo de vigilancia y seguridad": ["Usar para mantenimiento de cámaras, alarmas o casetas de vigilancia."], "telefonos e internet": ["Usar para telefonía e internet de oficina."], "energia electrica": ["Usar para el consumo eléctrico de oficina."]}};
+function nzTxt(s){return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/\s+/g," ").trim();}
+function descInsumo(empresa,nombre){const m=DESC_INSUMOS[empresa];return(m&&m[nzTxt(nombre)])||null;}
+function descHTML(d){return esc(d[0]);}
+function tgHTML(i,empresa,valor){
+  const lista=tiposGastoDe(empresa);
+  if(lista===null)return '<div class="tg-sel" id="tgs_'+i+'"><button type="button" class="tg-btn" disabled>Elija compañía primero</button></div>';
+  const d0=valor?descInsumo(empresa,valor):null;
+  return '<div class="tg-sel" id="tgs_'+i+'" data-i="'+i+'">'+
+    '<button type="button" class="tg-btn" data-tg="abrir">'+esc(valor||"— Selecciona —")+'</button>'+
+    '<ul class="tg-lista">'+lista.map(v=>{const d=descInsumo(empresa,v);
+      return '<li data-v="'+esc(v)+'"'+(v===valor?' class="sel"':'')+'><div class="tg-fila"><span>'+esc(v)+'</span>'+(d?'<button type="button" class="tg-q" data-tg="q" title="¿Cuándo usar este?">?</button>':'')+'</div>'+(d?'<div class="tg-desc">'+descHTML(d)+'</div>':'')+'</li>';}).join("")+'</ul>'+
+    (d0?'<div class="tg-nota">'+esc(d0[0])+'</div>':'')+'</div>';
+}
+document.addEventListener("click",e=>{
+  const sel=e.target.closest&&e.target.closest(".tg-sel");
+  document.querySelectorAll(".tg-sel.open").forEach(x=>{if(x!==sel)x.classList.remove("open")});
+  if(!sel||!sel.dataset.i)return;
+  const i=sel.dataset.i;
+  const q=e.target.closest('[data-tg="q"]');
+  if(q){e.stopPropagation();const li=q.closest("li");const d=li.querySelector(".tg-desc");const on=!d.classList.contains("on");
+    sel.querySelectorAll(".tg-desc.on").forEach(x=>x.classList.remove("on"));sel.querySelectorAll(".tg-q.on").forEach(x=>x.classList.remove("on"));
+    if(on){d.classList.add("on");q.classList.add("on");}return;}
+  if(e.target.closest('[data-tg="abrir"]')){sel.classList.toggle("open");return;}
+  const li=e.target.closest("li[data-v]");
+  if(li){
+    const v=li.dataset.v,s=document.getElementById("fg_tipo_"+i);
+    if(s){s.value=v;}
+    if(conceptos[i])conceptos[i].tipoGasto=v;
+    const emp=document.getElementById("f_empresa")?document.getElementById("f_empresa").value:"";
+    sel.outerHTML=tgHTML(i,emp,v);
+  }
+});
+
 function opcionesTipoGasto(empresa,valorActual){
   const lista=tiposGastoDe(empresa);
   if(lista===null)return '<option value="">Elija compañía primero</option>';
@@ -1525,7 +1842,7 @@ function renderFilasGastos(){
       return '<div class="fila-gasto material" id="fila-'+i+'"><div class="fila-gasto-header"><span class="fila-gasto-titulo">#'+(i+1)+' 🧱 '+esc(c.cfdi.emisor.nombre)+' · Folio '+esc(folio)+' · '+mxn(c.cfdi.total)+etiquetaPPD(c.cfdi)+'</span></div>'+
         '<div class="grid2">'+
         '<div class="campo"><label>Tipo de gasto <span class="req">*</span></label><select id="fg_tipo_'+i+'" onchange="conceptos['+i+'].tipoGasto=this.value">'+TIPOS_MATERIAL.map(t=>'<option value="'+esc(t)+'"'+(c.tipoGasto===t?" selected":"")+'>'+esc(t)+'</option>').join("")+'</select></div>'+
-        '<div class="campo"><label>Justificación <span class="req">*</span></label><input type="text" id="fg_just_'+i+'" maxlength="150" value="'+esc(c.justificacion||"")+'" placeholder="Ej: Compra de varilla…" oninput="conceptos['+i+'].justificacion=this.value;document.getElementById(\'fg_cnt_'+i+'\').textContent=this.value.length"><span class="contador-chars" id="fg_cnt_'+i+'">'+String((c.justificacion||"").length)+'</span>/150</div>'+
+        '<div class="campo"><label>Justificación <span class="req">*</span></label><input type="text" id="fg_just_'+i+'" maxlength="150" value="'+esc(c.justificacion||"")+'" placeholder="Ej: Compra de varilla…" oninput="conceptos['+i+'].justificacion=this.value;document.getElementById(\'fg_cnt_'+i+'\').textContent=this.value.length+\'/150\'"><span class="contador-chars" id="fg_cnt_'+i+'">'+String((c.justificacion||"").length)+'/150</span></div>'+
         '<div class="campo"><label>Desarrollo <span class="req">*</span></label><select id="fg_des_'+i+'" onchange="cambiarDesarrolloConcepto('+i+',this.value)">'+
           MATERIAL_OBRA.desarrollos.map(d=>'<option value="'+esc(d)+'"'+(c.desarrollo===d?" selected":"")+'>'+esc(d)+'</option>').join("")+'</select></div>'+
         '<div class="campo"><label>Etapa <span class="req">*</span></label><select id="fg_eta_'+i+'" '+(esEtapaUnica(c.desarrollo)?"disabled":"")+' onchange="cambiarEtapaConcepto('+i+',this.value)">'+
@@ -1543,8 +1860,8 @@ function renderFilasGastos(){
       const _tipoDisabled=_empresaActual?"":"disabled";
       return '<div class="fila-gasto" id="fila-'+i+'"><div class="fila-gasto-header"><span class="fila-gasto-titulo">#'+(i+1)+' 📄 '+esc(c.cfdi.emisor.nombre)+' · Folio '+esc(folio)+' · '+mxn(c.cfdi.total)+etiquetaPPD(c.cfdi)+'</span></div>'+
         '<div class="grid2">'+
-        '<div class="campo"><label>Tipo de gasto <span class="req">*</span></label><select id="fg_tipo_'+i+'" '+_tipoDisabled+' onchange="conceptos['+i+'].tipoGasto=this.value">'+tipos+'</select></div>'+
-        '<div class="campo"><label>Justificación <span class="req">*</span></label><input type="text" id="fg_just_'+i+'" maxlength="150" value="'+esc(c.justificacion||"")+'" placeholder="Ej: Consumo de alimentos…" oninput="conceptos['+i+'].justificacion=this.value;document.getElementById(\'fg_cnt_'+i+'\').textContent=this.value.length"><span class="contador-chars" id="fg_cnt_'+i+'">'+String((c.justificacion||"").length)+'</span>/150</div>'+
+        '<div class="campo"><label>Tipo de gasto <span class="req">*</span></label><select id="fg_tipo_'+i+'" class="tg-native" '+_tipoDisabled+' onchange="conceptos['+i+'].tipoGasto=this.value">'+tipos+'</select>'+tgHTML(i,_empresaActual,c.tipoGasto)+'</div>'+
+        '<div class="campo"><label>Justificación <span class="req">*</span></label><input type="text" id="fg_just_'+i+'" maxlength="150" value="'+esc(c.justificacion||"")+'" placeholder="Ej: Consumo de alimentos…" oninput="conceptos['+i+'].justificacion=this.value;document.getElementById(\'fg_cnt_'+i+'\').textContent=this.value.length+\'/150\'"><span class="contador-chars" id="fg_cnt_'+i+'">'+String((c.justificacion||"").length)+'/150</span></div>'+
         '<div class="campo" style="grid-column:1/-1"><label>Partida presupuestada <span class="req">*</span></label><div class="sw"><input type="text" id="fg_partida_txt_'+i+'" value="'+esc(c.partida||"")+'" placeholder="Buscar partida…" autocomplete="off"><input type="hidden" id="fg_partida_'+i+'" value="'+esc(c.partida||"")+'"><ul class="dd" id="fg_dd_partida_'+i+'"></ul></div></div>'+
         '</div></div>';
     } else if(c.tipo==="invoice"){
@@ -1553,8 +1870,8 @@ function renderFilasGastos(){
       const _tipoDisabled=_empresaActual?"":"disabled";
       return '<div class="fila-gasto" id="fila-'+i+'" style="border-color:#bfdbfe;background:#eff6ff"><div class="fila-gasto-header"><span class="fila-gasto-titulo">#'+(i+1)+' 🌐 '+esc(c.proveedor||"Invoice")+' · '+esc(c.referencia||"sin referencia")+' · '+mxn(c.monto)+'</span></div>'+
         '<div class="grid2">'+
-        '<div class="campo"><label>Tipo de gasto <span class="req">*</span></label><select id="fg_tipo_'+i+'" '+_tipoDisabled+' onchange="conceptos['+i+'].tipoGasto=this.value">'+tipos+'</select></div>'+
-        '<div class="campo"><label>Justificación <span class="req">*</span></label><input type="text" id="fg_just_'+i+'" maxlength="150" value="'+esc(c.justificacion||"")+'" oninput="conceptos['+i+'].justificacion=this.value;document.getElementById(\'fg_cnt_'+i+'\').textContent=this.value.length"><span class="contador-chars" id="fg_cnt_'+i+'">'+String((c.justificacion||"").length)+'</span>/150</div>'+
+        '<div class="campo"><label>Tipo de gasto <span class="req">*</span></label><select id="fg_tipo_'+i+'" class="tg-native" '+_tipoDisabled+' onchange="conceptos['+i+'].tipoGasto=this.value">'+tipos+'</select>'+tgHTML(i,_empresaActual,c.tipoGasto)+'</div>'+
+        '<div class="campo"><label>Justificación <span class="req">*</span></label><input type="text" id="fg_just_'+i+'" maxlength="150" value="'+esc(c.justificacion||"")+'" oninput="conceptos['+i+'].justificacion=this.value;document.getElementById(\'fg_cnt_'+i+'\').textContent=this.value.length+\'/150\'"><span class="contador-chars" id="fg_cnt_'+i+'">'+String((c.justificacion||"").length)+'/150</span></div>'+
         '<div class="campo" style="grid-column:1/-1"><label>Partida presupuestada <span class="req">*</span></label><div class="sw"><input type="text" id="fg_partida_txt_'+i+'" value="'+esc(c.partida||"")+'" placeholder="Buscar partida…" autocomplete="off"><input type="hidden" id="fg_partida_'+i+'" value="'+esc(c.partida||"")+'"><ul class="dd" id="fg_dd_partida_'+i+'"></ul></div></div>'+
         '</div></div>';
     } else {
@@ -1563,7 +1880,7 @@ function renderFilasGastos(){
       return '<div class="fila-gasto sincfdi" id="fila-'+i+'"><div class="fila-gasto-header"><span class="fila-gasto-titulo">#'+(i+1)+' ✏️ Sin comprobante · '+esc(c.fecha||"")+' · '+mxn(c.monto)+'</span></div>'+
         '<div class="grid2">'+
         '<div class="campo"><label>Tipo de gasto <span class="req">*</span></label><select id="fg_tipo_'+i+'" disabled>'+tipos+'</select></div>'+
-        '<div class="campo"><label>Justificación <span class="req">*</span></label><input type="text" id="fg_just_'+i+'" maxlength="150" value="'+esc(c.justificacion||"")+'" oninput="conceptos['+i+'].justificacion=this.value;document.getElementById(\'fg_cnt_'+i+'\').textContent=this.value.length"><span class="contador-chars" id="fg_cnt_'+i+'">'+String((c.justificacion||"").length)+'</span>/150</div>'+
+        '<div class="campo"><label>Justificación <span class="req">*</span></label><input type="text" id="fg_just_'+i+'" maxlength="150" value="'+esc(c.justificacion||"")+'" oninput="conceptos['+i+'].justificacion=this.value;document.getElementById(\'fg_cnt_'+i+'\').textContent=this.value.length+\'/150\'"><span class="contador-chars" id="fg_cnt_'+i+'">'+String((c.justificacion||"").length)+'/150</span></div>'+
         '<div class="campo" style="grid-column:1/-1"><label>Partida presupuestada <span class="req">*</span></label><div class="sw"><input type="text" id="fg_partida_txt_'+i+'" value="'+esc(c.partida||"")+'" placeholder="Buscar partida…" autocomplete="off"><input type="hidden" id="fg_partida_'+i+'" value="'+esc(c.partida||"")+'"><ul class="dd" id="fg_dd_partida_'+i+'"></ul></div></div>'+
         '</div></div>';
     }
