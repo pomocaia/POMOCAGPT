@@ -185,6 +185,14 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
 .tg-desc small{display:block;margin-top:3px;color:#78716c}
 .tg-nota{font-size:11.5px;color:#57534e;line-height:1.35;margin-top:3px}
 
+
+/* Botón flotante de WhatsApp (soporte) */
+.wa-flotante{position:fixed;right:16px;bottom:16px;z-index:900;display:none;align-items:center;gap:8px;background:#25D366;color:#fff;text-decoration:none;border-radius:999px;padding:10px 16px 10px 12px;font:700 13px Arial,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.wa-flotante.listo{display:flex}
+.wa-flotante:hover{background:#1ebe5b}
+.wa-flotante svg{width:26px;height:26px;flex:none;fill:#fff}
+@media(max-width:560px){.wa-flotante .wa-txt{display:none}.wa-flotante{padding:12px}}
+@media print{.wa-flotante{display:none!important}}
 .sw{position:relative}
 .sw .dd{position:absolute;top:100%;left:0;right:0;max-height:200px;overflow-y:auto;
   background:#fff;border:1px solid var(--verde);border-top:none;border-radius:0 0 7px 7px;
@@ -499,6 +507,23 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
 </div>
 
 <div id="toast"></div>
+
+<!-- WhatsApp de soporte: para activarlo, escribe el número (con lada de país, solo dígitos) en WHATSAPP_SOPORTE. Ej: "529931234567" -->
+<a id="waSoporte" class="wa-flotante" href="#" target="_blank" rel="noopener" title="¿Problemas con el vale? Escríbenos por WhatsApp">
+  <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16.04 3C9.4 3 4 8.39 4 15.02c0 2.12.55 4.18 1.6 6L4 29l8.17-1.57a12.03 12.03 0 0 0 5.87 1.5h.01C24.68 28.93 30 23.54 30 16.9 30 10.27 24.68 3 16.04 3zm0 22.9h-.01a10 10 0 0 1-5.1-1.4l-.37-.22-4.85.93.98-4.72-.24-.39a9.97 9.97 0 0 1-1.53-5.3c0-5.5 4.5-9.97 10.04-9.97 5.54 0 9.96 4.47 9.96 9.98 0 5.5-4.5 10.09-9.88 10.09zm5.5-7.5c-.3-.15-1.78-.88-2.05-.98-.28-.1-.48-.15-.68.15-.2.3-.78.98-.95 1.18-.18.2-.35.22-.65.07-.3-.15-1.27-.47-2.42-1.5-.9-.8-1.5-1.78-1.67-2.08-.18-.3-.02-.46.13-.6.13-.13.3-.35.45-.52.15-.18.2-.3.3-.5.1-.2.05-.38-.02-.53-.08-.15-.68-1.64-.93-2.25-.25-.58-.5-.5-.68-.5h-.58c-.2 0-.53.08-.8.38-.28.3-1.05 1.03-1.05 2.5s1.08 2.9 1.23 3.1c.15.2 2.12 3.23 5.13 4.53.72.3 1.28.5 1.72.63.72.23 1.38.2 1.9.12.58-.09 1.78-.73 2.03-1.43.25-.7.25-1.3.18-1.43-.08-.12-.28-.2-.58-.35z"/></svg>
+  <span class="wa-txt">¿Problemas? Escríbenos</span>
+</a>
+<script>
+(function(){
+  const WHATSAPP_SOPORTE="529931435085";   // ← número de soporte con lada de país, solo dígitos (ej. "529931234567")
+  const MENSAJE="Hola, tengo un problema con el Vale de Reembolso.";
+  const a=document.getElementById("waSoporte");
+  const n=String(WHATSAPP_SOPORTE).replace(/\D/g,"");
+  if(!a||!n)return;              // sin número configurado, el botón no se muestra
+  a.href="https://wa.me/"+n+"?text="+encodeURIComponent(MENSAJE);
+  a.classList.add("listo");
+})();
+</script>
 
 <!-- Modal Material de obra -->
 <div class="modal-bg" id="modal-material">
