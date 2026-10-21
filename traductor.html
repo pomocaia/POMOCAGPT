@@ -496,7 +496,7 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
         <div class="sw"><input type="text" id="m_partida_txt" placeholder="Buscar…" autocomplete="off">
         <input type="hidden" id="m_partida"><ul class="dd" id="m_dd_partida"></ul></div></div>
       <div class="campo" style="grid-column:1/-1"><label>Justificación <span class="req">*</span></label>
-        <input type="text" id="m_justificacion" maxlength="150" placeholder="Ej: Propina, estacionamiento sin recibo…" oninput="document.getElementById('m_cnt').textContent=this.value.length+\'/150\'"><span class="contador-chars" id="m_cnt">0</span>/150</div>
+        <input type="text" id="m_justificacion" maxlength="150" placeholder="Ej: Propina, estacionamiento sin recibo…" oninput="document.getElementById('m_cnt').textContent=this.value.length+'/150'"><span class="contador-chars" id="m_cnt">0/150</span></div>
     </div>
     <div id="modal-error"></div>
     <div class="modal-acciones">
@@ -576,7 +576,7 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
         <div class="sw"><input type="text" id="i_partida_txt" placeholder="Buscar…" autocomplete="off">
         <input type="hidden" id="i_partida"><ul class="dd" id="i_dd_partida"></ul></div></div>
       <div class="campo" style="grid-column:1/-1"><label>Justificación <span class="req">*</span></label>
-        <input type="text" id="i_justificacion" maxlength="150" placeholder="Ej: Publicidad digital en redes…" oninput="document.getElementById('i_cnt').textContent=this.value.length+\'/150\'"><span class="contador-chars" id="i_cnt">0</span>/150</div>
+        <input type="text" id="i_justificacion" maxlength="150" placeholder="Ej: Publicidad digital en redes…" oninput="document.getElementById('i_cnt').textContent=this.value.length+'/150'"><span class="contador-chars" id="i_cnt">0/150</span></div>
     </div>
     <div id="modal-invoice-error"></div>
     <div class="modal-acciones">
@@ -1419,29 +1419,30 @@ function renderListaConceptos(){
 function eliminarConcepto(i){conceptos.splice(i,1);renderListaConceptos();}
 
 // ══ AGREGAR FACTURAS XML (EN LOTE) ══
-// ══ CANDADO DE MES: en un mismo vale solo caben facturas emitidas en el mismo mes ══
+// ══ MESES: un vale con facturas de meses distintos sale en hojas separadas por mes (mismo folio, mismo total) ══
 const MESES_NOMBRE=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
 function mesClave(f){const m=String(f||"").match(/^(\d{4})-(\d{2})/);return m?m[1]+"-"+m[2]:"";}
 function mesTexto(k){const a=k.split("-");return MESES_NOMBRE[+a[1]-1]+" de "+a[0];}
 function mesDeConcepto(c){return mesClave(c.tipo==="cfdi"?(c.cfdi&&c.cfdi.fecha):c.fecha);}
 function mesBaseVale(){for(const c of conceptos){const k=mesDeConcepto(c);if(k)return k;}return "";}
-function leyendaMes(base,otro,que){
-  return 'En un mismo vale solo se aceptan facturas emitidas en el mismo mes. Este vale es de <strong>'+mesTexto(base)+'</strong> y '+(que||"esta factura")+' es de <strong>'+mesTexto(otro)+'</strong>. Las facturas de meses diferentes deben ir en vales diferentes.';
+function mesesDelVale(){return [...new Set(conceptos.map(mesDeConcepto).filter(Boolean))].sort();}
+function avisoMes(base,otro){
+  return 'Es de <strong>'+mesTexto(otro)+'</strong> y el vale es de <strong>'+mesTexto(base)+'</strong>. Se agrega normal: el vale saldrá en hojas separadas por mes, con el mismo folio y el mismo total.';
 }
-function leyendaMezcla(){
-  const meses=[...new Set(conceptos.map(mesDeConcepto).filter(Boolean))].sort();
-  if(meses.length<=1)return "";
-  return 'En un mismo vale solo se aceptan facturas emitidas en el mismo mes. Este vale mezcla facturas de <strong>'+meses.map(mesTexto).join("</strong>, <strong>")+'</strong>. Quita las de otro mes y hazlas en un vale diferente.';
+function avisoMesesVale(){
+  const m=mesesDelVale();
+  if(m.length<=1)return "";
+  return '📅 Este vale tiene facturas de <strong>'+m.map(mesTexto).join("</strong> y <strong>")+'</strong>. Saldrá en hojas separadas por mes, con el mismo folio y el mismo total.';
 }
-// Marca (en la lista de pendientes) las facturas que no son del mes del vale. El mes lo define el vale; si aún está vacío, la primera factura válida.
+// Marca en la lista de pendientes las facturas que no son del mes del vale (solo informativo)
 function revalidarMesesPendientes(){
   let base=mesBaseVale();
   pendientes.forEach(p=>{
-    p.errMes=null;
+    p.avisoMes=null;
     if(p.error||!p.cfdi||p.dupInterno||p.dupExistente)return;
     const k=mesClave(p.cfdi.fecha);if(!k)return;
     if(!base){base=k;return;}
-    if(k!==base)p.errMes=leyendaMes(base,k);
+    if(k!==base)p.avisoMes=avisoMes(base,k);
   });
 }
 let pendientes=[]; // [{id,nombre,cfdi,error,dupInterno,dupExistente}]
@@ -1524,17 +1525,13 @@ function renderPendientes(){
         '<div><div class="pendiente-nombre">✕ '+esc(p.nombre)+'</div><div class="pendiente-msg err">'+esc(p.error)+'</div></div>'+
         '<button class="btn-del" onclick="eliminarPendiente('+p.id+')">✕</button></div></div>';
     }
-    if(p.errMes){
-      return '<div class="pendiente-item err"><div class="pendiente-top">'+
-        '<div><div class="pendiente-nombre">✕ '+esc(p.cfdi.emisor.nombre)+'</div><div class="pendiente-detalle">Folio '+esc(folioMostrado(p.cfdi))+' · '+esc((p.cfdi.fecha||"").slice(0,10))+'</div><div class="pendiente-msg err">🔒 '+p.errMes+'</div></div>'+
-        '<button class="btn-del" onclick="eliminarPendiente('+p.id+')">✕</button></div></div>';
-    }
     const folio=folioMostrado(p.cfdi);
     let msg="";
     if(p.dupInterno)msg='<div class="pendiente-msg dup">⚠ Repetida dentro de estos mismos archivos.</div>';
     else if(p.dupExistente)msg='<div class="pendiente-msg dup">⚠ Ya está agregada en este vale.</div>';
     else if(p.spDup)msg='<div class="pendiente-msg err">🚨 Ya cobrada: registrada el '+esc(p.spDup.fecha)+' por '+esc(p.spDup.quien)+' (vale '+esc(p.spDup.vale)+').</div>';
     if(p.avisos)msg+=p.avisos.map(a=>'<div class="pendiente-msg dup">⚠ '+a+'</div>').join("");
+    if(p.avisoMes)msg+='<div class="pendiente-msg dup">📅 '+p.avisoMes+'</div>';
     const clase=(p.dupInterno||p.dupExistente||p.spDup)?"pendiente-item dup":"pendiente-item";
     return '<div class="'+clase+'"><div class="pendiente-top">'+
       '<div><div class="pendiente-nombre">'+esc(p.cfdi.emisor.nombre)+'</div>'+
@@ -1543,7 +1540,7 @@ function renderPendientes(){
       '<button class="btn-del" onclick="eliminarPendiente('+p.id+')">✕</button></div></div></div>';
   }).join("");
 
-  const validas=pendientes.filter(p=>!p.error&&!p.errMes&&!p.dupInterno&&!p.dupExistente);
+  const validas=pendientes.filter(p=>!p.error&&!p.dupInterno&&!p.dupExistente);
   const btn=document.getElementById("btnAgregarPendientes");
   if(validas.length){
     acciones.style.display="block";
@@ -1557,7 +1554,7 @@ function renderPendientes(){
 }
 
 function agregarPendientesAlVale(){
-  const validas=pendientes.filter(p=>!p.error&&!p.errMes&&!p.dupInterno&&!p.dupExistente);
+  const validas=pendientes.filter(p=>!p.error&&!p.dupInterno&&!p.dupExistente);
   if(!validas.length)return;
   const espacio=MAX_CONCEPTOS-conceptos.length;
   if(espacio<=0){document.getElementById("zonaError1").innerHTML='<div class="alerta alerta-error">Máximo '+MAX_CONCEPTOS+' conceptos por vale. Ya lo alcanzaste.</div>';return;}
@@ -1644,7 +1641,7 @@ async function guardarMaterial(){
       try{cfdi=parseCFDI(a.texto);cfdi._xml=a.texto;}catch(e){errores.push(esc(a.nombre)+": "+esc(e.message));continue;}
       if(cfdi.uuid&&conceptos.some(c=>c.cfdi&&c.cfdi.uuid===cfdi.uuid)){errores.push(esc(a.nombre)+": ya está en el vale.");continue;}
       if(cfdi.uuid&&agregados.includes(cfdi.uuid)){errores.push(esc(a.nombre)+": repetida en esta carga.");continue;}
-      {const bm=mesBaseVale(),km=mesClave(cfdi.fecha);if(bm&&km&&km!==bm){errores.push(esc(a.nombre)+": "+leyendaMes(bm,km));continue;}}
+      {const bm=mesBaseVale(),km=mesClave(cfdi.fecha);if(bm&&km&&km!==bm)avisos.push(esc(a.nombre)+": "+avisoMes(bm,km));}
       // Misma revisión antifraude que las facturas normales (si SharePoint está activo)
       if(typeof spDisponible==="function"&&spDisponible()){
         try{
@@ -1827,7 +1824,7 @@ function abrirModalInvoice(){
   document.getElementById("i_proveedor").value="";
   document.getElementById("i_referencia").value="";
   document.getElementById("i_partida").value="";document.getElementById("i_partida_txt").value="";
-  document.getElementById("i_justificacion").value="";document.getElementById("i_cnt").textContent="0";
+  document.getElementById("i_justificacion").value="";document.getElementById("i_cnt").textContent="0/150";
   document.getElementById("modal-invoice-error").innerHTML="";
   document.getElementById("modal-invoice").classList.add("open");
 }
@@ -1847,7 +1844,6 @@ function guardarInvoice(){
   if(!partida)return err("Selecciona la partida presupuestada.");
   if(!just)return err("Escribe la justificación.");
   if(conceptos.length>=MAX_CONCEPTOS)return err("Máximo "+MAX_CONCEPTOS+" conceptos por vale.");
-  {const bm=mesBaseVale(),km=mesClave(fecha);if(bm&&km&&km!==bm)return err(leyendaMes(bm,km));}
   conceptos.push({tipo:"invoice",fecha,montoOriginal,monto:montoPesos,proveedor,referencia,tipoGasto:"",partida,justificacion:just});
   const volver=volverAPaso2;
   cerrarModalInvoice();
@@ -1860,7 +1856,7 @@ function abrirModalSinCFDI(){
   document.getElementById("m_fecha").value=new Date().toISOString().slice(0,10);
   document.getElementById("m_monto").value="";
   document.getElementById("m_partida").value="";document.getElementById("m_partida_txt").value="";
-  document.getElementById("m_justificacion").value="";document.getElementById("m_cnt").textContent="0";
+  document.getElementById("m_justificacion").value="";document.getElementById("m_cnt").textContent="0/150";
   document.getElementById("modal-error").innerHTML="";
   document.getElementById("modal-sincfdi").classList.add("open");
 }
@@ -1876,7 +1872,6 @@ function guardarSinCFDI(){
   if(!partida)return err("Selecciona la partida presupuestada.");
   if(!just)return err("Escribe la justificación.");
   if(conceptos.length>=MAX_CONCEPTOS)return err("Máximo "+MAX_CONCEPTOS+" conceptos por vale.");
-  {const bm=mesBaseVale(),km=mesClave(fecha);if(bm&&km&&km!==bm)return err(leyendaMes(bm,km,"este gasto"));}
   conceptos.push({tipo:"manual",fecha,monto,tipoGasto:"Gasto sin comprobante fiscal",partida,justificacion:just});
   const volver=volverAPaso2;
   cerrarModalSinCFDI();
@@ -1887,10 +1882,10 @@ function guardarSinCFDI(){
 // ══ PASO 2 ══
 function irPaso2(){
   if(!conceptos.length){document.getElementById("zonaError1").innerHTML='<div class="alerta alerta-error">Agrega al menos un concepto.</div>';return}
-  {const lm=leyendaMezcla();if(lm){document.getElementById("zonaError1").innerHTML='<div class="alerta alerta-error">🔒 '+lm+'</div>';return}}
   const total=conceptos.reduce((s,c)=>s+montoConcepto(c),0);
   document.getElementById("resumenConceptos2").innerHTML='<h2>'+conceptos.length+' concepto'+(conceptos.length>1?"s":"")+' · Total: '+mxn(total)+'</h2>'+
-    conceptos.map((c,i)=>'<div style="font-size:12px;color:#57534e;padding:3px 0">#'+(i+1)+' '+(c.esMaterial?"🧱":c.tipo==="cfdi"?"📄":c.tipo==="invoice"?"🌐":"✏️")+' <strong>'+esc(nombreConcepto(c))+'</strong> · '+mxn(montoConcepto(c))+'</div>').join("");
+    conceptos.map((c,i)=>'<div style="font-size:12px;color:#57534e;padding:3px 0">#'+(i+1)+' '+(c.esMaterial?"🧱":c.tipo==="cfdi"?"📄":c.tipo==="invoice"?"🌐":"✏️")+' <strong>'+esc(nombreConcepto(c))+'</strong> · '+mxn(montoConcepto(c))+'</div>').join("")+
+    (avisoMesesVale()?'<div class="alerta alerta-ojo" style="margin:8px 0 0">'+avisoMesesVale()+'</div>':"");
   renderResponsableField();
   renderFilasGastos();
   setStep(2);
@@ -1961,7 +1956,6 @@ function getFD(){return{
   tipodoc:document.getElementById("f_tipodoc").value||"COMPROBACION DE GASTOS"};}
 
 function validarPaso2(){
-  {const lm=leyendaMezcla();if(lm){document.getElementById("zonaError2").innerHTML='<div class="alerta alerta-error">🔒 '+lm+'</div>';return false}}
   const fd=getFD();
   const g=[["responsable","Responsable"],["empresa","Empresa"],["tipodoc","Tipo de documento"],["area","Área"],["oficina","Oficinas"],["beneficiario","Beneficiario"],["gerente","Gerente"]];
   for(const[k,lbl]of g)if(!fd[k]){document.getElementById("zonaError2").innerHTML='<div class="alerta alerta-error">Llena el campo: <strong>'+lbl+'</strong></div>';return false}
@@ -2071,7 +2065,7 @@ function generarVale(){
     '</tr><tr></tr></thead>';
 
   // ── 5. Construir una fila de datos ──
-  function filaDatos(i){
+  function filaDatos(i,num){
     const c=conceptos[i], d=dets[i];
     const esManual=c.tipo!=="cfdi";
     const ppd=c.tipo==="cfdi"&&esPPD(c.cfdi);
@@ -2086,7 +2080,7 @@ function generarVale(){
       folio="Sin CFDI";
       fechaF=c.fecha?new Date(c.fecha+"T12:00:00").toLocaleDateString("es-MX"):"";
     }
-    let celdas='<td>'+(i+1)+'</td>'+
+    let celdas='<td>'+(num||(i+1))+'</td>'+
       '<td>'+fechaF+'</td>'+
       '<td class="fol">'+esc(folio)+(ppd?'<br><span class="ppd-tag">PPD</span>':'')+'</td>'+
       '<td class="izq tg">'+esc(c.tipoGasto)+'</td>'+
@@ -2112,22 +2106,30 @@ function generarVale(){
   }
 
   // ── 6. Fila de SUMA (solo en la última hoja) ──
-  let sumaRow='<tr class="vtotal"><td colspan="7" style="text-align:right;font-size:8.5pt;font-weight:700">SUMA:</td>';
-  if(showSin) sumaRow+='<td class="der">'+dash(sSin)+'</td>';
-  if(showInvoice) sumaRow+='<td class="der"></td>';
-  sumaRow+='<td class="der">'+mxn(sSub)+'</td>'+
-    '<td class="der">'+dash(sB0)+'</td>'+
-    '<td class="der">'+dash(sB16)+'</td>'+
-    '<td class="der">'+dash(sIVA)+'</td>';
-  for(const col of colsImp) sumaRow+='<td class="der">'+dash(col.suma)+'</td>';
-  for(const col of colsRet) sumaRow+='<td class="der">'+dash(col.suma)+'</td>';
-  sumaRow+='<td class="col-s">'+mxn(sTotal)+'</td><td class="col-t"></td></tr>';
+  function sumaRowDe(lista,etq){
+    const sm=k=>lista.reduce((a,i)=>a+(dets[i][k]||0),0);
+    const gSin=lista.reduce((a,i)=>a+dets[i]._sinComp,0),gSub=lista.reduce((a,i)=>a+dets[i]._subtotalMostrado,0);
+    const gB0=lista.reduce((a,i)=>a+dets[i].base0+dets[i].baseOtra,0),gTot=lista.reduce((a,i)=>a+dets[i]._total,0);
+    let r='<tr class="vtotal"><td colspan="7" style="text-align:right;font-size:8.5pt;font-weight:700">'+etq+'</td>';
+    if(showSin) r+='<td class="der">'+dash(gSin)+'</td>';
+    if(showInvoice) r+='<td class="der"></td>';
+    r+='<td class="der">'+mxn(gSub)+'</td>'+
+      '<td class="der">'+dash(gB0)+'</td>'+
+      '<td class="der">'+dash(sm("base16"))+'</td>'+
+      '<td class="der">'+dash(sm("ivaAcred"))+'</td>';
+    for(const col of colsImp) r+='<td class="der">'+dash(sm(col.key))+'</td>';
+    for(const col of colsRet) r+='<td class="der">'+dash(sm(col.key))+'</td>';
+    r+='<td class="col-s">'+mxn(gTot)+'</td><td class="col-t"></td></tr>';
+    return r;
+  }
+  const todosIdx=conceptos.map((_,i)=>i);
+  const sumaRow=sumaRowDe(todosIdx,"SUMA:");
 
   const letra=numALetra(sTotal);
 
   // ── 7. Encabezado del vale (se repite en cada hoja) ──
-  function encabezadoHoja(nHoja,totalHojas){
-    const indicador=totalHojas>1?'<span style="font-weight:700;padding-left:4mm;font-size:7.5pt">HOJA '+nHoja+' DE '+totalHojas+'</span>':'';
+  function encabezadoHoja(nHoja,totalHojas,mesEtq){
+    const indicador=totalHojas>1?'<span style="font-weight:700;padding-left:4mm;font-size:7.5pt">HOJA '+nHoja+' DE '+totalHojas+(mesEtq?' · '+esc(mesEtq):'')+'</span>':'';
     return '<div class="vh"><div class="vh-logo">'+logoImg+'</div>'+
       '<div class="vh-centro"><div class="vh-empresa">'+esc(fd.empresa)+'</div><div class="vh-tipo">'+esc(fd.tipodoc)+'</div></div>'+
       '<div class="vh-logo">'+logoImg+'</div></div>'+
@@ -2146,10 +2148,11 @@ function generarVale(){
   }
 
   // ── 8. Bloque de cheque + firmas (solo en la última hoja) ──
-  const bloqueFinal=
+  function bloqueFinalDe(lista,etqTotal){
+  return ''+
     '<div class="vcheque"><div class="vcheque-label">ELABORAR&nbsp; CHEQUE A<br>NOMBRE DE:</div>'+
     '<div class="vcheque-nombre">'+esc(fd.beneficiario)+'</div>'+
-    '<div class="vcheque-totales"><div class="vcheque-suma-row"><span>TOTAL:</span><span class="vcheque-suma-val">'+mxn(sTotal)+'</span></div>'+
+    '<div class="vcheque-totales"><div class="vcheque-suma-row"><span>'+etqTotal+'</span><span class="vcheque-suma-val">'+mxn(sTotal)+'</span></div>'+
     '<div class="vletra-box">'+letra+'</div></div></div>'+
     '<div class="vsep-firmas"></div><div class="vfirmas-titulo">FIRMAS DE AUTORIZACIÓN</div>'+
     '<div class="vfirmas">'+
@@ -2159,7 +2162,9 @@ function generarVale(){
     '<div class="vfirma"><div class="vfirma-label">AUTORIZÓ</div><div class="vfirma-linea"><div class="vfirma-nombre">ING. GUSTAVO CARRERA FALCON</div><div class="vfirma-cargo">DIRECTOR GENERAL</div></div></div>'+
     '</div>'+
     '<div style="margin-top:3mm;font-size:4.5pt;color:#888;border-top:.5px solid #ccc;padding-top:1mm">'+
-    conceptos.filter(c=>c.tipo==="cfdi").map(c=>'UUID: '+esc(c.cfdi.uuid||"—")+' · RFC: '+esc(c.cfdi.emisor.rfc||"—")).join(" &nbsp;|&nbsp; ")+'</div>';
+    lista.map(i=>conceptos[i]).filter(c=>c.tipo==="cfdi").map(c=>'UUID: '+esc(c.cfdi.uuid||"—")+' · RFC: '+esc(c.cfdi.emisor.rfc||"—")).join(" &nbsp;|&nbsp; ")+'</div>';
+  }
+  const bloqueFinal=bloqueFinalDe(todosIdx,"TOTAL:");
 
   // ── 9. Armar las hojas (PAGINACIÓN DINÁMICA POR MEDICIÓN REAL) ──
   // No hay número fijo de conceptos por hoja: se mide la altura real de cada fila
@@ -2200,104 +2205,122 @@ function generarVale(){
   const dispNormal=altoContenido-headH-theadH;               // hoja intermedia
   const dispUltima=altoContenido-headH-theadH-sumaH-footH;   // hoja final (reserva totales+firmas)
 
-  // 9.3 Repartir conceptos en hojas según lo que realmente quepa
-  const paginas=[];
-  let idx=0;
-  while(idx<conceptos.length){
-    const pagina=[];let acum=0;
-    while(idx<conceptos.length){
-      const hFila=alturas[idx];
-      if(pagina.length&&acum+hFila>dispNormal)break;
-      pagina.push(idx);acum+=hFila;idx++;
+  // 9.3 Repartir los conceptos de UN grupo (un mes) en hojas según lo que realmente quepa
+  function paginar(lista){
+    const paginas=[];
+    let idx=0;
+    while(idx<lista.length){
+      const pagina=[];let acum=0;
+      while(idx<lista.length){
+        const hFila=alturas[lista[idx]];
+        if(pagina.length&&acum+hFila>dispNormal)break;
+        pagina.push(lista[idx]);acum+=hFila;idx++;
+      }
+      paginas.push(pagina);
     }
-    paginas.push(pagina);
-  }
-  // La última hoja debe además dejar sitio al total y las firmas.
-  // Se mueve el MÍNIMO de conceptos necesarios: las hojas previas quedan llenas
-  // y solo el sobrante pasa a la hoja siguiente.
-  let guardia=0;
-  while(guardia++<50){
-    const ult=paginas[paginas.length-1];
-    let accU=ult.reduce((a,i)=>a+alturas[i],0);
-    if(accU<=dispUltima)break;
-    const nueva=[];let accN=0;
-    while(ult.length>1){
-      const m=ult[ult.length-1];
-      if(nueva.length&&accN+alturas[m]>dispUltima)break;
-      ult.pop();nueva.unshift(m);accN+=alturas[m];accU-=alturas[m];
-      if(accU<=dispNormal)break;   // la hoja previa ya cabe como hoja intermedia
+    // La última hoja debe además dejar sitio al total y las firmas.
+    // Se mueve el MÍNIMO de conceptos necesarios: las hojas previas quedan llenas
+    // y solo el sobrante pasa a la hoja siguiente.
+    let guardia=0;
+    while(guardia++<50){
+      const ult=paginas[paginas.length-1];
+      let accU=ult.reduce((a,i)=>a+alturas[i],0);
+      if(accU<=dispUltima)break;
+      const nueva=[];let accN=0;
+      while(ult.length>1){
+        const m=ult[ult.length-1];
+        if(nueva.length&&accN+alturas[m]>dispUltima)break;
+        ult.pop();nueva.unshift(m);accN+=alturas[m];accU-=alturas[m];
+        if(accU<=dispNormal)break;   // la hoja previa ya cabe como hoja intermedia
+      }
+      if(!nueva.length)break;
+      paginas.push(nueva);
     }
-    if(!nueva.length)break;
-    paginas.push(nueva);
+    // 9.3b Reequilibrar: ya sabemos cuántas hojas hacen falta. En vez de llenar
+    // al máximo las primeras y dejar casi vacía la última (lo que se ve raro,
+    // ej. 11 conceptos + 1 solito), se reparten de forma pareja según el espacio
+    // real de cada hoja (la última siempre tiene menos por las firmas y el total).
+    if(paginas.length>1){
+      const orden=paginas.flat();
+      const nPag=paginas.length;
+      const budgetHoja=idx2=>idx2===nPag-1?dispUltima:dispNormal;
+      const totalBudget=Array.from({length:nPag},(_,i)=>budgetHoja(i)).reduce((a,b)=>a+b,0);
+      const totalContenido=orden.reduce((a,i)=>a+alturas[i],0);
+      const razon=totalContenido/totalBudget; // qué tan llena debe quedar cada hoja, en proporción
+      const nuevas=[];
+      let pos=0;
+      for(let pg=0;pg<nPag;pg++){
+        const esUltimaPg=pg===nPag-1;
+        const tope=budgetHoja(pg);
+        const objetivo=tope*razon;
+        const pagina=[];let acc=0;
+        while(pos<orden.length){
+          const alt=alturas[orden[pos]];
+          if(pagina.length&&acc+alt>tope)break;                 // nunca exceder el espacio real de la hoja
+          if(!esUltimaPg&&pagina.length&&acc>=objetivo)break;    // hojas intermedias: parar en el reparto parejo
+          pagina.push(orden[pos]);acc+=alt;pos++;
+        }
+        nuevas.push(pagina);
+      }
+      // Solo aplicar el reequilibrio si quedaron acomodados todos los conceptos
+      // y la última hoja sigue cabiendo en su espacio real (nunca arriesgar el total/firmas)
+      const todosColocados=nuevas.flat().length===orden.length;
+      const ultimaCabe=nuevas[nuevas.length-1].reduce((a,i)=>a+alturas[i],0)<=dispUltima;
+      if(todosColocados&&ultimaCabe&&nuevas.every(p=>p.length>0)){
+        paginas.length=0;
+        nuevas.forEach(p=>paginas.push(p));
+      }
+    }
+    return paginas;
   }
 
-  // ── 9.3b Reequilibrar: ya sabemos cuántas hojas hacen falta. En vez de llenar
-  // al máximo las primeras y dejar casi vacía la última (lo que se ve raro,
-  // ej. 11 conceptos + 1 solito), se reparten de forma pareja según el espacio
-  // real de cada hoja (la última siempre tiene menos por las firmas y el total).
-  if(paginas.length>1){
-    const orden=paginas.flat();
-    const nPag=paginas.length;
-    const budgetHoja=idx2=>idx2===nPag-1?dispUltima:dispNormal;
-    const totalBudget=Array.from({length:nPag},(_,i)=>budgetHoja(i)).reduce((a,b)=>a+b,0);
-    const totalContenido=orden.reduce((a,i)=>a+alturas[i],0);
-    const razon=totalContenido/totalBudget; // qué tan llena debe quedar cada hoja, en proporción
-    const nuevas=[];
-    let pos=0;
-    for(let pg=0;pg<nPag;pg++){
-      const esUltimaPg=pg===nPag-1;
-      const tope=budgetHoja(pg);
-      const objetivo=tope*razon;
-      const pagina=[];let acc=0;
-      while(pos<orden.length){
-        const alt=alturas[orden[pos]];
-        if(pagina.length&&acc+alt>tope)break;                 // nunca exceder el espacio real de la hoja
-        if(!esUltimaPg&&pagina.length&&acc>=objetivo)break;    // hojas intermedias: parar en el reparto parejo
-        pagina.push(orden[pos]);acc+=alt;pos++;
-      }
-      nuevas.push(pagina);
-    }
-    // Solo aplicar el reequilibrio si quedaron acomodados todos los conceptos
-    // y la última hoja sigue cabiendo en su espacio real (nunca arriesgar el total/firmas)
-    const todosColocados=nuevas.flat().length===orden.length;
-    const ultimaCabe=nuevas[nuevas.length-1].reduce((a,i)=>a+alturas[i],0)<=dispUltima;
-    if(todosColocados&&ultimaCabe&&nuevas.every(p=>p.length>0)){
-      paginas.length=0;
-      nuevas.forEach(p=>paginas.push(p));
-    }
-  }
+  // 9.3c Separar por MES de la factura: cada mes sale en su(s) propia(s) hoja(s), con el mismo folio,
+  // el mismo encabezado y el mismo bloque de cheque/firmas (con el TOTAL GENERAL del reembolso).
+  // Si todo es del mismo mes (lo normal) queda exactamente como siempre: un solo grupo.
+  const gruposMap=new Map();
+  conceptos.forEach((c,i)=>{const k=mesDeConcepto(c);if(!gruposMap.has(k))gruposMap.set(k,[]);gruposMap.get(k).push(i);});
+  const grupos=[...gruposMap.entries()].sort((x,y)=>(x[0]===""?1:0)-(y[0]===""?1:0)||(x[0]<y[0]?-1:x[0]>y[0]?1:0)).map(([mes,idxs])=>({mes,idxs,paginas:paginar(idxs)}));
+  const multiMes=grupos.length>1;
+  const totalHojas=grupos.reduce((a,g)=>a+g.paginas.length,0);
 
   // 9.4 Dibujar cada hoja, rellenando el espacio sobrante
-  const totalHojas=paginas.length;
   let htmlHojas="";
-  for(let hoja=0;hoja<totalHojas;hoja++){
-    const esUltima=(hoja===totalHojas-1);
-    const disp=esUltima?dispUltima:dispNormal;
-    const indices=paginas[hoja];
-    let filasHTML="";
-    let usado=0;
-    for(const i of indices){filasHTML+=filaDatos(i);usado+=alturas[i];}
-    // Solo la ÚLTIMA hoja se rellena con filas vacías (da el aspecto de formato completo).
-    // Las hojas intermedias NO llevan relleno: la hoja siguiente trae más conceptos reales,
-    // y si aquí se agregaran vacías, sus números chocarían con los de esa hoja siguiente.
-    if(esUltima){
-      let numeroFila=indices.length?indices[indices.length-1]+2:1;
-      let libre=disp-usado;
-      const vacias=Math.max(0,Math.floor(libre/altoFilaPx));
-      for(let v=0;v<vacias;v++){filasHTML+=filaVacia(numeroFila++);}
-    }
-    htmlHojas+='<div class="vale-hoja'+(esUltima?"":" salto-hoja")+'">'+
-      encabezadoHoja(hoja+1,totalHojas)+
-      '<table class="vtable">'+colgroup+thead+'<tbody>'+filasHTML+(esUltima?sumaRow:"")+'</tbody></table>'+
-      (esUltima?bloqueFinal:"")+
-      '</div>';
-  }
+  let nHojaGlobal=0;
+  grupos.forEach((g,gi)=>{
+    const etqMes=multiMes&&g.mes?mesTexto(g.mes).toUpperCase():"";
+    const sumaG=multiMes?sumaRowDe(g.idxs,"SUMA"+(etqMes?" "+esc(etqMes):"")+":"):sumaRow;
+    const bloqueG=bloqueFinalDe(g.idxs,multiMes?"TOTAL GENERAL:":"TOTAL:");
+    let numero=0;
+    g.paginas.forEach((indices,hoja)=>{
+      nHojaGlobal++;
+      const esUltima=(hoja===g.paginas.length-1);      // última hoja de ESTE mes: lleva suma, cheque y firmas
+      const esUltimaGlobal=(nHojaGlobal===totalHojas);
+      const disp=esUltima?dispUltima:dispNormal;
+      let filasHTML="";
+      let usado=0;
+      for(const i of indices){numero++;filasHTML+=filaDatos(i,multiMes?numero:undefined);usado+=alturas[i];}
+      // Solo la ÚLTIMA hoja de cada mes se rellena con filas vacías (aspecto de formato completo).
+      // Las intermedias NO llevan relleno: la hoja siguiente trae más conceptos reales,
+      // y si aquí se agregaran vacías, sus números chocarían con los de esa hoja siguiente.
+      if(esUltima){
+        let numeroFila=multiMes?numero+1:(indices.length?indices[indices.length-1]+2:1);
+        let libre=disp-usado;
+        const vacias=Math.max(0,Math.floor(libre/altoFilaPx));
+        for(let v=0;v<vacias;v++){filasHTML+=filaVacia(numeroFila++);}
+      }
+      htmlHojas+='<div class="vale-hoja'+(esUltimaGlobal?"":" salto-hoja")+'">'+
+        encabezadoHoja(nHojaGlobal,totalHojas,etqMes)+
+        '<table class="vtable">'+colgroup+thead+'<tbody>'+filasHTML+(esUltima?sumaG:"")+'</tbody></table>'+
+        (esUltima?bloqueG:"")+
+        '</div>';
+    });
+  });
   document.getElementById("vale").innerHTML=htmlHojas;
 
   document.getElementById("vale-container").style.display="block";
   const cnt=conceptos.length;
   document.getElementById("alerta-paso3").innerHTML='✓ <strong>Vale generado.</strong> '+cnt+' concepto'+(cnt>1?"s":"")+
-    (totalHojas>1?' en '+totalHojas+' hojas':'')+' · Total: <strong>'+mxn(sTotal)+'</strong>. Revisa abajo y descárgalo.';
+    (totalHojas>1?' en '+totalHojas+' hojas'+(multiMes?' (separadas por mes)':''):'')+' · Total: <strong>'+mxn(sTotal)+'</strong>. Revisa abajo y descárgalo.';
   // Solo se registran en el sistema antifraude las facturas que ese vale todavía no había registrado
   const cfdis=soloVer?[]:conceptos.filter(c=>c.tipo==="cfdi"&&!_uuidsRegistrados.has(c.cfdi.uuid));
   if(spDisponible()&&cfdis.length){
