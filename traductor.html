@@ -1419,6 +1419,31 @@ function renderListaConceptos(){
 function eliminarConcepto(i){conceptos.splice(i,1);renderListaConceptos();}
 
 // ══ AGREGAR FACTURAS XML (EN LOTE) ══
+// ══ CANDADO DE MES: en un mismo vale solo caben facturas emitidas en el mismo mes ══
+const MESES_NOMBRE=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+function mesClave(f){const m=String(f||"").match(/^(\d{4})-(\d{2})/);return m?m[1]+"-"+m[2]:"";}
+function mesTexto(k){const a=k.split("-");return MESES_NOMBRE[+a[1]-1]+" de "+a[0];}
+function mesDeConcepto(c){return mesClave(c.tipo==="cfdi"?(c.cfdi&&c.cfdi.fecha):c.fecha);}
+function mesBaseVale(){for(const c of conceptos){const k=mesDeConcepto(c);if(k)return k;}return "";}
+function leyendaMes(base,otro,que){
+  return 'En un mismo vale solo se aceptan facturas emitidas en el mismo mes. Este vale es de <strong>'+mesTexto(base)+'</strong> y '+(que||"esta factura")+' es de <strong>'+mesTexto(otro)+'</strong>. Las facturas de meses diferentes deben ir en vales diferentes.';
+}
+function leyendaMezcla(){
+  const meses=[...new Set(conceptos.map(mesDeConcepto).filter(Boolean))].sort();
+  if(meses.length<=1)return "";
+  return 'En un mismo vale solo se aceptan facturas emitidas en el mismo mes. Este vale mezcla facturas de <strong>'+meses.map(mesTexto).join("</strong>, <strong>")+'</strong>. Quita las de otro mes y hazlas en un vale diferente.';
+}
+// Marca (en la lista de pendientes) las facturas que no son del mes del vale. El mes lo define el vale; si aún está vacío, la primera factura válida.
+function revalidarMesesPendientes(){
+  let base=mesBaseVale();
+  pendientes.forEach(p=>{
+    p.errMes=null;
+    if(p.error||!p.cfdi||p.dupInterno||p.dupExistente)return;
+    const k=mesClave(p.cfdi.fecha);if(!k)return;
+    if(!base){base=k;return;}
+    if(k!==base)p.errMes=leyendaMes(base,k);
+  });
+}
 let pendientes=[]; // [{id,nombre,cfdi,error,dupInterno,dupExistente}]
 let _pendId=0;
 
@@ -1448,6 +1473,7 @@ function leerArchivos(fileList){
       if(res.ok)procesarUno(res.texto,res.nombre);
       else pendientes.push({id:++_pendId,nombre:res.nombre,cfdi:null,error:"No se pudo leer el archivo."});
     }
+    revalidarMesesPendientes();
     renderPendientes();
   }
 }
@@ -1483,6 +1509,7 @@ function procesarUno(txt,nombre){
 
 function eliminarPendiente(id){
   pendientes=pendientes.filter(p=>p.id!==id);
+  revalidarMesesPendientes();
   renderPendientes();
 }
 
@@ -1495,6 +1522,11 @@ function renderPendientes(){
     if(p.error){
       return '<div class="pendiente-item err"><div class="pendiente-top">'+
         '<div><div class="pendiente-nombre">✕ '+esc(p.nombre)+'</div><div class="pendiente-msg err">'+esc(p.error)+'</div></div>'+
+        '<button class="btn-del" onclick="eliminarPendiente('+p.id+')">✕</button></div></div>';
+    }
+    if(p.errMes){
+      return '<div class="pendiente-item err"><div class="pendiente-top">'+
+        '<div><div class="pendiente-nombre">✕ '+esc(p.cfdi.emisor.nombre)+'</div><div class="pendiente-detalle">Folio '+esc(folioMostrado(p.cfdi))+' · '+esc((p.cfdi.fecha||"").slice(0,10))+'</div><div class="pendiente-msg err">🔒 '+p.errMes+'</div></div>'+
         '<button class="btn-del" onclick="eliminarPendiente('+p.id+')">✕</button></div></div>';
     }
     const folio=folioMostrado(p.cfdi);
@@ -1511,7 +1543,7 @@ function renderPendientes(){
       '<button class="btn-del" onclick="eliminarPendiente('+p.id+')">✕</button></div></div></div>';
   }).join("");
 
-  const validas=pendientes.filter(p=>!p.error&&!p.dupInterno&&!p.dupExistente);
+  const validas=pendientes.filter(p=>!p.error&&!p.errMes&&!p.dupInterno&&!p.dupExistente);
   const btn=document.getElementById("btnAgregarPendientes");
   if(validas.length){
     acciones.style.display="block";
@@ -1525,7 +1557,7 @@ function renderPendientes(){
 }
 
 function agregarPendientesAlVale(){
-  const validas=pendientes.filter(p=>!p.error&&!p.dupInterno&&!p.dupExistente);
+  const validas=pendientes.filter(p=>!p.error&&!p.errMes&&!p.dupInterno&&!p.dupExistente);
   if(!validas.length)return;
   const espacio=MAX_CONCEPTOS-conceptos.length;
   if(espacio<=0){document.getElementById("zonaError1").innerHTML='<div class="alerta alerta-error">Máximo '+MAX_CONCEPTOS+' conceptos por vale. Ya lo alcanzaste.</div>';return;}
@@ -1612,6 +1644,7 @@ async function guardarMaterial(){
       try{cfdi=parseCFDI(a.texto);cfdi._xml=a.texto;}catch(e){errores.push(esc(a.nombre)+": "+esc(e.message));continue;}
       if(cfdi.uuid&&conceptos.some(c=>c.cfdi&&c.cfdi.uuid===cfdi.uuid)){errores.push(esc(a.nombre)+": ya está en el vale.");continue;}
       if(cfdi.uuid&&agregados.includes(cfdi.uuid)){errores.push(esc(a.nombre)+": repetida en esta carga.");continue;}
+      {const bm=mesBaseVale(),km=mesClave(cfdi.fecha);if(bm&&km&&km!==bm){errores.push(esc(a.nombre)+": "+leyendaMes(bm,km));continue;}}
       // Misma revisión antifraude que las facturas normales (si SharePoint está activo)
       if(typeof spDisponible==="function"&&spDisponible()){
         try{
@@ -1814,6 +1847,7 @@ function guardarInvoice(){
   if(!partida)return err("Selecciona la partida presupuestada.");
   if(!just)return err("Escribe la justificación.");
   if(conceptos.length>=MAX_CONCEPTOS)return err("Máximo "+MAX_CONCEPTOS+" conceptos por vale.");
+  {const bm=mesBaseVale(),km=mesClave(fecha);if(bm&&km&&km!==bm)return err(leyendaMes(bm,km));}
   conceptos.push({tipo:"invoice",fecha,montoOriginal,monto:montoPesos,proveedor,referencia,tipoGasto:"",partida,justificacion:just});
   const volver=volverAPaso2;
   cerrarModalInvoice();
@@ -1842,6 +1876,7 @@ function guardarSinCFDI(){
   if(!partida)return err("Selecciona la partida presupuestada.");
   if(!just)return err("Escribe la justificación.");
   if(conceptos.length>=MAX_CONCEPTOS)return err("Máximo "+MAX_CONCEPTOS+" conceptos por vale.");
+  {const bm=mesBaseVale(),km=mesClave(fecha);if(bm&&km&&km!==bm)return err(leyendaMes(bm,km,"este gasto"));}
   conceptos.push({tipo:"manual",fecha,monto,tipoGasto:"Gasto sin comprobante fiscal",partida,justificacion:just});
   const volver=volverAPaso2;
   cerrarModalSinCFDI();
@@ -1852,6 +1887,7 @@ function guardarSinCFDI(){
 // ══ PASO 2 ══
 function irPaso2(){
   if(!conceptos.length){document.getElementById("zonaError1").innerHTML='<div class="alerta alerta-error">Agrega al menos un concepto.</div>';return}
+  {const lm=leyendaMezcla();if(lm){document.getElementById("zonaError1").innerHTML='<div class="alerta alerta-error">🔒 '+lm+'</div>';return}}
   const total=conceptos.reduce((s,c)=>s+montoConcepto(c),0);
   document.getElementById("resumenConceptos2").innerHTML='<h2>'+conceptos.length+' concepto'+(conceptos.length>1?"s":"")+' · Total: '+mxn(total)+'</h2>'+
     conceptos.map((c,i)=>'<div style="font-size:12px;color:#57534e;padding:3px 0">#'+(i+1)+' '+(c.esMaterial?"🧱":c.tipo==="cfdi"?"📄":c.tipo==="invoice"?"🌐":"✏️")+' <strong>'+esc(nombreConcepto(c))+'</strong> · '+mxn(montoConcepto(c))+'</div>').join("");
@@ -1925,6 +1961,7 @@ function getFD(){return{
   tipodoc:document.getElementById("f_tipodoc").value||"COMPROBACION DE GASTOS"};}
 
 function validarPaso2(){
+  {const lm=leyendaMezcla();if(lm){document.getElementById("zonaError2").innerHTML='<div class="alerta alerta-error">🔒 '+lm+'</div>';return false}}
   const fd=getFD();
   const g=[["responsable","Responsable"],["empresa","Empresa"],["tipodoc","Tipo de documento"],["area","Área"],["oficina","Oficinas"],["beneficiario","Beneficiario"],["gerente","Gerente"]];
   for(const[k,lbl]of g)if(!fd[k]){document.getElementById("zonaError2").innerHTML='<div class="alerta alerta-error">Llena el campo: <strong>'+lbl+'</strong></div>';return false}
