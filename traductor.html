@@ -565,6 +565,13 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
       <p class="nombre-arch" id="inv-nombre-arch"></p>
     </div>
     <div id="inv-leyendo" style="display:none;font-size:12px;color:var(--gris);margin-bottom:10px">⏳ Leyendo el PDF…</div>
+    <div class="material-ask" id="inv-obra-ask">
+      <span>¿Este invoice es <strong>de obra</strong>?</span>
+      <div class="material-ask-btns">
+        <button type="button" class="mini-btn" id="inv-obra-si">Sí</button>
+        <button type="button" class="mini-btn activo" id="inv-obra-no">No</button>
+      </div>
+    </div>
     <div class="grid2">
       <div class="campo"><label>Fecha <span class="req">*</span></label><input type="date" id="i_fecha"></div>
       <div class="campo"><label>Monto en la moneda del documento</label><input type="text" id="i_monto" placeholder="0.00"></div>
@@ -572,9 +579,17 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
       <div class="campo"><label>Proveedor <span class="req">*</span></label><input type="text" id="i_proveedor" placeholder="Ej: Meta, Railway…"></div>
       <div class="campo"><label>No. de invoice / referencia</label><input type="text" id="i_referencia" placeholder="Opcional"></div>
 
-      <div class="campo"><label>Partida presupuestada <span class="req">*</span></label>
+      <div class="campo" id="i_partida_wrap"><label>Partida presupuestada <span class="req">*</span></label>
         <div class="sw"><input type="text" id="i_partida_txt" placeholder="Buscar…" autocomplete="off">
         <input type="hidden" id="i_partida"><ul class="dd" id="i_dd_partida"></ul></div></div>
+      <div id="inv-obra-campos" style="display:none;grid-column:1/-1">
+        <div class="grid2">
+          <div class="campo"><label>Desarrollo <span class="req">*</span></label><select id="inv_desarrollo"></select></div>
+          <div class="campo"><label>¿Para qué etapa? <span class="req">*</span></label><select id="inv_etapa"></select></div>
+          <div class="campo" style="grid-column:1/-1"><label>Contrato <span class="req">*</span></label><select id="inv_contrato"></select></div>
+        </div>
+        <p class="modal-sub" style="margin:6px 0 0">Igual que material de obra: el tipo de gasto (Material de obra o Servicio en obra) se elige en el siguiente paso.</p>
+      </div>
       <div class="campo" style="grid-column:1/-1"><label>Justificación <span class="req">*</span></label>
         <input type="text" id="i_justificacion" maxlength="150" placeholder="Ej: Publicidad digital en redes…" oninput="document.getElementById('i_cnt').textContent=this.value.length+'/150'"><span class="contador-chars" id="i_cnt">0/150</span></div>
     </div>
@@ -1385,6 +1400,13 @@ function renderListaConceptos(){
   if(!conceptos.length){cont.innerHTML="";document.getElementById("zona-continuar").style.display="none";return}
   let total=conceptos.reduce((s,c)=>s+montoConcepto(c),0);
   cont.innerHTML=conceptos.map((c,i)=>{
+    if(c.esMaterial&&c.tipo==="invoice"){
+      return '<div class="factura-item" style="background:#fffbeb;border-color:#fcd34d"><span class="factura-num" style="background:#fef3c7;color:#92400e">#'+(i+1)+'</span>'+
+        '<div class="factura-info"><div class="factura-nombre">'+esc(c.proveedor||"Invoice")+'</div>'+
+        '<div class="factura-detalle">🧱🌐 Invoice de obra · '+esc(c.tipoGasto||TIPO_MATERIAL)+' · '+esc(c.referencia||"sin referencia")+' · '+esc(c.partida||"sin contrato")+'</div></div>'+
+        '<span class="factura-monto">'+mxn(c.monto)+'</span>'+
+        '<button class="btn-del" onclick="eliminarConcepto('+i+')">✕</button></div>';
+    }
     if(c.esMaterial){
       const folio=folioMostrado(c.cfdi);
       return '<div class="factura-item" style="background:#fffbeb;border-color:#fcd34d"><span class="factura-num" style="background:#fef3c7;color:#92400e">#'+(i+1)+'</span>'+
@@ -1815,7 +1837,45 @@ async function leerInvoicePDF(file){
     document.getElementById("inv-leyendo").style.display="none";
   }
 }
+// ── Invoice DE OBRA: mismas listas de desarrollo → etapa → contrato que material de obra ──
+let invObra=false;
+function setInvObra(si){
+  invObra=!!si;
+  document.getElementById("inv-obra-si").classList.toggle("activo",invObra);
+  document.getElementById("inv-obra-no").classList.toggle("activo",!invObra);
+  document.getElementById("inv-obra-campos").style.display=invObra?"":"none";
+  document.getElementById("i_partida_wrap").style.display=invObra?"none":"";
+  if(invObra)invLlenarObra();
+}
+function invLlenarObra(){
+  const sd=document.getElementById("inv_desarrollo");
+  sd.innerHTML='<option value="">— Selecciona —</option>'+MATERIAL_OBRA.desarrollos.map(d=>'<option value="'+esc(d)+'">'+esc(d)+'</option>').join("");
+  invRefrescarEtapas();
+}
+function invRefrescarEtapas(){
+  const des=document.getElementById("inv_desarrollo").value;
+  const se=document.getElementById("inv_etapa");
+  if(esEtapaUnica(des)){
+    se.innerHTML='<option value="'+esc(etapaFija(des))+'" selected>'+esc(etapaFija(des))+'</option>';
+    se.disabled=true;
+  } else if(des){
+    se.innerHTML='<option value="">— Selecciona —</option>'+MATERIAL_OBRA.etapasPorDesarrollo["Bicentenario Infonavit"].map(e=>'<option value="'+esc(e)+'">Etapa '+esc(e)+'</option>').join("");
+    se.disabled=false;
+  } else {
+    se.innerHTML='<option value="">Elige el desarrollo primero</option>';
+    se.disabled=true;
+  }
+  invRefrescarContratos();
+}
+function invRefrescarContratos(){
+  const des=document.getElementById("inv_desarrollo").value;
+  const et=document.getElementById("inv_etapa").value;
+  const sc=document.getElementById("inv_contrato");
+  sc.innerHTML=opcionesContrato(des,et,"");
+  sc.disabled=!(des&&et);
+}
 function abrirModalInvoice(){
+  setInvObra(false);
   document.getElementById("inv-nombre-arch").textContent="";
   document.getElementById("inputInvoicePDF").value="";
   document.getElementById("i_fecha").value=new Date().toISOString().slice(0,10);
@@ -1841,10 +1901,16 @@ function guardarInvoice(){
   if(!fecha)return err("Indica la fecha.");
   if(!montoPesos||montoPesos<=0)return err("Indica el monto en pesos (MXN) — es el que se usa para el vale.");
   if(!proveedor)return err("Indica el proveedor.");
-  if(!partida)return err("Selecciona la partida presupuestada.");
+  const desO=document.getElementById("inv_desarrollo").value,etO=document.getElementById("inv_etapa").value,conO=document.getElementById("inv_contrato").value;
+  if(invObra){
+    if(!desO)return err("Selecciona el desarrollo.");
+    if(!etO)return err("Selecciona la etapa.");
+    if(!conO)return err("Selecciona el contrato.");
+  } else if(!partida)return err("Selecciona la partida presupuestada.");
   if(!just)return err("Escribe la justificación.");
   if(conceptos.length>=MAX_CONCEPTOS)return err("Máximo "+MAX_CONCEPTOS+" conceptos por vale.");
-  conceptos.push({tipo:"invoice",fecha,montoOriginal,monto:montoPesos,proveedor,referencia,tipoGasto:"",partida,justificacion:just});
+  if(invObra)conceptos.push({tipo:"invoice",esMaterial:true,desarrollo:desO,etapa:etO,fecha,montoOriginal,monto:montoPesos,proveedor,referencia,tipoGasto:TIPO_MATERIAL,partida:conO,justificacion:just});
+  else conceptos.push({tipo:"invoice",fecha,montoOriginal,monto:montoPesos,proveedor,referencia,tipoGasto:"",partida,justificacion:just});
   const volver=volverAPaso2;
   cerrarModalInvoice();
   if(volver)irPaso2();
@@ -1894,8 +1960,8 @@ function renderFilasGastos(){
   const cont=document.getElementById("filas-gastos");
   cont.innerHTML=conceptos.map((c,i)=>{
     if(c.esMaterial){
-      const folio=folioMostrado(c.cfdi);
-      return '<div class="fila-gasto material" id="fila-'+i+'"><div class="fila-gasto-header"><span class="fila-gasto-titulo">#'+(i+1)+' 🧱 '+esc(c.cfdi.emisor.nombre)+' · Folio '+esc(folio)+' · '+mxn(c.cfdi.total)+etiquetaPPD(c.cfdi)+'</span></div>'+
+      const tit=c.tipo==="invoice"?(esc(c.proveedor||"Invoice")+' · Invoice'+(c.referencia?' '+esc(c.referencia):'')+' · '+mxn(c.monto)):(esc(c.cfdi.emisor.nombre)+' · Folio '+esc(folioMostrado(c.cfdi))+' · '+mxn(c.cfdi.total)+etiquetaPPD(c.cfdi));
+      return '<div class="fila-gasto material" id="fila-'+i+'"><div class="fila-gasto-header"><span class="fila-gasto-titulo">#'+(i+1)+' '+(c.tipo==="invoice"?'🧱🌐':'🧱')+' '+tit+'</span></div>'+
         '<div class="grid2">'+
         '<div class="campo"><label>Tipo de gasto <span class="req">*</span></label><select id="fg_tipo_'+i+'" onchange="conceptos['+i+'].tipoGasto=this.value">'+TIPOS_MATERIAL.map(t=>'<option value="'+esc(t)+'"'+(c.tipoGasto===t?" selected":"")+'>'+esc(t)+'</option>').join("")+'</select></div>'+
         '<div class="campo"><label>Justificación <span class="req">*</span></label><input type="text" id="fg_just_'+i+'" maxlength="150" value="'+esc(c.justificacion||"")+'" placeholder="Ej: Compra de varilla…" oninput="conceptos['+i+'].justificacion=this.value;document.getElementById(\'fg_cnt_'+i+'\').textContent=this.value.length+\'/150\'"><span class="contador-chars" id="fg_cnt_'+i+'">'+String((c.justificacion||"").length)+'/150</span></div>'+
@@ -2808,6 +2874,10 @@ document.addEventListener("DOMContentLoaded",()=>{
   document.getElementById("btnMenuExtra").addEventListener("click",e=>{e.stopPropagation();toggleMenuExtra();});
   document.addEventListener("click",e=>{const menu=document.getElementById("menuExtra");if(menu.classList.contains("open")&&!menu.contains(e.target)&&e.target.id!=="btnMenuExtra")menu.classList.remove("open");});
   document.getElementById("op-invoice").addEventListener("click",()=>{document.getElementById("menuExtra").classList.remove("open");abrirModalInvoice();});
+  document.getElementById("inv-obra-si").addEventListener("click",()=>setInvObra(true));
+  document.getElementById("inv-obra-no").addEventListener("click",()=>setInvObra(false));
+  document.getElementById("inv_desarrollo").addEventListener("change",invRefrescarEtapas);
+  document.getElementById("inv_etapa").addEventListener("change",invRefrescarContratos);
   document.getElementById("i_cancelar").addEventListener("click",cerrarModalInvoice);
   document.getElementById("i_guardar").addEventListener("click",guardarInvoice);
   document.getElementById("modal-invoice").addEventListener("click",e=>{if(e.target.id==="modal-invoice")cerrarModalInvoice()});
