@@ -250,6 +250,7 @@ table.imp tr.tot td{border-top:2px solid #1c1917;font-weight:700;font-size:13px}
 .vtable .th-big{background:#BFBFBF;border-bottom:1px solid #888}
 .vtable td{text-align:center;font-size:7.3pt;color:#161616}
 .vtable td.txt{font-size:5.5pt;word-break:break-word;line-height:1.15}
+.vtable td.area{font-size:5pt}
 .vtable td.fol{word-break:break-all;line-height:1.15}
 /* thead ocupa su altura natural; las filas de datos se reparten el resto */
 .vtable thead th{height:auto;padding:0.6mm 0.5mm}
@@ -1279,6 +1280,22 @@ const PRESUPUESTO_POR_DESARROLLO={
   "UHB":"UHB",
   "EDIFICIO CARRIZAL":"INDIRECTOS"
 };
+// Área (del gasto): se pide por concepto en facturas, gastos sin comprobante e invoices normales (NO en material de obra)
+const AREAS_GASTO=["DIRECCION GENERAL","GERENCIA DE CAMPECHE","CONTRALORIA","ADMINISTRACION Y FINANZAS","RECURSOS HUMANOS","EDIFICIO CARRIZAL","PROYECTOS","POSTVENTA","VENTAS","MARKETING","TRAMITES"];
+// En el vale el área va en máximo 2 renglones con el corte ya puesto: el salto de línea automático
+// se encima al generar el PDF (html2canvas) cuando la celda es angosta.
+function areaCelda(a){
+  if(!a)return '';
+  const w=String(a).split(/\s+/);
+  if(w.length<2)return '<span style="white-space:nowrap">'+esc(a)+'</span>';
+  let mejor=1,dif=1e9;
+  for(let k=1;k<w.length;k++){const d=Math.abs(w.slice(0,k).join(" ").length-w.slice(k).join(" ").length);if(d<dif){dif=d;mejor=k;}}
+  return '<span style="white-space:nowrap">'+esc(w.slice(0,mejor).join(" "))+'</span><br><span style="white-space:nowrap">'+esc(w.slice(mejor).join(" "))+'</span>';
+}
+function areaGastoHTML(i,c){
+  return '<div class="campo"><label>Área (del gasto) <span class="req">*</span></label><select id="fg_area_'+i+'" onchange="conceptos['+i+'].areaGasto=this.value">'+
+    '<option value="">— Selecciona —</option>'+AREAS_GASTO.map(a=>'<option value="'+esc(a)+'"'+(c.areaGasto===a?" selected":"")+'>'+esc(a)+'</option>').join("")+'</select></div>';
+}
 function presupuestoDe(c){
   if(c.esMaterial)return PRESUPUESTO_POR_DESARROLLO[c.desarrollo]||"INDIRECTOS";
   return "INDIRECTOS";
@@ -2003,7 +2020,8 @@ function renderFilasGastos(){
         '<div class="grid2">'+
         '<div class="campo"><label>Tipo de gasto <span class="req">*</span></label><select id="fg_tipo_'+i+'" class="tg-native" '+_tipoDisabled+' onchange="conceptos['+i+'].tipoGasto=this.value">'+tipos+'</select>'+tgHTML(i,_empresaActual,c.tipoGasto)+'</div>'+
         '<div class="campo"><label>Justificación <span class="req">*</span></label><input type="text" id="fg_just_'+i+'" maxlength="150" value="'+esc(c.justificacion||"")+'" placeholder="Ej: Consumo de alimentos…" oninput="conceptos['+i+'].justificacion=this.value;document.getElementById(\'fg_cnt_'+i+'\').textContent=this.value.length+\'/150\'"><span class="contador-chars" id="fg_cnt_'+i+'">'+String((c.justificacion||"").length)+'/150</span></div>'+
-        '<div class="campo" style="grid-column:1/-1"><label>Partida presupuestada <span class="req">*</span></label><div class="sw"><input type="text" id="fg_partida_txt_'+i+'" value="'+esc(c.partida||"")+'" placeholder="Buscar partida…" autocomplete="off"><input type="hidden" id="fg_partida_'+i+'" value="'+esc(c.partida||"")+'"><ul class="dd" id="fg_dd_partida_'+i+'"></ul></div></div>'+
+        '<div class="campo"><label>Partida presupuestada <span class="req">*</span></label><div class="sw"><input type="text" id="fg_partida_txt_'+i+'" value="'+esc(c.partida||"")+'" placeholder="Buscar partida…" autocomplete="off"><input type="hidden" id="fg_partida_'+i+'" value="'+esc(c.partida||"")+'"><ul class="dd" id="fg_dd_partida_'+i+'"></ul></div></div>'+
+        areaGastoHTML(i,c)+
         '</div></div>';
     } else if(c.tipo==="invoice"){
       const _empresaActual=document.getElementById("f_empresa")?document.getElementById("f_empresa").value:"";
@@ -2013,7 +2031,8 @@ function renderFilasGastos(){
         '<div class="grid2">'+
         '<div class="campo"><label>Tipo de gasto <span class="req">*</span></label><select id="fg_tipo_'+i+'" class="tg-native" '+_tipoDisabled+' onchange="conceptos['+i+'].tipoGasto=this.value">'+tipos+'</select>'+tgHTML(i,_empresaActual,c.tipoGasto)+'</div>'+
         '<div class="campo"><label>Justificación <span class="req">*</span></label><input type="text" id="fg_just_'+i+'" maxlength="150" value="'+esc(c.justificacion||"")+'" oninput="conceptos['+i+'].justificacion=this.value;document.getElementById(\'fg_cnt_'+i+'\').textContent=this.value.length+\'/150\'"><span class="contador-chars" id="fg_cnt_'+i+'">'+String((c.justificacion||"").length)+'/150</span></div>'+
-        '<div class="campo" style="grid-column:1/-1"><label>Partida presupuestada <span class="req">*</span></label><div class="sw"><input type="text" id="fg_partida_txt_'+i+'" value="'+esc(c.partida||"")+'" placeholder="Buscar partida…" autocomplete="off"><input type="hidden" id="fg_partida_'+i+'" value="'+esc(c.partida||"")+'"><ul class="dd" id="fg_dd_partida_'+i+'"></ul></div></div>'+
+        '<div class="campo"><label>Partida presupuestada <span class="req">*</span></label><div class="sw"><input type="text" id="fg_partida_txt_'+i+'" value="'+esc(c.partida||"")+'" placeholder="Buscar partida…" autocomplete="off"><input type="hidden" id="fg_partida_'+i+'" value="'+esc(c.partida||"")+'"><ul class="dd" id="fg_dd_partida_'+i+'"></ul></div></div>'+
+        areaGastoHTML(i,c)+
         '</div></div>';
     } else {
       // Manual: Tipo de gasto siempre fijo a "Gasto sin comprobante fiscal" — no depende de empresa, no es elegible
@@ -2022,7 +2041,8 @@ function renderFilasGastos(){
         '<div class="grid2">'+
         '<div class="campo"><label>Tipo de gasto <span class="req">*</span></label><select id="fg_tipo_'+i+'" disabled>'+tipos+'</select></div>'+
         '<div class="campo"><label>Justificación <span class="req">*</span></label><input type="text" id="fg_just_'+i+'" maxlength="150" value="'+esc(c.justificacion||"")+'" oninput="conceptos['+i+'].justificacion=this.value;document.getElementById(\'fg_cnt_'+i+'\').textContent=this.value.length+\'/150\'"><span class="contador-chars" id="fg_cnt_'+i+'">'+String((c.justificacion||"").length)+'/150</span></div>'+
-        '<div class="campo" style="grid-column:1/-1"><label>Partida presupuestada <span class="req">*</span></label><div class="sw"><input type="text" id="fg_partida_txt_'+i+'" value="'+esc(c.partida||"")+'" placeholder="Buscar partida…" autocomplete="off"><input type="hidden" id="fg_partida_'+i+'" value="'+esc(c.partida||"")+'"><ul class="dd" id="fg_dd_partida_'+i+'"></ul></div></div>'+
+        '<div class="campo"><label>Partida presupuestada <span class="req">*</span></label><div class="sw"><input type="text" id="fg_partida_txt_'+i+'" value="'+esc(c.partida||"")+'" placeholder="Buscar partida…" autocomplete="off"><input type="hidden" id="fg_partida_'+i+'" value="'+esc(c.partida||"")+'"><ul class="dd" id="fg_dd_partida_'+i+'"></ul></div></div>'+
+        areaGastoHTML(i,c)+
         '</div></div>';
     }
   }).join("");
@@ -2052,6 +2072,11 @@ function validarPaso2(){
     if(!c.tipoGasto){document.getElementById("zonaError2").innerHTML='<div class="alerta alerta-error">Concepto #'+(i+1)+': selecciona el <strong>Tipo de gasto</strong>.</div>';return false}
     if(!c.justificacion.trim()){document.getElementById("zonaError2").innerHTML='<div class="alerta alerta-error">Concepto #'+(i+1)+': escribe la <strong>Justificación</strong>.</div>';return false}
     if(!c.partida){document.getElementById("zonaError2").innerHTML='<div class="alerta alerta-error">Concepto #'+(i+1)+': selecciona '+(c.esMaterial?'el <strong>Contrato</strong> (desarrollo y etapa)':'la <strong>Partida</strong>')+'.</div>';return false}
+    if(!c.esMaterial){
+      c.areaGasto=document.getElementById("fg_area_"+i)?.value||c.areaGasto||"";
+      // Vales guardados antes de existir este campo: se pueden ver sin él; al crear o editar es obligatorio
+      if(!c.areaGasto&&!_soloVer){document.getElementById("zonaError2").innerHTML='<div class="alerta alerta-error">Concepto #'+(i+1)+': selecciona el <strong>Área (del gasto)</strong>.</div>';return false}
+    }
   }
   document.getElementById("zonaError2").innerHTML="";return true;
 }
@@ -2108,7 +2133,7 @@ function generarVale(){
   const showInvoice=sInvoice>0.001;
 
   // ── 3. Anchos de columnas ──
-  const fijas=[{w:2.2},{w:4},{w:4.2},{w:4.5},{w:9.5},{w:9},{w:4.5}];
+  const fijas=[{w:2.2},{w:4},{w:4.2},{w:4.5},{w:9.5},{w:9},{w:4.5},{w:6.5}];
   if(showSin) fijas.push({w:4.5});
   if(showInvoice) fijas.push({w:6});
   const subCols=[{w:5},{w:4},{w:4},{w:5}];
@@ -2122,7 +2147,7 @@ function generarVale(){
 
   const MMPX=96/25.4;              // px por milímetro a 96dpi
   const altoFilaPx=5.6*MMPX;       // alto mínimo de una fila vacía
-  const nColsFijas=7+(showSin?1:0)+(showInvoice?1:0);
+  const nColsFijas=8+(showSin?1:0)+(showInvoice?1:0);
   const nColsTotal=nColsFijas+4+colsImp.length+colsRet.length+2;
 
   // ── 4. Encabezado de tabla (igual en todas las hojas) ──
@@ -2130,7 +2155,7 @@ function generarVale(){
   const nImpGroup=1+nImp;
   let thead='<thead><tr>'+
     '<th rowspan="4">No.</th><th rowspan="4">FECHA DE FACTURA</th><th rowspan="4">FOLIO FACTURA</th><th rowspan="4">TIPO DE GASTOS</th>'+
-    '<th rowspan="4">JUSTIFICACION</th><th rowspan="4">PARTIDA PRESUPUESTADA</th><th rowspan="4">PRESUPUESTO</th>'+
+    '<th rowspan="4">JUSTIFICACION</th><th rowspan="4">PARTIDA PRESUPUESTADA</th><th rowspan="4">PRESUPUESTO</th><th rowspan="4">AREA (DEL GASTO)</th>'+
     (showSin?'<th rowspan="4">SIN COMP. FISCAL</th>':'')+
     (showInvoice?'<th rowspan="4">INVOICE (DÓLARES)</th>':'')+
     '<th class="th-big gc" colspan="3">SUBTOTAL</th>'+
@@ -2171,7 +2196,8 @@ function generarVale(){
       '<td class="izq tg">'+esc(c.tipoGasto)+'</td>'+
       '<td class="izq txt">'+cortable(c.justificacion)+'</td>'+
       '<td class="txt">'+cortable(c.partida)+'</td>'+
-      '<td class="txt">'+esc(presupuestoDe(c))+'</td>';
+      '<td class="txt">'+esc(presupuestoDe(c))+'</td>'+
+      '<td class="txt area">'+(c.esMaterial?'':areaCelda(c.areaGasto))+'</td>';
     if(showSin) celdas+='<td class="der">'+(c.tipo==="manual"?mxn(c.monto):"-")+'</td>';
     if(showInvoice) celdas+='<td class="der">'+(c.tipo==="invoice"&&c.montoOriginal?mxn(c.montoOriginal):"-")+'</td>';
     celdas+='<td class="der">'+(c.tipo==="invoice"?mxn(d._subtotalMostrado):(esManual?"":mxn(d.subtotal)))+'</td>'+
@@ -2195,7 +2221,7 @@ function generarVale(){
     const sm=k=>lista.reduce((a,i)=>a+(dets[i][k]||0),0);
     const gSin=lista.reduce((a,i)=>a+dets[i]._sinComp,0),gSub=lista.reduce((a,i)=>a+dets[i]._subtotalMostrado,0);
     const gB0=lista.reduce((a,i)=>a+dets[i].base0+dets[i].baseOtra,0),gTot=lista.reduce((a,i)=>a+dets[i]._total,0);
-    let r='<tr class="vtotal"><td colspan="7" style="text-align:right;font-size:8.5pt;font-weight:700">'+etq+'</td>';
+    let r='<tr class="vtotal"><td colspan="8" style="text-align:right;font-size:8.5pt;font-weight:700">'+etq+'</td>';
     if(showSin) r+='<td class="der">'+dash(gSin)+'</td>';
     if(showInvoice) r+='<td class="der"></td>';
     r+='<td class="der">'+mxn(gSub)+'</td>'+
@@ -2246,8 +2272,8 @@ function generarVale(){
     '<div class="vfirma"><div class="vfirma-label">VERIFICACION</div><div class="vfirma-linea"><div class="vfirma-nombre">DEPARTAMENTO DE CONTABILIDAD</div></div></div>'+
     '<div class="vfirma"><div class="vfirma-label">AUTORIZÓ</div><div class="vfirma-linea"><div class="vfirma-nombre">ING. GUSTAVO CARRERA FALCON</div><div class="vfirma-cargo">DIRECTOR GENERAL</div></div></div>'+
     '</div>'+
-    '<div style="margin-top:3mm;font-size:4.5pt;color:#888;border-top:.5px solid #ccc;padding-top:1mm">'+
-    lista.map(i=>conceptos[i]).filter(c=>c.tipo==="cfdi").map(c=>'UUID: '+esc(c.cfdi.uuid||"—")+' · RFC: '+esc(c.cfdi.emisor.rfc||"—")).join(" &nbsp;|&nbsp; ")+'</div>';
+    '<div style="margin-top:3mm;font-size:4.5pt;line-height:1.4;color:#888;border-top:.5px solid #ccc;padding-top:1mm">'+
+    lista.map(i=>conceptos[i]).filter(c=>c.tipo==="cfdi").map(c=>'<span style="white-space:nowrap">UUID: '+esc(c.cfdi.uuid||"—")+' · RFC: '+esc(c.cfdi.emisor.rfc||"—")+'</span>').join(" &nbsp;|&nbsp; ")+'</div>';
   }
   const bloqueFinal=bloqueFinalDe(todosIdx,"TOTAL:");
 
