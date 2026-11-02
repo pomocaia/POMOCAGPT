@@ -2287,7 +2287,11 @@ function generarVale(){
     '<div class="vfirma"><div class="vfirma-label">VERIFICACIÓN</div><div class="vfirma-linea"><div class="vfirma-nombre">DEPARTAMENTO DE CONTABILIDAD</div></div></div>'+
     '<div class="vfirma"><div class="vfirma-label">AUTORIZÓ</div><div class="vfirma-linea"><div class="vfirma-nombre">ING. GUSTAVO CARRERA FALCON</div><div class="vfirma-cargo">DIRECTOR GENERAL</div></div></div>'+
     '</div>'+
-    '<div style="margin-top:3mm;font-size:4.5pt;line-height:1.4;color:#888;border-top:.5px solid #ccc;padding-top:1mm">'+
+    pieUUIDsDe(lista);
+  }
+  // Pie con UUID y RFC de las facturas de la lista (va al cierre de cada mes)
+  function pieUUIDsDe(lista){
+    return '<div style="margin-top:3mm;font-size:4.5pt;line-height:1.4;color:#888;border-top:.5px solid #ccc;padding-top:1mm">'+
     lista.map(i=>conceptos[i]).filter(c=>c.tipo==="cfdi").map(c=>'<span style="white-space:nowrap">UUID: '+esc(c.cfdi.uuid||"—")+' · RFC: '+esc(c.cfdi.emisor.rfc||"—")+'</span>').join(" &nbsp;|&nbsp; ")+'</div>';
   }
   const bloqueFinal=bloqueFinalDe(todosIdx,"TOTAL:");
@@ -2313,13 +2317,15 @@ function generarVale(){
     '<table class="vtable" id="med-tabla">'+colgroup+thead+'<tbody>'+filasTodas+
     '<tr id="med-suma" class="vtotal">'+sumaRow.replace(/^<tr class="vtotal">/,"").replace(/<\/tr>$/,"")+'</tr>'+
     '</tbody></table>'+
-    '<div id="med-foot">'+bloqueFinal+'</div>';
+    '<div id="med-foot">'+bloqueFinal+'</div>'+
+    '<div id="med-piemes">'+pieUUIDsDe(todosIdx)+'</div>';
   document.body.appendChild(med);
 
   const headH=med.querySelector("#med-head").getBoundingClientRect().height;
   const theadH=med.querySelector("#med-tabla thead").getBoundingClientRect().height;
   const sumaH=med.querySelector("#med-suma").getBoundingClientRect().height;
   const footH=med.querySelector("#med-foot").getBoundingClientRect().height+6; // +margen del bloque
+  const pieMesH=med.querySelector("#med-piemes").getBoundingClientRect().height+6;
   const alturas=[];
   med.querySelectorAll('#med-tabla tbody tr[data-fila]').forEach(tr=>{
     alturas.push(tr.getBoundingClientRect().height);
@@ -2330,9 +2336,11 @@ function generarVale(){
   const altoContenido=(ALTO_UTIL_MM-PAD_VALE_MM)*MMPX-COLCHON_PX;
   const dispNormal=altoContenido-headH-theadH;               // hoja intermedia
   const dispUltima=altoContenido-headH-theadH-sumaH-footH;   // hoja final (reserva totales+firmas)
+  const dispCierreMes=altoContenido-headH-theadH-sumaH-pieMesH; // última hoja de un mes que NO es el último: solo suma y UUIDs
 
   // 9.3 Repartir los conceptos de UN grupo (un mes) en hojas según lo que realmente quepa
-  function paginar(lista){
+  function paginar(lista,dispFin){
+    if(dispFin==null)dispFin=dispUltima;
     const paginas=[];
     let idx=0;
     while(idx<lista.length){
@@ -2351,11 +2359,11 @@ function generarVale(){
     while(guardia++<50){
       const ult=paginas[paginas.length-1];
       let accU=ult.reduce((a,i)=>a+alturas[i],0);
-      if(accU<=dispUltima)break;
+      if(accU<=dispFin)break;
       const nueva=[];let accN=0;
       while(ult.length>1){
         const m=ult[ult.length-1];
-        if(nueva.length&&accN+alturas[m]>dispUltima)break;
+        if(nueva.length&&accN+alturas[m]>dispFin)break;
         ult.pop();nueva.unshift(m);accN+=alturas[m];accU-=alturas[m];
         if(accU<=dispNormal)break;   // la hoja previa ya cabe como hoja intermedia
       }
@@ -2369,7 +2377,7 @@ function generarVale(){
     if(paginas.length>1){
       const orden=paginas.flat();
       const nPag=paginas.length;
-      const budgetHoja=idx2=>idx2===nPag-1?dispUltima:dispNormal;
+      const budgetHoja=idx2=>idx2===nPag-1?dispFin:dispNormal;
       const totalBudget=Array.from({length:nPag},(_,i)=>budgetHoja(i)).reduce((a,b)=>a+b,0);
       const totalContenido=orden.reduce((a,i)=>a+alturas[i],0);
       const razon=totalContenido/totalBudget; // qué tan llena debe quedar cada hoja, en proporción
@@ -2391,7 +2399,7 @@ function generarVale(){
       // Solo aplicar el reequilibrio si quedaron acomodados todos los conceptos
       // y la última hoja sigue cabiendo en su espacio real (nunca arriesgar el total/firmas)
       const todosColocados=nuevas.flat().length===orden.length;
-      const ultimaCabe=nuevas[nuevas.length-1].reduce((a,i)=>a+alturas[i],0)<=dispUltima;
+      const ultimaCabe=nuevas[nuevas.length-1].reduce((a,i)=>a+alturas[i],0)<=dispFin;
       if(todosColocados&&ultimaCabe&&nuevas.every(p=>p.length>0)){
         paginas.length=0;
         nuevas.forEach(p=>paginas.push(p));
@@ -2401,11 +2409,12 @@ function generarVale(){
   }
 
   // 9.3c Separar por MES de la factura: cada mes sale en su(s) propia(s) hoja(s), con el mismo folio,
-  // el mismo encabezado y el mismo bloque de cheque/firmas (con el TOTAL GENERAL del reembolso).
+  // el mismo encabezado. Cada mes cierra con su SUMA y sus UUID; el cheque con el TOTAL GENERAL
+  // y las firmas van una sola vez, en la última hoja del vale.
   // Si todo es del mismo mes (lo normal) queda exactamente como siempre: un solo grupo.
   const gruposMap=new Map();
   conceptos.forEach((c,i)=>{const k=mesDeConcepto(c);if(!gruposMap.has(k))gruposMap.set(k,[]);gruposMap.get(k).push(i);});
-  const grupos=[...gruposMap.entries()].sort((x,y)=>(x[0]===""?1:0)-(y[0]===""?1:0)||(x[0]<y[0]?-1:x[0]>y[0]?1:0)).map(([mes,idxs])=>({mes,idxs,paginas:paginar(idxs)}));
+  const grupos=[...gruposMap.entries()].sort((x,y)=>(x[0]===""?1:0)-(y[0]===""?1:0)||(x[0]<y[0]?-1:x[0]>y[0]?1:0)).map(([mes,idxs],k,arr)=>({mes,idxs,final:k===arr.length-1,paginas:paginar(idxs,k===arr.length-1?dispUltima:dispCierreMes)}));
   const multiMes=grupos.length>1;
   const totalHojas=grupos.reduce((a,g)=>a+g.paginas.length,0);
 
@@ -2419,9 +2428,9 @@ function generarVale(){
     let numero=0;
     g.paginas.forEach((indices,hoja)=>{
       nHojaGlobal++;
-      const esUltima=(hoja===g.paginas.length-1);      // última hoja de ESTE mes: lleva suma, cheque y firmas
+      const esUltima=(hoja===g.paginas.length-1);      // última hoja de ESTE mes: lleva su suma; cheque y firmas solo si es el último mes
       const esUltimaGlobal=(nHojaGlobal===totalHojas);
-      const disp=esUltima?dispUltima:dispNormal;
+      const disp=esUltima?(g.final?dispUltima:dispCierreMes):dispNormal;
       let filasHTML="";
       let usado=0;
       for(const i of indices){numero++;filasHTML+=filaDatos(i,multiMes?numero:undefined);usado+=alturas[i];}
@@ -2437,7 +2446,7 @@ function generarVale(){
       htmlHojas+='<div class="vale-hoja'+(esUltimaGlobal?"":" salto-hoja")+'">'+
         encabezadoHoja(nHojaGlobal,totalHojas,etqMes)+
         '<table class="vtable">'+colgroup+thead+'<tbody>'+filasHTML+(esUltima?sumaG:"")+'</tbody></table>'+
-        (esUltima?bloqueG:"")+
+        (esUltima?(g.final?bloqueG:pieUUIDsDe(g.idxs)):"")+
         '</div>';
     });
   });
