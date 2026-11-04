@@ -1276,7 +1276,7 @@ const MATERIAL_OBRA={
     "EDIFICIO CARRIZAL": ["MANTENIMIENTO DE EQUIPO DE TRANSPORTE", "MANTENIMIENTO DE EQUIPO DE OFICINA", "MANTENIMIENTO DE CLIMAS", "ACONDICIONAMIENTO DE AREA", "MANTENIMIENTO DE PORTONES", "MANTENIMIENTO DE COLINDANCIA", "MANTENIMIENTO DE INTERIORES", "MANTENIMIENTO DE OFICINA", "INSTALACION DE RED"]
   }
 };
-// ══ Presupuesto por concepto: INDIRECTOS si no es material de obra; si lo es, depende del desarrollo ══
+// ══ Presupuesto por concepto: si es material de obra depende del desarrollo; si no, es el Área (del gasto) ══
 const PRESUPUESTO_POR_DESARROLLO={
   "Bicentenario Infonavit":"BIC INF",
   "Bosques Infonavit":"BSQ INF",
@@ -1305,7 +1305,9 @@ function areaGastoHTML(i,c){
 }
 function presupuestoDe(c){
   if(c.esMaterial)return PRESUPUESTO_POR_DESARROLLO[c.desarrollo]||"INDIRECTOS";
-  return "INDIRECTOS";
+  // Compra normal (factura, sin comprobante, invoice): el presupuesto es el Área (del gasto) del concepto.
+  // Vales viejos sin área: INDIRECTOS como antes.
+  return c.areaGasto||"INDIRECTOS";
 }
 const TIPO_MATERIAL="Material de obra";
 const TIPOS_MATERIAL=["Material de obra","Servicio en obra"]; // elegibles cuando el concepto es de material de obra
@@ -2148,7 +2150,7 @@ function generarVale(){
   const showInvoice=sInvoice>0.001;
 
   // ── 3. Anchos de columnas ──
-  const fijas=[{w:2.2},{w:4},{w:4.2},{w:4.5},{w:9},{w:6.8},{w:5.8},{w:6.2}];
+  const fijas=[{w:2.2},{w:4},{w:4.2},{w:4.5},{w:9.5},{w:8.5},{w:6.2}];
   if(showSin) fijas.push({w:4.5});
   if(showInvoice) fijas.push({w:6});
   const subCols=[{w:5},{w:4},{w:4},{w:5.6}];
@@ -2162,7 +2164,7 @@ function generarVale(){
 
   const MMPX=96/25.4;              // px por milímetro a 96dpi
   const altoFilaPx=5.6*MMPX;       // alto mínimo de una fila vacía
-  const nColsFijas=8+(showSin?1:0)+(showInvoice?1:0);
+  const nColsFijas=7+(showSin?1:0)+(showInvoice?1:0);
   const nColsTotal=nColsFijas+4+colsImp.length+colsRet.length+2;
 
   // ── 4. Encabezado de tabla (igual en todas las hojas) ──
@@ -2170,7 +2172,7 @@ function generarVale(){
   const nImpGroup=1+nImp;
   let thead='<thead><tr>'+
     '<th rowspan="4">No.</th><th rowspan="4">FECHA DE FACTURA</th><th rowspan="4">FOLIO FACTURA</th><th rowspan="4">TIPO DE GASTOS</th>'+
-    '<th rowspan="4">JUSTIFICACIÓN</th><th rowspan="4">PARTIDA PRESUPUESTADA</th><th rowspan="4">PRESUPUESTO</th><th rowspan="4">ÁREA (DEL GASTO)</th>'+
+    '<th rowspan="4">JUSTIFICACIÓN</th><th rowspan="4">PARTIDA PRESUPUESTADA</th><th rowspan="4">PRESUPUESTO</th>'+
     (showSin?'<th rowspan="4">SIN COMP. FISCAL</th>':'')+
     (showInvoice?'<th rowspan="4">INVOICE (DÓLARES)</th>':'')+
     '<th class="th-big gc" colspan="3">SUBTOTAL</th>'+
@@ -2211,8 +2213,7 @@ function generarVale(){
       '<td class="izq tg">'+esc(c.tipoGasto)+'</td>'+
       '<td class="izq txt">'+cortable(c.justificacion)+'</td>'+
       '<td class="txt">'+cortable(c.partida)+'</td>'+
-      '<td class="txt">'+esc(presupuestoDe(c))+'</td>'+
-      '<td class="txt area">'+(c.esMaterial?'':areaCelda(c.areaGasto))+'</td>';
+      '<td class="txt area">'+areaCelda(presupuestoDe(c))+'</td>';
     if(showSin) celdas+='<td class="der">'+(c.tipo==="manual"?mxn(c.monto):"-")+'</td>';
     if(showInvoice) celdas+='<td class="der">'+(c.tipo==="invoice"&&c.montoOriginal?mxn(c.montoOriginal):"-")+'</td>';
     celdas+='<td class="der">'+(c.tipo==="invoice"?mxn(d._subtotalMostrado):(esManual?"":mxn(d.subtotal)))+'</td>'+
@@ -2236,7 +2237,7 @@ function generarVale(){
     const sm=k=>lista.reduce((a,i)=>a+(dets[i][k]||0),0);
     const gSin=lista.reduce((a,i)=>a+dets[i]._sinComp,0),gSub=lista.reduce((a,i)=>a+dets[i]._subtotalMostrado,0);
     const gB0=lista.reduce((a,i)=>a+dets[i].base0+dets[i].baseOtra,0),gTot=lista.reduce((a,i)=>a+dets[i]._total,0);
-    let r='<tr class="vtotal"><td colspan="8" style="text-align:right;font-size:8.5pt;font-weight:700">'+etq+'</td>';
+    let r='<tr class="vtotal"><td colspan="7" style="text-align:right;font-size:8.5pt;font-weight:700">'+etq+'</td>';
     if(showSin) r+='<td class="der">'+dash(gSin)+'</td>';
     if(showInvoice) r+='<td class="der"></td>';
     r+='<td class="der">'+mxn(gSub)+'</td>'+
